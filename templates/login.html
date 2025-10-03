@@ -11,4 +11,49 @@
         <div style="max-width: 400px; margin: 100px auto;">
             <div class="panel">
                 <h1 class="title" style="text-align: center; margin-bottom: 8px;">Вход</h1>
-                <p class="subtitle" style="text-align: center; margin-bottom: 32px;">
+                <p class="subtitle" style="text-align: center; margin-bottom: 32px;">Войдите в свою учетную запись</p>
+
+                <form method="POST">
+                    <div class="form-group">
+                        <label class="form-label">Имя пользователя</label>
+                        <input type="text" name="username" class="form-input" placeholder="Введите логин" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Пароль</label>
+                        <input type="password" name="password" class="form-input" placeholder="Введите пароль" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" name="remember">
+                            <span>Запомнить меня</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn" style="width: 100%; justify-content: center;">Войти в систему</button>
+                </form>
+
+                <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                    <p style="color: var(--text-secondary); text-align: center; margin-bottom: 16px;">Тестовые аккаунты:</p>
+                    <div style="background: var(--bg-card); padding: 12px; border-radius: 6px; font-size: 0.9em;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span>admin</span>
+                            <span>password</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>user1</span>
+                            <span>pass1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 24px;">
+                    <a href="{{ url_for('register') }}" class="btn btn-outline" style="display: inline-block;">Создать аккаунт</a>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline" style="display: inline-block; margin-left: 12px;">На главную</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

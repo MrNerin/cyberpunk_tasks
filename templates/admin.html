@@ -2,134 +2,112 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Админка </title>
-    <style>
-        body {
-            background: #0a0a15;
-            color: #e0e0ff;
-            font-family: 'Courier New', monospace;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: rgba(18, 18, 37, 0.95);
-            border: 2px solid #00ffff;
-            padding: 30px;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
-        }
-        h1 {
-            color: #00ffff;
-            text-align: center;
-            text-shadow: 0 0 10px #00ffff;
-            border-bottom: 2px solid #00ffff;
-            padding-bottom: 10px;
-        }
-        .task-group {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #00ffff;
-            padding: 20px;
-            margin: 20px 0;
-        }
-        .task-row {
-            display: flex;
-            margin: 10px 0;
-            gap: 10px;
-        }
-        input, select {
-            flex: 1;
-            padding: 10px;
-            background: #121225;
-            color: white;
-            border: 1px solid #00ffff;
-            font-family: 'Courier New', monospace;
-        }
-        button {
-            background: #0066cc;
-            color: white;
-            border: 1px solid #00ffff;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-        }
-        button:hover {
-            background: #00ffff;
-            color: black;
-        }
-        .user-info {
-            text-align: right;
-            color: #00ff00;
-            margin-bottom: 20px;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель управления - TaskFlow</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <div class="user-info">
-            👤 {{ session.username }} ({{ session.role }}) |
-            <a href="/logout" style="color: #ff4444;">Выйти</a> |
-            <a href="/" style="color: #00ffff;">На главную</a>
-        </div>
+    <div class="app-container">
+        <header class="nav-bar">
+            <div>
+                <h1 class="title">Панель управления</h1>
+                <p class="subtitle">Управление задачами и настройки системы</p>
+            </div>
 
-        <h1>⚙️ ПАНЕЛЬ УПРАВЛЕНИЯ</h1>
+            <div class="nav-links">
+                <div class="user-info">
+                    <div class="user-avatar">A</div>
+                    <span>{{ session.username }} (admin)</span>
+                </div>
+                <a href="/" class="btn btn-outline">На главную</a>
+                <a href="/logout" class="btn">Выйти</a>
+            </div>
+        </header>
 
         <form method="POST" action="/admin/save">
-            <!-- Управление задачами -->
-            <div class="task-group">
-                <h3>📝 ОСНОВНЫЕ ЗАДАНИЯ</h3>
-                {% for btn_name, btn_label in [('button1', 'Кнопка 1'), ('button2', 'Кнопка 2'), ('button3', 'Кнопка 3')] %}
-                <h4>{{ btn_label }}</h4>
-                {% for task in tasks[btn_name] %}
-                <div class="task-row">
-                    <input type="text" name="{{ btn_name }}[]" value="{{ task }}" placeholder="Введите задание">
-                </div>
-                {% endfor %}
-                <div class="task-row">
-                    <input type="text" name="{{ btn_name }}[]" placeholder="Новое задание">
-                </div>
-                {% endfor %}
-            </div>
+            <!-- Основные задачи -->
+            <section class="panel">
+                <h2 class="section-title">📝 Основные задачи</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Настройте задачи для ежедневного использования
+                </p>
 
-            <!-- Доска заданий -->
-            <div class="task-group">
-                <h3>📋 ДОСКА ЗАДАНИЙ</h3>
-                <div id="board-tasks">
-                    <div class="task-row">
-                        <input type="text" name="board_tasks[]" placeholder="Текст задания">
-                        <select name="board_difficulties[]">
-                            <option value="лёгкая">Лёгкая</option>
-                            <option value="средняя" selected>Средняя</option>
-                            <option value="сложная">Сложная</option>
-                        </select>
+                {% for btn_name, btn_label in [('button1', 'Группа задач 1'), ('button2', 'Группа задач 2'), ('button3', 'Группа задач 3')] %}
+                <div style="margin-bottom: 24px;">
+                    <h3 style="color: var(--text-accent); margin-bottom: 12px;">{{ btn_label }}</h3>
+                    {% for task in tasks[btn_name] %}
+                    <div class="card">
+                        <input type="text" name="{{ btn_name }}[]" value="{{ task }}" class="form-input" placeholder="Введите задание">
+                    </div>
+                    {% endfor %}
+                    <div class="card">
+                        <input type="text" name="{{ btn_name }}[]" class="form-input" placeholder="Новое задание">
                     </div>
                 </div>
-                <button type="button" onclick="addBoardTask()">➕ Добавить задание на доску</button>
-            </div>
+                {% endfor %}
+            </section>
 
-            <div style="text-align: center; margin-top: 30px;">
-                <button type="submit" style="background: #00ff00; color: black; padding: 15px 30px; font-size: 1.2em;">
-                    💾 СОХРАНИТЬ ВСЕ ИЗМЕНЕНИЯ
+            <!-- Доска задач -->
+            <section class="panel">
+                <h2 class="section-title">📋 Доска задач</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Добавьте новые задачи на общую доску
+                </p>
+
+                <div id="board-tasks">
+                    <div class="card">
+                        <div style="display: flex; gap: 12px;">
+                            <input type="text" name="board_tasks[]" class="form-input" placeholder="Текст задания">
+                            <select name="board_difficulties[]" class="form-input" style="min-width: 120px;">
+                                <option value="лёгкая">Лёгкая</option>
+                                <option value="средняя" selected>Средняя</option>
+                                <option value="сложная">Сложная</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-outline" onclick="addBoardTask()" style="margin-top: 12px;">
+                    ➕ Добавить задание
                 </button>
-            </div>
+            </section>
+
+            <!-- Действия -->
+            <section class="panel">
+                <h2 class="section-title">⚡ Действия</h2>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-success">💾 Сохранить все изменения</button>
+                    <button type="button" class="btn" onclick="generateDailyTasks()">🔄 Обновить ежедневные задачи</button>
+                </div>
+            </section>
         </form>
     </div>
 
     <script>
         function addBoardTask() {
             const container = document.getElementById('board-tasks');
-            const newRow = document.createElement('div');
-            newRow.className = 'task-row';
-            newRow.innerHTML = `
-                <input type="text" name="board_tasks[]" placeholder="Текст задания">
-                <select name="board_difficulties[]">
-                    <option value="лёгкая">Лёгкая</option>
-                    <option value="средняя" selected>Средняя</option>
-                    <option value="сложная">Сложная</option>
-                </select>
-                <button type="button" onclick="this.parentElement.remove()">🗑️ Удалить</button>
+            const newTask = document.createElement('div');
+            newTask.className = 'card';
+            newTask.innerHTML = `
+                <div style="display: flex; gap: 12px;">
+                    <input type="text" name="board_tasks[]" class="form-input" placeholder="Текст задания">
+                    <select name="board_difficulties[]" class="form-input" style="min-width: 120px;">
+                        <option value="лёгкая">Лёгкая</option>
+                        <option value="средняя" selected>Средняя</option>
+                        <option value="сложная">Сложная</option>
+                    </select>
+                    <button type="button" class="btn btn-outline" onclick="this.parentElement.parentElement.remove()">🗑️</button>
+                </div>
             `;
-            container.appendChild(newRow);
+            container.appendChild(newTask);
+        }
+
+        function generateDailyTasks() {
+            fetch('/mark_daily_done', { method: 'POST' })
+                .then(() => {
+                    alert('Ежедневные задачи обновлены!');
+                    location.reload();
+                });
         }
     </script>
 </body>
