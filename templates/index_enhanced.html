@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neo-Tokyo // Task Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Enhanced Background Effects -->
+    <div class="cyber-grid"></div>
+    <div class="floating-particles" id="particles"></div>
+
+    <div class="cyber-container optimized">
+        <!-- Header -->
+        <header style="text-align: center; padding: 30px 0;">
+            <h1 class="cyber-title glitch-text" data-text="NEO-TOKYO SYSTEM">
+                NEO-TOKYO SYSTEM
+            </h1>
+            <div class="cyber-subtitle">
+                > TASK MANAGEMENT INTERFACE v2.0
+            </div>
+        </header>
+
+        <!-- User Stats -->
+        {% if 'username' in session %}
+        <div class="cyber-container" style="margin: 20px 0; padding: 20px;">
+            <h3 class="cyber-subtitle">USER PROFILE // {{ session.username|upper }}</h3>
+            <div class="cyber-progress">
+                <div class="progress-fill" style="width: {{ (user_daily_done|length / 3 * 100) | round | int }}%"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                <span>DAILY PROGRESS: {{ user_daily_done|length }}/3</span>
+                <span>RANK: {{ session.role|upper }}</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Daily Tasks Section -->
+        <section style="padding: 20px;">
+            <h2 class="cyber-subtitle">DAILY OBJECTIVES</h2>
+            <div class="daily-tasks-enhanced">
+                {% for task in daily %}
+                <div class="daily-task-card optimized">
+                    <div class="task-content">
+                        <div class="task-text">{{ task }}</div>
+                        <div class="task-actions">
+                            {% if 'username' in session %}
+                                {% if task not in user_daily_done %}
+                                <form method="post" action="/mark_daily_done" style="display: inline;">
+                                    <input type="hidden" name="task" value="{{ task }}">
+                                    <button type="submit" class="btn-cyber-v2 btn-success">
+                                        EXECUTE
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span style="color: var(--text-accent3); text-shadow: var(--neon-shadow);">
+                                    ✅ COMPLETED
+                                </span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Mission Board -->
+        <section style="padding: 20px;">
+            <h2 class="cyber-subtitle">MISSION BOARD</h2>
+            <table class="cyber-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>MISSION</th>
+                        <th>DIFFICULTY</th>
+                        <th>STATUS</th>
+                        <th>OPERATOR</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in board %}
+                    {% if task.status != 'done' %}
+                    <tr class="optimized">
+                        <td>#{{ task.id }}</td>
+                        <td>{{ task.text }}</td>
+                        <td class="difficulty-{{ task.difficulty|lower }}">
+                            {{ task.difficulty|upper }}
+                        </td>
+                        <td>
+                            <span class="status-{{ task.status }}">
+                                {{ task.status|upper }}
+                            </span>
+                        </td>
+                        <td>{{ task.user or '—' }}</td>
+                        <td>
+                            {% if 'username' not in session %}
+                                <a href="/login" class="btn-cyber-v2 btn-primary">ACCESS</a>
+                            {% elif task.status == 'free' %}
+                                <form method="post" action="/board/take/{{ task.id }}" style="display: inline;">
+                                    <button type="submit" class="btn-cyber-v2 btn-secondary">
+                                        ACCEPT
+                                    </button>
+                                </form>
+                            {% elif task.status == 'taken' and task.user == session.get('username') %}
+                                <form method="post" action="/board/done/{{ task.id }}" style="display: inline;">
+                                    <button type="submit" class="btn-cyber-v2 btn-success">
+                                        COMPLETE
+                                    </button>
+                                </form>
+                            {% elif task.status == 'taken' %}
+                                <span style="color: var(--text-accent2);">ENGAGED</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Navigation -->
+        <footer style="padding: 30px; text-align: center; border-top: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                <a href="/archive" class="btn-cyber-v2">ARCHIVE</a>
+                {% if 'username' not in session %}
+                <a href="/login" class="btn-cyber-v2 btn-primary">LOGIN</a>
+                <a href="/register" class="btn-cyber-v2 btn-secondary">REGISTER</a>
+                {% else %}
+                {% if session.role == 'admin' %}
+                <a href="/admin" class="btn-cyber-v2" style="background: linear-gradient(135deg, #ff00ff, #ff4444);">ADMIN PANEL</a>
+                {% endif %}
+                <a href="/logout" class="btn-cyber-v2" style="background: linear-gradient(135deg, #ff4444, #cc0000);">LOGOUT</a>
+                {% endif %}
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Enhanced particle system
+        function createParticles() {
+            const container = document.getElementById('particles');
+            if (!container) return;
+
+            for (let i = 0; i < 25; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+
+            // Add hover effects to cards
+            document.querySelectorAll('.daily-task-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateX(10px)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateX(0)';
+                });
+            });
+
+            // Add click effects to buttons
+            document.querySelectorAll('.btn-cyber-v2').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    // Create ripple effect
+                    const ripple = document.createElement('div');
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255,255,255,0.6);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size/2;
+                    const y = e.clientY - rect.top - size/2;
+
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+
+                    this.appendChild(ripple);
+
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+        });
+
+        // Add ripple animation to CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

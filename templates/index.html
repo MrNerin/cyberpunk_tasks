@@ -3,129 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ежедневные задания</title>
+    <title>TaskFlow - Управление задачами</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Фоновые эффекты -->
-    <div class="hologram-grid"></div>
-    <div class="energy-wave"></div>
-    <div class="scanline"></div>
-    <div class="particles-container" id="particles"></div>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="nav-bar">
+            <div>
+                <h1 class="title">TaskFlow</h1>
+                <p class="subtitle">Система управления задачами и проектами</p>
+            </div>
 
-    <div class="container cyber-glow">
-        <!-- === Ежедневные Задания === -->
-        <h1 class="cyber-gradient">Ежедневные задания</h1>
-
-        {% if 'username' in session %}
-        <div class="daily-stats hud-element">
-            <div class="hud-header">Статистика системы</div>
-            Выполнено сегодня: <strong>{{ user_daily_done|length }}/3</strong>
-        </div>
-        {% endif %}
-
-        <div class="daily-tasks">
-            {% for task in daily %}
-            <div class="daily-task cyber-3d">
-                <div class="daily-task-text">{{ task }}</div>
-
+            <div class="nav-links">
                 {% if 'username' in session %}
-                    {% if task not in user_daily_done %}
-                    <form class="form-inline" method="post" action="/mark_daily_done">
-                        <input type="hidden" name="task" value="{{ task }}">
-                        <button type="submit" class="btn-cyber btn-cyber-success">
-                            ✅ Выполнить
-                        </button>
-                    </form>
-                    {% else %}
-                    <span class="done-badge">
-                        ✅ ВЫПОЛНЕНО
-                    </span>
-                    {% endif %}
+                <div class="user-info">
+                    <div class="user-avatar">
+                        {{ session.username[0]|upper }}
+                    </div>
+                    <span>{{ session.username }}</span>
+                </div>
+                <a href="/logout" class="btn btn-outline">Выйти</a>
+                {% if session.role == 'admin' %}
+                <a href="/admin" class="btn btn-secondary">Панель управления</a>
+                {% endif %}
+                {% else %}
+                <a href="/login" class="btn">Войти</a>
+                <a href="/register" class="btn btn-outline">Регистрация</a>
                 {% endif %}
             </div>
-            {% endfor %}
+        </header>
+
+        <!-- User Stats -->
+        {% if 'username' in session %}
+        <div class="stats-panel">
+            <div class="stat-card">
+                <div class="stat-value">{{ user_daily_done|length }}/3</div>
+                <div class="stat-label">Выполнено сегодня</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ (user_daily_done|length / 3 * 100) | round | int }}%"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ session.role|upper }}</div>
+                <div class="stat-label">Ваш уровень доступа</div>
+            </div>
         </div>
-
-        <div class="divider"></div>
-
-        <h1 class="board-title">ДОСКА ЗАДАНИЙ</h1>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>ЗАДАНИЕ</th>
-                    <th>СЛОЖНОСТЬ</th>
-                    <th>СТАТУС</th>
-                    <th>ОПЕРАТОР</th>
-                    <th>ДЕЙСТВИЯ</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for task in board %}
-                {% if task.status != 'done' %}
-                <tr>
-                    <td>#{{ task.id }}</td>
-                    <td>{{ task.text }}</td>
-                    <td class="difficulty-{{ task.difficulty|lower }}">{{ task.difficulty }}</td>
-                    <td class="status-{{ task.status }}">{{ task.status|upper }}</td>
-                    <td>{{ task.user or '—' }}</td>
-                    <td>
-                        {% if 'username' not in session %}
-                            <a href="/login" class="btn-cyber">🚪 ВХОД</a>
-                        {% elif task.status == 'free' %}
-                            <form class="form-inline" method="post" action="/board/take/{{ task.id }}">
-                                <button type="submit" class="btn-cyber">ВЗЯТЬ</button>
-                            </form>
-                        {% elif task.status == 'taken' and task.user == session.get('username') %}
-                            <form class="form-inline" method="post" action="/board/done/{{ task.id }}">
-                                <button type="submit" class="btn-cyber">✅ ВЫПОЛНЕНО</button>
-                            </form>
-                        {% elif task.status == 'taken' %}
-                            Занято: {{ task.user }}
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endif %}
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <br>
-        <a href="/archive" class="btn-cyber">📋 АРХИВ</a>
-
-        {% if 'username' not in session %}
-        <br><br>
-        <a href="/login" class="btn-cyber">🚪 ВХОД</a>
-        <a href="/register" class="btn-cyber">👤 РЕГИСТРАЦИЯ</a>
-        {% else %}
-        <br><br>
-        <p>Вы вошли как: <strong>{{ session.username }}</strong> | <a href="/logout">Выйти</a></p>
-        {% if session.role == 'admin' %}
-        <a href="/admin" class="btn-cyber">⚙️ АДМИНКА</a>
         {% endif %}
+
+        <!-- Daily Tasks -->
+        <section class="panel">
+            <h2 class="section-title">📅 Ежедневные задачи</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                Выполняйте ежедневные задачи для поддержания прогресса
+            </p>
+
+            <div class="tasks-list">
+                {% for task in daily %}
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-text">{{ task }}</div>
+                        <div class="card-actions">
+                            {% if 'username' in session %}
+                                {% if task not in user_daily_done %}
+                                <form method="post" action="/mark_daily_done" style="display: inline;">
+                                    <input type="hidden" name="task" value="{{ task }}">
+                                    <button type="submit" class="btn btn-success">
+                                        ✅ Выполнить
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="status status-done">Выполнено</span>
+                                {% endif %}
+                            {% else %}
+                                <a href="/login" class="btn btn-outline">Войти для выполнения</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Task Board -->
+        <section class="panel">
+            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+                <h2 class="section-title" style="margin-bottom: 0; flex: 1;">📋 Доска задач</h2>
+                <a href="/archive" class="btn btn-outline">Архив задач</a>
+            </div>
+
+            {% if board %}
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Задача</th>
+                            <th>Сложность</th>
+                            <th>Статус</th>
+                            <th>Исполнитель</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in board %}
+                        {% if task.status != 'done' %}
+                        <tr>
+                            <td>{{ task.text }}</td>
+                            <td>
+                                <span class="difficulty difficulty-{{ task.difficulty|lower }}">
+                                    {{ task.difficulty }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status status-{{ task.status }}">
+                                    {% if task.status == 'free' %}Свободна{% endif %}
+                                    {% if task.status == 'taken' %}В работе{% endif %}
+                                    {% if task.status == 'done' %}Выполнена{% endif %}
+                                </span>
+                            </td>
+                            <td>{{ task.user or '—' }}</td>
+                            <td>
+                                {% if 'username' not in session %}
+                                    <a href="/login" class="btn btn-outline">Войти</a>
+                                {% elif task.status == 'free' %}
+                                    <form method="post" action="/board/take/{{ task.id }}" style="display: inline;">
+                                        <button type="submit" class="btn">Взять задачу</button>
+                                    </form>
+                                {% elif task.status == 'taken' and task.user == session.get('username') %}
+                                    <form method="post" action="/board/done/{{ task.id }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-success">Завершить</button>
+                                    </form>
+                                {% elif task.status == 'taken' %}
+                                    <span style="color: var(--text-secondary);">Занято: {{ task.user }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                <p>На доске пока нет активных задач</p>
+                {% if session.role == 'admin' %}
+                <a href="/admin" class="btn" style="margin-top: 16px;">Добавить задачи</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Quick Actions -->
+        {% if 'username' in session %}
+        <section class="panel">
+            <h2 class="section-title">⚡ Быстрые действия</h2>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <a href="/board" class="btn btn-secondary">Просмотреть все задачи</a>
+                <a href="/archive" class="btn btn-outline">История выполненных</a>
+                {% if session.role == 'admin' %}
+                <a href="/admin" class="btn">Управление системой</a>
+                {% endif %}
+            </div>
+        </section>
         {% endif %}
     </div>
 
-    <div class="crt-cursor"></div>
-
     <script>
-        // Простой скрипт для частиц
-        function createParticles() {
-            const container = document.getElementById('particles');
-            if (!container) return;
+        // Smooth interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add subtle hover effects
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
 
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + 'vw';
-                particle.style.animationDelay = Math.random() * 10 + 's';
-                container.appendChild(particle);
-            }
-        }
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
 
-        document.addEventListener('DOMContentLoaded', createParticles);
+            // Button click feedback
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+
+            // Form submission handling
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function() {
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.classList.add('loading');
+                        submitBtn.innerHTML = '⏳ Обработка...';
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>
