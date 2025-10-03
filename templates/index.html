@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TaskFlow - Управление задачами</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
 </head>
 <body>
     <div class="app-container">
@@ -87,8 +88,8 @@
 
         <!-- Task Board -->
         <section class="panel">
-            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
-                <h2 class="section-title" style="margin-bottom: 0; flex: 1;">📋 Доска задач</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 class="section-title" style="margin-bottom: 0;">📋 Доска задач</h2>
                 <a href="/archive" class="btn btn-outline">Архив задач</a>
             </div>
 
@@ -144,7 +145,8 @@
                 </table>
             </div>
             {% else %}
-            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
                 <p>На доске пока нет активных задач</p>
                 {% if session.role == 'admin' %}
                 <a href="/admin" class="btn" style="margin-top: 16px;">Добавить задачи</a>
@@ -169,9 +171,8 @@
     </div>
 
     <script>
-        // Smooth interactions
         document.addEventListener('DOMContentLoaded', function() {
-            // Add subtle hover effects
+            // Enhanced interactions
             const cards = document.querySelectorAll('.card');
             cards.forEach(card => {
                 card.addEventListener('mouseenter', function() {
@@ -183,7 +184,25 @@
                 });
             });
 
-            // Button click feedback
+            // Form handling
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function() {
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        const originalText = submitBtn.innerHTML;
+                        submitBtn.innerHTML = '<span class="loading-spinner"></span> Обработка...';
+                        submitBtn.disabled = true;
+
+                        setTimeout(() => {
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+                        }, 3000);
+                    }
+                });
+            });
+
+            // Button feedback
             const buttons = document.querySelectorAll('.btn');
             buttons.forEach(btn => {
                 btn.addEventListener('click', function(e) {
@@ -191,18 +210,6 @@
                     setTimeout(() => {
                         this.style.transform = '';
                     }, 150);
-                });
-            });
-
-            // Form submission handling
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                form.addEventListener('submit', function() {
-                    const submitBtn = this.querySelector('button[type="submit"]');
-                    if (submitBtn) {
-                        submitBtn.classList.add('loading');
-                        submitBtn.innerHTML = '⏳ Обработка...';
-                    }
                 });
             });
         });

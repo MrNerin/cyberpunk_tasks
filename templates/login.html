@@ -3,32 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход </title>
+    <title>Вход - TaskFlow</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="hologram-grid"></div>
-    <div class="container">
-        <h1 class="cyber-gradient">🚪 СИСТЕМНЫЙ ВХОД</h1>
-
-        <form method="POST" class="cyber-form">
-            <div class="form-group">
-                <input type="text" name="username" placeholder="Имя пользователя" required>
-            </div>
-            <div class="form-group">
-                <input type="password" name="password" placeholder="Пароль" required>
-            </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="remember"> Запомнить меня
-                </label>
-            </div>
-            <button type="submit" class="btn-cyber">ВОЙТИ В СИСТЕМУ</button>
-        </form>
-
-        <br>
-        <a href="{{ url_for('index') }}">← Назад</a> |
-        <a href="{{ url_for('register') }}">📝 Регистрация</a>
-    </div>
-</body>
-</html>
+    <div class="app-container">
+        <div style="max-width: 400px; margin: 100px auto;">
+            <div class="panel">
+                <h1 class="title" style="text-align: center; margin-bottom: 8px;">Вход</h1>
+                <p class="subtitle" style="text-align: center; margin-bottom: 32px;">
