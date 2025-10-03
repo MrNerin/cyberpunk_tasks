@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>📋 Доска Объявлений</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📋 ДОСКА ОБЪЯВЛЕНИЙ</h1>
+
+        <p>Возьмите задание и отметьте его выполненным, когда закончите.</p>
+
+        {% if 'username' not in session %}
+        <p><a href="/login">Войдите</a>, чтобы брать задания.</p>
+        {% endif %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ЗАДАНИЕ</th>
+                    <th>СЛОЖНОСТЬ</th>
+                    <th>СТАТУС</th>
+                    <th>ВЗЯЛ</th>
+                    <th>ВЗЯТ</th>
+                    <th>ВЫПОЛНЕН</th>
+                    <th>ДЕЙСТВИЕ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in board %}
+                {% if task.status != 'done' %}
+                <tr>
+                    <td>{{ task.id }}</td>
+                    <td>{{ task.text }}</td>
+                    <td class="difficulty-{{ task.difficulty|lower }}">{{ task.difficulty }}</td>
+                    <td class="status-{{ task.status }}">{{ task.status|title }}</td>
+                    <td>{{ task.user or '-' }}</td>
+                    <td>{{ task.taken_at or '-' }}</td>
+                    <td>{{ task.done_at or '-' }}</td>
+                    <td>
+                        {% if task.status == 'free' and 'username' in session %}
+                        <form class="form-inline" method="post" action="/board/take/{{ task.id }}">
+                            <!-- Имя пользователя подставляется автоматически -->
+                            <input type="hidden" name="username" value="{{ session.username }}">
+                            <button type="submit">ВЗЯТЬ</button>
+                        </form>
+                        {% elif task.status == 'taken' and task.user == session.get('username') %}
+                        <form class="form-inline" method="post" action="/board/done/{{ task.id }}">
+                            <button type="submit">✅ ВЫПОЛНЕНО</button>
+                        </form>
+                        {% elif task.status == 'taken' %}
+                        Занято: {{ task.user }}
+                        {% else %}
+                        —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <br>
+        <a href="/">← НАЗАД</a> | <a href="/archive">📋 АРХИВ</a>
+        {% if 'username' in session %}
+        | <a href="/logout">🚪 ВЫЙТИ ({{ session.username }})</a>
+        {% endif %}
+    </div>
+</body>
+</html>

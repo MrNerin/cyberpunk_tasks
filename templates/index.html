@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ежедневные задания</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Фоновые эффекты -->
+    <div class="hologram-grid"></div>
+    <div class="energy-wave"></div>
+    <div class="scanline"></div>
+    <div class="particles-container" id="particles"></div>
+
+    <div class="container cyber-glow">
+        <!-- === Ежедневные Задания === -->
+        <h1 class="cyber-gradient">Ежедневные задания</h1>
+
+        {% if 'username' in session %}
+        <div class="daily-stats hud-element">
+            <div class="hud-header">Статистика системы</div>
+            Выполнено сегодня: <strong>{{ user_daily_done|length }}/3</strong>
+        </div>
+        {% endif %}
+
+        <div class="daily-tasks">
+            {% for task in daily %}
+            <div class="daily-task cyber-3d">
+                <div class="daily-task-text">{{ task }}</div>
+
+                {% if 'username' in session %}
+                    {% if task not in user_daily_done %}
+                    <form class="form-inline" method="post" action="/mark_daily_done">
+                        <input type="hidden" name="task" value="{{ task }}">
+                        <button type="submit" class="btn-cyber btn-cyber-success">
+                            ✅ Выполнить
+                        </button>
+                    </form>
+                    {% else %}
+                    <span class="done-badge">
+                        ✅ ВЫПОЛНЕНО
+                    </span>
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="divider"></div>
+
+        <h1 class="board-title">ДОСКА ЗАДАНИЙ</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ЗАДАНИЕ</th>
+                    <th>СЛОЖНОСТЬ</th>
+                    <th>СТАТУС</th>
+                    <th>ОПЕРАТОР</th>
+                    <th>ДЕЙСТВИЯ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in board %}
+                {% if task.status != 'done' %}
+                <tr>
+                    <td>#{{ task.id }}</td>
+                    <td>{{ task.text }}</td>
+                    <td class="difficulty-{{ task.difficulty|lower }}">{{ task.difficulty }}</td>
+                    <td class="status-{{ task.status }}">{{ task.status|upper }}</td>
+                    <td>{{ task.user or '—' }}</td>
+                    <td>
+                        {% if 'username' not in session %}
+                            <a href="/login" class="btn-cyber">🚪 ВХОД</a>
+                        {% elif task.status == 'free' %}
+                            <form class="form-inline" method="post" action="/board/take/{{ task.id }}">
+                                <button type="submit" class="btn-cyber">ВЗЯТЬ</button>
+                            </form>
+                        {% elif task.status == 'taken' and task.user == session.get('username') %}
+                            <form class="form-inline" method="post" action="/board/done/{{ task.id }}">
+                                <button type="submit" class="btn-cyber">✅ ВЫПОЛНЕНО</button>
+                            </form>
+                        {% elif task.status == 'taken' %}
+                            Занято: {{ task.user }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <br>
+        <a href="/archive" class="btn-cyber">📋 АРХИВ</a>
+
+        {% if 'username' not in session %}
+        <br><br>
+        <a href="/login" class="btn-cyber">🚪 ВХОД</a>
+        <a href="/register" class="btn-cyber">👤 РЕГИСТРАЦИЯ</a>
+        {% else %}
+        <br><br>
+        <p>Вы вошли как: <strong>{{ session.username }}</strong> | <a href="/logout">Выйти</a></p>
+        {% if session.role == 'admin' %}
+        <a href="/admin" class="btn-cyber">⚙️ АДМИНКА</a>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <div class="crt-cursor"></div>
+
+    <script>
+        // Простой скрипт для частиц
+        function createParticles() {
+            const container = document.getElementById('particles');
+            if (!container) return;
+
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', createParticles);
+    </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>📋 Архив выполненных заданий</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📋 АРХИВ ВЫПОЛНЕННЫХ ЗАДАНИЙ</h1>
+
+        <p>Здесь отображаются задания, которые были выполнены.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ЗАДАНИЕ</th>
+                    <th>ВЗЯЛ</th>
+                    <th>ВЗЯТ</th>
+                    <th>ВЫПОЛНЕН</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in board %}
+                <tr>
+                    <td>{{ task.id }}</td>
+                    <td>{{ task.text }}</td>
+                    <td>{{ task.user or '-' }}</td>
+                    <td>{{ task.taken_at or '-' }}</td>
+                    <td>{{ task.done_at or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <br>
+        <a href="/">← НАЗАД</a>
+    </div>
+</body>
+</html>

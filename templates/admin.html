@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админка </title>
+    <style>
+        body {
+            background: #0a0a15;
+            color: #e0e0ff;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(18, 18, 37, 0.95);
+            border: 2px solid #00ffff;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+        h1 {
+            color: #00ffff;
+            text-align: center;
+            text-shadow: 0 0 10px #00ffff;
+            border-bottom: 2px solid #00ffff;
+            padding-bottom: 10px;
+        }
+        .task-group {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #00ffff;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .task-row {
+            display: flex;
+            margin: 10px 0;
+            gap: 10px;
+        }
+        input, select {
+            flex: 1;
+            padding: 10px;
+            background: #121225;
+            color: white;
+            border: 1px solid #00ffff;
+            font-family: 'Courier New', monospace;
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: 1px solid #00ffff;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+        button:hover {
+            background: #00ffff;
+            color: black;
+        }
+        .user-info {
+            text-align: right;
+            color: #00ff00;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="user-info">
+            👤 {{ session.username }} ({{ session.role }}) |
+            <a href="/logout" style="color: #ff4444;">Выйти</a> |
+            <a href="/" style="color: #00ffff;">На главную</a>
+        </div>
+
+        <h1>⚙️ ПАНЕЛЬ УПРАВЛЕНИЯ</h1>
+
+        <form method="POST" action="/admin/save">
+            <!-- Управление задачами -->
+            <div class="task-group">
+                <h3>📝 ОСНОВНЫЕ ЗАДАНИЯ</h3>
+                {% for btn_name, btn_label in [('button1', 'Кнопка 1'), ('button2', 'Кнопка 2'), ('button3', 'Кнопка 3')] %}
+                <h4>{{ btn_label }}</h4>
+                {% for task in tasks[btn_name] %}
+                <div class="task-row">
+                    <input type="text" name="{{ btn_name }}[]" value="{{ task }}" placeholder="Введите задание">
+                </div>
+                {% endfor %}
+                <div class="task-row">
+                    <input type="text" name="{{ btn_name }}[]" placeholder="Новое задание">
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Доска заданий -->
+            <div class="task-group">
+                <h3>📋 ДОСКА ЗАДАНИЙ</h3>
+                <div id="board-tasks">
+                    <div class="task-row">
+                        <input type="text" name="board_tasks[]" placeholder="Текст задания">
+                        <select name="board_difficulties[]">
+                            <option value="лёгкая">Лёгкая</option>
+                            <option value="средняя" selected>Средняя</option>
+                            <option value="сложная">Сложная</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="button" onclick="addBoardTask()">➕ Добавить задание на доску</button>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button type="submit" style="background: #00ff00; color: black; padding: 15px 30px; font-size: 1.2em;">
+                    💾 СОХРАНИТЬ ВСЕ ИЗМЕНЕНИЯ
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function addBoardTask() {
+            const container = document.getElementById('board-tasks');
+            const newRow = document.createElement('div');
+            newRow.className = 'task-row';
+            newRow.innerHTML = `
+                <input type="text" name="board_tasks[]" placeholder="Текст задания">
+                <select name="board_difficulties[]">
+                    <option value="лёгкая">Лёгкая</option>
+                    <option value="средняя" selected>Средняя</option>
+                    <option value="сложная">Сложная</option>
+                </select>
+                <button type="button" onclick="this.parentElement.remove()">🗑️ Удалить</button>
+            `;
+            container.appendChild(newRow);
+        }
+    </script>
+</body>
+</html>
