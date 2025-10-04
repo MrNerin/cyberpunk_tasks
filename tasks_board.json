@@ -1,18 +1,3 @@
 [
-  {
-    "id": 1,
-    "text": "Пройти 20 уровней: https://5jqdmjxdwavv.trickle.host/",
-    "status": "taken",
-    "user": "admin",
-    "taken_at": "2025-10-03 15:22:22",
-    "done_at": null
-  },
-  {
-    "id": 2,
-    "text": "Набрать 10000 очков: https://poki.com/ru/g/hex-frvr",
-    "status": "taken",
-    "user": "admin",
-    "taken_at": "2025-10-03 15:22:25",
-    "done_at": null
-  }
+  {}
 ]
