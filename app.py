@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session, make_response
 import json
-import os
+import os  # ← ДОБАВЬТЕ ЭТУ СТРОКУ
 import random
 from datetime import datetime, date
 import functools
@@ -302,7 +302,7 @@ def mark_daily_done_route():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    init_files()
-    print("🚀 TaskFlow запущен: http://localhost:5000")
+    port = int(os.environ.get('PORT', 5000))
+    print(f"🚀 TaskFlow запущен: http://localhost:{port}")
     print("👤 Админ: admin / password")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=port)
