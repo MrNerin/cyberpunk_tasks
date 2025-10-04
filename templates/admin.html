@@ -72,16 +72,18 @@
                 </button>
             </section>
 
-            <!-- Действия -->
-            <section class="panel">
-                <h2 class="section-title">⚡ Действия</h2>
-                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button type="submit" class="btn btn-success">💾 Сохранить все изменения</button>
-                    <button type="button" class="btn" onclick="generateDailyTasks()">🔄 Обновить ежедневные задачи</button>
-                </div>
-            </section>
+<!-- Действия -->
+<section class="panel">
+    <h2 class="section-title">⚡ Действия</h2>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button type="submit" class="btn btn-success">💾 Сохранить все изменения</button>
+
+        <!-- ОБНОВЛЕННАЯ КНОПКА -->
+        <form method="POST" action="/admin/update_daily" style="display: inline;">
+            <button type="submit" class="btn">🔄 Обновить ежедневные задачи</button>
         </form>
     </div>
+</section>
 
     <script>
         function addBoardTask() {
