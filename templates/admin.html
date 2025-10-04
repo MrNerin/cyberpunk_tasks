@@ -24,25 +24,30 @@
             </div>
         </header>
 
-        <form method="POST" action="/admin/save">
+        <form method="POST" action="/admin/save" id="main-form">
             <!-- Основные задачи -->
             <section class="panel">
                 <h2 class="section-title">📝 Основные задачи</h2>
                 <p style="color: var(--text-secondary); margin-bottom: 20px;">
-                    Настройте задачи для ежедневного использования
+                    Настройте задачи для ежедневного использования. Пустые поля будут игнорироваться.
                 </p>
 
                 {% for btn_name, btn_label in [('button1', 'Группа задач 1'), ('button2', 'Группа задач 2'), ('button3', 'Группа задач 3')] %}
-                <div style="margin-bottom: 24px;">
-                    <h3 style="color: var(--text-accent); margin-bottom: 12px;">{{ btn_label }}</h3>
-                    {% for task in tasks[btn_name] %}
-                    <div class="card">
-                        <input type="text" name="{{ btn_name }}[]" value="{{ task }}" class="form-input" placeholder="Введите задание">
+                <div style="margin-bottom: 32px;">
+                    <h3 style="color: var(--text-accent); margin-bottom: 16px; font-size: 1.1em;">{{ btn_label }}</h3>
+                    <div id="{{ btn_name }}-container">
+                        {% for task in tasks[btn_name] %}
+                        <div class="card task-input-group">
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <input type="text" name="{{ btn_name }}[]" value="{{ task }}" class="form-input" placeholder="Введите задание">
+                                <button type="button" class="btn btn-outline" onclick="removeTaskInput(this)" style="padding: 8px 12px; font-size: 0.9em;">🗑️</button>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
-                    <div class="card">
-                        <input type="text" name="{{ btn_name }}[]" class="form-input" placeholder="Новое задание">
-                    </div>
+                    <button type="button" class="btn btn-outline" onclick="addTaskInput('{{ btn_name }}')" style="margin-top: 12px;">
+                        ➕ Добавить задание в {{ btn_label }}
+                    </button>
                 </div>
                 {% endfor %}
             </section>
@@ -55,62 +60,230 @@
                 </p>
 
                 <div id="board-tasks">
-                    <div class="card">
-                        <div style="display: flex; gap: 12px;">
+                    <!-- Существующие задачи доски -->
+                    {% for task in board %}
+                    {% if task.status != 'done' %}
+                    <div class="card board-task-group">
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <input type="text" name="board_tasks[]" value="{{ task.text }}" class="form-input" placeholder="Текст задания">
+                            <select name="board_difficulties[]" class="form-input" style="min-width: 140px;">
+                                <option value="лёгкая" {% if task.difficulty == 'лёгкая' %}selected{% endif %}>Лёгкая</option>
+                                <option value="средняя" {% if task.difficulty == 'средняя' %}selected{% endif %}>Средняя</option>
+                                <option value="сложная" {% if task.difficulty == 'сложная' %}selected{% endif %}>Сложная</option>
+                            </select>
+                            <span class="status status-{{ task.status }}" style="min-width: 100px; text-align: center;">
+                                {% if task.status == 'free' %}Свободна{% endif %}
+                                {% if task.status == 'taken' %}В работе{% endif %}
+                                {% if task.status == 'done' %}Выполнена{% endif %}
+                            </span>
+                            <button type="button" class="btn btn-outline" onclick="removeBoardTask(this)" style="padding: 8px 12px; font-size: 0.9em;">🗑️</button>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+
+                    <!-- Новые задачи доски -->
+                    <div class="card board-task-group">
+                        <div style="display: flex; gap: 12px; align-items: center;">
                             <input type="text" name="board_tasks[]" class="form-input" placeholder="Текст задания">
-                            <select name="board_difficulties[]" class="form-input" style="min-width: 120px;">
+                            <select name="board_difficulties[]" class="form-input" style="min-width: 140px;">
                                 <option value="лёгкая">Лёгкая</option>
                                 <option value="средняя" selected>Средняя</option>
                                 <option value="сложная">Сложная</option>
                             </select>
+                            <span style="min-width: 100px; text-align: center; color: var(--text-secondary);">Новая</span>
+                            <button type="button" class="btn btn-outline" onclick="removeBoardTask(this)" style="padding: 8px 12px; font-size: 0.9em;">🗑️</button>
                         </div>
                     </div>
                 </div>
 
                 <button type="button" class="btn btn-outline" onclick="addBoardTask()" style="margin-top: 12px;">
-                    ➕ Добавить задание
+                    ➕ Добавить новое задание на доску
                 </button>
             </section>
 
-<!-- Действия -->
-<section class="panel">
-    <h2 class="section-title">⚡ Действия</h2>
-    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <button type="submit" class="btn btn-success">💾 Сохранить все изменения</button>
+            <!-- Действия -->
+            <section class="panel">
+                <h2 class="section-title">⚡ Действия</h2>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-success" id="save-btn">
+                        💾 Сохранить все изменения
+                    </button>
 
-        <!-- ОБНОВЛЕННАЯ КНОПКА -->
-        <form method="POST" action="/admin/update_daily" style="display: inline;">
-            <button type="submit" class="btn">🔄 Обновить ежедневные задачи</button>
+                    <button type="button" class="btn" onclick="updateDailyTasks()" id="update-daily-btn">
+                        🔄 Обновить ежедневные задачи
+                    </button>
+
+                    <button type="button" class="btn btn-outline" onclick="clearAllTasks()">
+                        🗑️ Очистить все задачи
+                    </button>
+                </div>
+
+                <div id="message-area" style="margin-top: 16px;"></div>
+            </section>
         </form>
     </div>
-</section>
 
     <script>
-        function addBoardTask() {
-            const container = document.getElementById('board-tasks');
+        // Добавление поля для основных задач
+        function addTaskInput(buttonName) {
+            const container = document.getElementById(`${buttonName}-container`);
             const newTask = document.createElement('div');
-            newTask.className = 'card';
+            newTask.className = 'card task-input-group';
             newTask.innerHTML = `
-                <div style="display: flex; gap: 12px;">
-                    <input type="text" name="board_tasks[]" class="form-input" placeholder="Текст задания">
-                    <select name="board_difficulties[]" class="form-input" style="min-width: 120px;">
-                        <option value="лёгкая">Лёгкая</option>
-                        <option value="средняя" selected>Средняя</option>
-                        <option value="сложная">Сложная</option>
-                    </select>
-                    <button type="button" class="btn btn-outline" onclick="this.parentElement.parentElement.remove()">🗑️</button>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <input type="text" name="${buttonName}[]" class="form-input" placeholder="Введите задание">
+                    <button type="button" class="btn btn-outline" onclick="removeTaskInput(this)" style="padding: 8px 12px; font-size: 0.9em;">🗑️</button>
                 </div>
             `;
             container.appendChild(newTask);
         }
 
-        function generateDailyTasks() {
-            fetch('/mark_daily_done', { method: 'POST' })
-                .then(() => {
-                    alert('Ежедневные задачи обновлены!');
-                    location.reload();
-                });
+        // Удаление поля основных задач
+        function removeTaskInput(button) {
+            const group = button.closest('.task-input-group');
+            group.remove();
         }
+
+        // Добавление задачи на доску
+        function addBoardTask() {
+            const container = document.getElementById('board-tasks');
+            const newTask = document.createElement('div');
+            newTask.className = 'card board-task-group';
+            newTask.innerHTML = `
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <input type="text" name="board_tasks[]" class="form-input" placeholder="Текст задания">
+                    <select name="board_difficulties[]" class="form-input" style="min-width: 140px;">
+                        <option value="лёгкая">Лёгкая</option>
+                        <option value="средняя" selected>Средняя</option>
+                        <option value="сложная">Сложная</option>
+                    </select>
+                    <span style="min-width: 100px; text-align: center; color: var(--text-secondary);">Новая</span>
+                    <button type="button" class="btn btn-outline" onclick="removeBoardTask(this)" style="padding: 8px 12px; font-size: 0.9em;">🗑️</button>
+                </div>
+            `;
+            container.appendChild(newTask);
+        }
+
+        // Удаление задачи с доски
+        function removeBoardTask(button) {
+            const group = button.closest('.board-task-group');
+            group.remove();
+        }
+
+        // Обновление ежедневных задач
+        function updateDailyTasks() {
+            const btn = document.getElementById('update-daily-btn');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<span class="loading-spinner"></span> Обновление...';
+            btn.disabled = true;
+
+            fetch('/admin/update_daily', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    showMessage('Ежедневные задачи успешно обновлены!', 'success');
+                } else {
+                    showMessage('Ошибка при обновлении задач', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Ошибка при обновлении задач', 'error');
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        // Показать сообщение
+        function showMessage(text, type) {
+            const messageArea = document.getElementById('message-area');
+            const messageClass = type === 'success' ? 'success-message' : 'error-message';
+
+            messageArea.innerHTML = `
+                <div class="${messageClass}" style="${type === 'error' ? 'background: rgba(239, 83, 80, 0.1); border: 1px solid #ef5350; color: #ef5350;' : ''}">
+                    ${text}
+                </div>
+            `;
+
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 5000);
+        }
+
+        // Очистка всех задач
+        function clearAllTasks() {
+            if (confirm('Вы уверены, что хотите очистить ВСЕ задачи? Это действие нельзя отменить.')) {
+                const taskGroups = document.querySelectorAll('.task-input-group');
+                const boardTasks = document.querySelectorAll('.board-task-group');
+
+                taskGroups.forEach(group => {
+                    const input = group.querySelector('input');
+                    if (input) input.value = '';
+                });
+
+                boardTasks.forEach(group => group.remove());
+
+                // Добавить одно пустое поле для доски
+                addBoardTask();
+
+                showMessage('Все задачи очищены. Не забудьте сохранить изменения!', 'success');
+            }
+        }
+
+        // Обработка отправки формы
+        document.getElementById('main-form').addEventListener('submit', function(e) {
+            const saveBtn = document.getElementById('save-btn');
+            const originalText = saveBtn.innerHTML;
+
+            saveBtn.innerHTML = '<span class="loading-spinner"></span> Сохранение...';
+            saveBtn.disabled = true;
+
+            setTimeout(() => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            }, 2000);
+        });
+
+        // Инициализация - добавить пустые поля если их нет
+        document.addEventListener('DOMContentLoaded', function() {
+            const containers = ['button1-container', 'button2-container', 'button3-container'];
+            containers.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (container.children.length === 0) {
+                    const buttonName = containerId.replace('-container', '');
+                    addTaskInput(buttonName);
+                }
+            });
+
+            const boardContainer = document.getElementById('board-tasks');
+            if (boardContainer.children.length === 0) {
+                addBoardTask();
+            }
+        });
     </script>
+
+    <style>
+        .error-message {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 16px 0;
+        }
+
+        .task-input-group, .board-task-group {
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .board-task-group {
+            border-left: 3px solid var(--border-accent);
+        }
+    </style>
 </body>
 </html>

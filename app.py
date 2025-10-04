@@ -301,6 +301,16 @@ def mark_daily_done_route():
         mark_daily_done(session['username'], task_text)
     return redirect(url_for('index'))
 
+@app.route('/admin/update_daily', methods=['POST'])
+def update_daily_tasks():
+    if 'username' not in session or session.get('role') != 'admin':
+        return "Доступ запрещен", 403
+
+    generate_daily_tasks()
+    _data_cache.pop('daily_tasks', None)
+
+    return redirect(url_for('admin'))
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f"🚀 TaskFlow запущен: http://localhost:{port}")
