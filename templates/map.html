@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта прогресса - RGG QUEST</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-menu-toggle" onclick="toggleSidebar()">
+        <span>☰</span>
+        <span>Меню</span>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">RGG QUEST</div>
+                <div class="sidebar-subtitle">Управление задачами</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Основное</div>
+                    <a href="/" class="sidebar-link">
+                        <span class="sidebar-link-icon">📋</span>
+                        <span class="sidebar-link-text">Главная</span>
+                    </a>
+                    <a href="/map" class="sidebar-link active">
+                        <span class="sidebar-link-icon">🗺️</span>
+                        <span class="sidebar-link-text">Карта прогресса</span>
+                    </a>
+                    <a href="/archive" class="sidebar-link">
+                        <span class="sidebar-link-icon">📚</span>
+                        <span class="sidebar-link-text">Архив задач</span>
+                    </a>
+                </div>
+
+                {% if session.role == 'admin' %}
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Администрирование</div>
+                    <a href="/admin" class="sidebar-link">
+                        <span class="sidebar-link-icon">⚙️</span>
+                        <span class="sidebar-link-text">Панель управления</span>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Быстрые действия -->
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Быстрые действия</div>
+                    <div class="quick-actions">
+                        <a href="/" class="action-button">
+                            <span class="action-button-icon">📋</span>
+                            <span class="action-button-text">К заданиям</span>
+                        </a>
+                        <a href="/archive" class="action-button">
+                            <span class="action-button-icon">📚</span>
+                            <span class="action-button-text">История выполненных</span>
+                        </a>
+                        {% if session.role == 'admin' %}
+                        <a href="/admin" class="action-button">
+                            <span class="action-button-icon">⚙️</span>
+                            <span class="action-button-text">Управление системой</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </nav>
+
+            <!-- User Info -->
+            <div class="sidebar-user">
+                {% if 'username' in session %}
+                <div class="user-profile">
+                    <div class="user-avatar-large">
+                        {{ session.username[0]|upper }}
+                    </div>
+                    <div class="user-info-compact">
+                        <div class="user-name">{{ session.username }}</div>
+                        <div class="user-role">{{ session.role }}</div>
+                    </div>
+                    <a href="/logout" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8em;">Выйти</a>
+                </div>
+                {% else %}
+                <div style="display: flex; gap: 8px; flex-direction: column;">
+                    <a href="/login" class="btn" style="width: 100%; text-align: center;">Войти</a>
+                    <a href="/register" class="btn btn-outline" style="width: 100%; text-align: center;">Регистрация</a>
+                </div>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% if 'username' in session %}
+            <!-- Основная статистика -->
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <div class="stat-value">{{ total_completed }}</div>
+                    <div class="stat-label">Выполнено задач</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="currentPosition">0</div>
+                    <div class="stat-label">Текущая позиция</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="onlineUsers">1</div>
+                    <div class="stat-label">Игроков онлайн</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalPoints">0</div>
+                    <div class="stat-label">Всего точек</div>
+                </div>
+            </div>
+
+            <!-- Карта -->
+            <section class="panel">
+                <div class="map-container">
+                    <div class="map-controls">
+                        <button class="btn btn-outline" onclick="moveToStart()">В начало</button>
+                        <button class="btn btn-outline" onclick="moveBack()">← Назад</button>
+                        <button class="btn" onclick="moveForward()">Вперед →</button>
+                        <button class="btn btn-secondary" onclick="savePosition()">Сохранить позицию</button>
+                    </div>
+
+                    <div class="map-wrapper" id="mapWrapper">
+                        <img src="{{ url_for('static', filename='images/map.png') }}"
+                             alt="Карта прогресса RGG" class="map-image" id="mapImage">
+
+                        <!-- Линии маршрута -->
+                        <svg class="map-path" id="mapPath"></svg>
+
+                        <!-- Контейнер для всех фишек -->
+                        <div class="map-pins-container" id="pinsContainer">
+                            <!-- Фишка текущего пользователя -->
+                            <div class="map-pin user-pin crystal-pin-1" id="userPin"
+                                 style="left: {{ user_position[0] }}%; top: {{ user_position[1] }}%;">
+                                <div class="pin-crystal">
+                                    <div class="crystal-core"></div>
+                                    <div class="crystal-shine"></div>
+                                </div>
+                                <div class="pin-label">{{ session.username }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Точки маршрута (скрытые) -->
+                        {% for point in all_points %}
+                        <div class="hidden-point"
+                             style="left: {{ point.x }}%; top: {{ point.y }}%;"
+                             data-index="{{ loop.index0 }}"
+                             onclick="moveToPoint({{ loop.index0 }})"
+                             title="Точка {{ loop.index0 }}"></div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="map-progress">
+                        <div class="progress-label">
+                            <span>Позиция на карте: <span id="positionText">0</span>/<span id="totalPointsText">0</span></span>
+                            <span id="pathPercentage">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="pathProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Легенда пользователей -->
+                    <div class="users-legend" id="usersLegend">
+                        <div class="user-legend-item">
+                            <div class="user-legend-crystal crystal-1"></div>
+                            <span>{{ session.username }} (Вы)</span>
+                        </div>
+                    </div>
+
+                    <div class="map-legend">
+                        <div class="legend-item">
+                            <span class="legend-crystal crystal-1"></span>
+                            <span>Положение игроков</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-marker" style="color: #64b5f6;">●</span>
+                            <span>Точки маршрута</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-marker completed">⭐</span>
+                            <span>Контрольные точки</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Достижения -->
+            <section class="panel">
+                <h2 class="section-title">🏆 Достижения</h2>
+                <div class="achievements-grid">
+                    <div class="achievement {% if total_completed >= 1 %}unlocked{% endif %}">
+                        <div class="achievement-icon">🎯</div>
+                        <div class="achievement-info">
+                            <strong>Первые шаги</strong>
+                            <small>Выполните первую задачу</small>
+                        </div>
+                    </div>
+                    <div class="achievement {% if total_completed >= 5 %}unlocked{% endif %}">
+                        <div class="achievement-icon">🔥</div>
+                        <div class="achievement-info">
+                            <strong>Стабильность</strong>
+                            <small>5 выполненных задач</small>
+                        </div>
+                    </div>
+                    <div class="achievement {% if total_completed >= 10 %}unlocked{% endif %}">
+                        <div class="achievement-icon">⚡</div>
+                        <div class="achievement-info">
+                            <strong>Эксперт</strong>
+                            <small>10 выполненных задач</small>
+                        </div>
+                    </div>
+                    <div class="achievement {% if total_completed >= 20 %}unlocked{% endif %}">
+                        <div class="achievement-icon">🌟</div>
+                        <div class="achievement-info">
+                            <strong>Мастер</strong>
+                            <small>20 выполненных задач</small>
+                        </div>
+                    </div>
+                    <div class="achievement {% if total_completed >= 30 %}unlocked{% endif %}">
+                        <div class="achievement-icon">🚀</div>
+                        <div class="achievement-info">
+                            <strong>Легенда</strong>
+                            <small>30 выполненных задач</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {% else %}
+            <section class="panel">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🗺️</div>
+                    <h3>Карта прогресса</h3>
+                    <p>Войдите в систему, чтобы увидеть своё путешествие</p>
+                    <a href="/login" class="btn" style="margin-top: 16px;">Войти в систему</a>
+                </div>
+            </section>
+            {% endif %}
+        </main>
+    </div>
+
+    <script>
+        let currentPosition = 0;
+        const points = [
+            {% for point in all_points %}
+            {x: {{ point.x }}, y: {{ point.y }} },
+            {% endfor %}
+        ];
+
+        // Цвета кристаллов для пользователей
+        const crystalColors = [
+            { class: 'crystal-pin-1', legend: 'crystal-1', name: 'Синий кристалл' },
+            { class: 'crystal-pin-2', legend: 'crystal-2', name: 'Зеленый кристалл' },
+            { class: 'crystal-pin-3', legend: 'crystal-3', name: 'Фиолетовый кристалл' },
+            { class: 'crystal-pin-4', legend: 'crystal-4', name: 'Золотой кристалл' },
+            { class: 'crystal-pin-5', legend: 'crystal-5', name: 'Розовый кристалл' },
+            { class: 'crystal-pin-6', legend: 'crystal-6', name: 'Бирюзовый кристалл' }
+        ];
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+
+        // Close sidebar when clicking on a link (mobile)
+        document.querySelectorAll('.sidebar-link, .action-button').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        function initMap() {
+            console.log('Initializing map with', points.length, 'points');
+            console.log('Points array:', points);
+
+            // Обновляем общее количество точек
+            document.getElementById('totalPoints').textContent = points.length;
+            document.getElementById('totalPointsText').textContent = points.length;
+
+            // Загружаем сохраненную позицию
+            const savedPosition = localStorage.getItem('userMapPosition');
+            if (savedPosition !== null && savedPosition !== 'null') {
+                currentPosition = parseInt(savedPosition);
+                console.log('Loaded saved position:', currentPosition);
+            } else {
+                // Если нет сохраненной позиции, ставим на старт (позиция 0)
+                currentPosition = 0;
+                console.log('No saved position, starting from position 0 (start)');
+            }
+
+            // Проверяем валидность позиции
+            if (currentPosition >= points.length) {
+                currentPosition = points.length - 1;
+                console.log('Position corrected to last point:', currentPosition);
+            }
+            if (currentPosition < 0) {
+                currentPosition = 0;
+                console.log('Position corrected to first point:', currentPosition);
+            }
+
+            console.log('Final position:', currentPosition);
+            console.log('Start point position:', points[0]);
+
+            updatePosition();
+            drawPath();
+            loadOtherUsers();
+
+            // Анимация фишки текущего пользователя
+            const userPin = document.getElementById('userPin');
+            if (userPin) {
+                userPin.classList.add('miniature');
+                setTimeout(() => {
+                    userPin.classList.add('pin-move');
+                    setTimeout(() => {
+                        userPin.classList.remove('pin-move');
+                    }, 1500);
+                }, 800);
+            }
+        }
+
+        function updatePosition() {
+            if (points.length === 0) {
+                console.error('No points available');
+                return;
+            }
+
+            const userPin = document.getElementById('userPin');
+            const currentPoint = points[currentPosition];
+
+            console.log('Moving to position', currentPosition, 'at', currentPoint);
+
+            userPin.style.left = currentPoint.x + '%';
+            userPin.style.top = currentPoint.y + '%';
+
+            // Обновляем статистику
+            document.getElementById('currentPosition').textContent = currentPosition;
+            document.getElementById('positionText').textContent = currentPosition;
+
+            // Обновляем прогресс
+            const progress = points.length > 1 ? (currentPosition / (points.length - 1)) * 100 : 0;
+            document.getElementById('pathProgress').style.width = progress + '%';
+            document.getElementById('pathPercentage').textContent = Math.round(progress) + '%';
+
+            // Сохраняем позицию
+            localStorage.setItem('userMapPosition', currentPosition);
+
+            // Сохраняем позицию на сервере
+            saveUserPositionToServer(currentPosition);
+        }
+
+        function drawPath() {
+            const svg = document.getElementById('mapPath');
+            svg.innerHTML = '';
+
+            if (points.length < 2) {
+                console.log('Not enough points to draw path');
+                return;
+            }
+
+            console.log('Drawing path with', points.length, 'points');
+
+            let pathData = `M ${points[0].x}% ${points[0].y}% `;
+
+            for (let i = 1; i < points.length; i++) {
+                pathData += `L ${points[i].x}% ${points[i].y}% `;
+            }
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', 'rgba(100, 181, 246, 0.5)');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('stroke-dasharray', '4,3');
+
+            svg.appendChild(path);
+        }
+
+        async function loadOtherUsers() {
+            try {
+                const response = await fetch('/api/users/positions');
+                const usersPositions = await response.json();
+
+                const pinsContainer = document.getElementById('pinsContainer');
+                const usersLegend = document.getElementById('usersLegend');
+                const currentUser = '{{ current_user }}';
+
+                let colorIndex = 1; // Начинаем со второго цвета (первый для текущего пользователя)
+                let onlineCount = 1; // Текущий пользователь уже онлайн
+
+                for (const [username, userData] of Object.entries(usersPositions)) {
+                    // Пропускаем текущего пользователя (его фишка уже есть)
+                    if (username === currentUser) continue;
+
+                    if (colorIndex < crystalColors.length) {
+                        const userPoint = points[userData.position] || points[0];
+
+                        // Создаем фишку пользователя
+                        const userPin = document.createElement('div');
+                        userPin.className = `map-pin user-pin ${crystalColors[colorIndex].class} miniature`;
+                        userPin.style.left = userPoint.x + '%';
+                        userPin.style.top = userPoint.y + '%';
+                        userPin.innerHTML = `
+                            <div class="pin-crystal">
+                                <div class="crystal-core"></div>
+                                <div class="crystal-shine"></div>
+                            </div>
+                            <div class="pin-label">${username}</div>
+                        `;
+                        pinsContainer.appendChild(userPin);
+
+                        // Добавляем в легенду
+                        const legendItem = document.createElement('div');
+                        legendItem.className = 'user-legend-item';
+                        legendItem.innerHTML = `
+                            <div class="user-legend-crystal ${crystalColors[colorIndex].legend}"></div>
+                            <span>${username}</span>
+                        `;
+                        usersLegend.appendChild(legendItem);
+
+                        colorIndex++;
+                        onlineCount++;
+                    }
+                }
+
+                // Обновляем счетчик онлайн пользователей
+                document.getElementById('onlineUsers').textContent = onlineCount;
+
+            } catch (error) {
+                console.error('Error loading other users:', error);
+            }
+        }
+
+        async function saveUserPositionToServer(position) {
+            try {
+                const response = await fetch('/api/user/position', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ position: position })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    console.log('Position saved to server:', position);
+                } else {
+                    console.error('Error saving position to server:', result.error);
+                }
+            } catch (error) {
+                console.error('Error saving position to server:', error);
+            }
+        }
+
+        function moveToPoint(index) {
+            if (index >= 0 && index < points.length) {
+                console.log('Moving to point', index, 'at position:', points[index]);
+                currentPosition = index;
+                updatePosition();
+            } else {
+                console.error('Invalid point index:', index);
+            }
+        }
+
+        function moveForward() {
+            if (currentPosition < points.length - 1) {
+                currentPosition++;
+                console.log('Moving forward to position', currentPosition);
+                updatePosition();
+            } else {
+                console.log('Already at the end');
+            }
+        }
+
+        function moveBack() {
+            if (currentPosition > 0) {
+                currentPosition--;
+                console.log('Moving back to position', currentPosition);
+                updatePosition();
+            } else {
+                console.log('Already at the start');
+            }
+        }
+
+        function moveToStart() {
+            console.log('Moving to start position 0');
+            currentPosition = 0;
+            updatePosition();
+        }
+
+        function savePosition() {
+            localStorage.setItem('userMapPosition', currentPosition);
+            console.log('Position saved:', currentPosition);
+
+            // Показываем сообщение об успехе
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Сохранено!';
+            btn.classList.add('btn-success');
+
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('btn-success');
+            }, 2000);
+        }
+
+        // Обработчики клавиш
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                moveForward();
+            } else if (e.key === 'ArrowLeft') {
+                moveBack();
+            } else if (e.key === 'Home') {
+                moveToStart();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing map...');
+            initMap();
+
+            // Update active link based on current page
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

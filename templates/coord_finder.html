@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <img src="/static/images/map.png" id="map" style="width: 100%; cursor: crosshair;">
+    <div id="coords"></div>
+    <script>
+        document.getElementById('map').addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            document.getElementById('coords').innerHTML =
+                `Координаты: (${x.toFixed(1)}%, ${y.toFixed(1)}%)`;
+        });
+    </script>
+</body>
+</html>
