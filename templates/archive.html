@@ -3,65 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Архив задач - TaskFlow</title>
+    <title>Архив задач - RGG QUEST</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 </head>
 <body>
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-menu-toggle" onclick="toggleSidebar()">
+        <span>☰</span>
+        <span>Меню</span>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+
     <div class="app-container">
-        <header class="nav-bar">
-            <div>
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">RGG QUEST</div>
+                <div class="sidebar-subtitle">Управление задачами</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <!-- Основная навигация -->
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Навигация</div>
+                    <a href="/" class="sidebar-link">
+                        <span class="sidebar-link-icon">📋</span>
+                        <span class="sidebar-link-text">Главная</span>
+                    </a>
+                    <a href="/map" class="sidebar-link">
+                        <span class="sidebar-link-icon">🗺️</span>
+                        <span class="sidebar-link-text">Карта прогресса</span>
+                    </a>
+                    <a href="/archive" class="sidebar-link active">
+                        <span class="sidebar-link-icon">📚</span>
+                        <span class="sidebar-link-text">Архив задач</span>
+                    </a>
+                </div>
+
+                {% if session.role == 'admin' %}
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Администрирование</div>
+                    <a href="/admin" class="sidebar-link">
+                        <span class="sidebar-link-icon">⚙️</span>
+                        <span class="sidebar-link-text">Панель управления</span>
+                    </a>
+                </div>
+                {% endif %}
+            </nav>
+
+            <!-- User Info -->
+            <div class="sidebar-user">
+                {% if 'username' in session %}
+                <div class="user-profile">
+                    <div class="user-avatar-large">
+                        {{ session.username[0]|upper }}
+                    </div>
+                    <div class="user-info-compact">
+                        <div class="user-name">{{ session.username }}</div>
+                        <div class="user-role">{{ session.role }}</div>
+                    </div>
+                    <a href="/logout" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8em;">Выйти</a>
+                </div>
+                {% else %}
+                <div style="display: flex; gap: 8px; flex-direction: column;">
+                    <a href="/login" class="btn" style="width: 100%; text-align: center;">Войти</a>
+                    <a href="/register" class="btn btn-outline" style="width: 100%; text-align: center;">Регистрация</a>
+                </div>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Заголовок страницы -->
+            <div style="margin-bottom: 32px;">
                 <h1 class="title">Архив задач</h1>
                 <p class="subtitle">История выполненных заданий</p>
             </div>
 
-            <div class="nav-links">
-                <a href="/" class="btn btn-outline">На главную</a>
-                {% if 'username' in session %}
-                <a href="/logout" class="btn">Выйти</a>
-                {% else %}
-                <a href="/login" class="btn">Войти</a>
-                {% endif %}
-            </div>
-        </header>
-
-        <section class="panel">
             {% if board %}
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Задача</th>
-                            <th>Сложность</th>
-                            <th>Исполнитель</th>
-                            <th>Взята</th>
-                            <th>Выполнена</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for task in board %}
-                        <tr>
-                            <td>{{ task.text }}</td>
-                            <td>
-                                <span class="difficulty difficulty-{{ task.difficulty|lower }}">
-                                    {{ task.difficulty }}
-                                </span>
-                            </td>
-                            <td>{{ task.user or '—' }}</td>
-                            <td>{{ task.taken_at or '—' }}</td>
-                            <td>{{ task.done_at or '—' }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <section class="panel">
+                <h2 class="section-title">📚 Выполненные задачи</h2>
+
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Задача</th>
+                                <th>Сложность</th>
+                                <th>Исполнитель</th>
+                                <th>Взята</th>
+                                <th>Завершена</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in board %}
+                            <tr>
+                                <td>{{ task.text }}</td>
+                                <td>
+                                    <span class="difficulty difficulty-{{ task.difficulty|lower }}">
+                                        {{ task.difficulty }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--text-accent), var(--text-accent2)); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7em; font-weight: 600;">
+                                            {{ task.user[0]|upper if task.user else '?' }}
+                                        </div>
+                                        {{ task.user or '—' }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if task.taken_at %}
+                                        {{ task.taken_at.split(' ')[0] }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if task.done_at %}
+                                        {{ task.done_at.split(' ')[0] }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 20px; text-align: center; color: var(--text-secondary);">
+                    <p>Всего выполнено задач: {{ board|length }}</p>
+                </div>
+            </section>
             {% else %}
-            <div class="empty-state">
-                <div class="empty-state-icon">📚</div>
-                <p>В архиве пока нет выполненных задач</p>
-                <a href="/" class="btn" style="margin-top: 16px;">Вернуться к задачам</a>
-            </div>
+            <section class="panel">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📚</div>
+                    <h3>Архив пуст</h3>
+                    <p>Здесь появятся выполненные задачи</p>
+                    <a href="/" class="btn" style="margin-top: 16px;">Перейти к заданиям</a>
+                </div>
+            </section>
             {% endif %}
-        </section>
+        </main>
     </div>
+
+    <script>
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+
+        // Close sidebar when clicking on a link (mobile)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update active link based on current page
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
