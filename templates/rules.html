@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Правила - RGG QUEST</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-menu-toggle" onclick="toggleSidebar()">
+        <span>☰</span>
+        <span>Меню</span>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">RGG QUEST</div>
+                <div class="sidebar-subtitle">Управление задачами</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Основное</div>
+                    <a href="/" class="sidebar-link">
+                        <span class="sidebar-link-icon">📋</span>
+                        <span class="sidebar-link-text">Главная</span>
+                    </a>
+                    <a href="/map" class="sidebar-link">
+                        <span class="sidebar-link-icon">🗺️</span>
+                        <span class="sidebar-link-text">Карта прогресса</span>
+                    </a>
+                    <a href="/rules" class="sidebar-link active">
+                        <span class="sidebar-link-icon">📖</span>
+                        <span class="sidebar-link-text">Правила</span>
+                    </a>
+                    <a href="/archive" class="sidebar-link">
+                        <span class="sidebar-link-icon">📚</span>
+                        <span class="sidebar-link-text">Архив задач</span>
+                    </a>
+                </div>
+
+                {% if session.role == 'admin' %}
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Администрирование</div>
+                    <a href="/admin" class="sidebar-link">
+                        <span class="sidebar-link-icon">⚙️</span>
+                        <span class="sidebar-link-text">Панель управления</span>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Быстрые действия -->
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Быстрые действия</div>
+                    <div class="quick-actions">
+                        <a href="/" class="action-button">
+                            <span class="action-button-icon">📋</span>
+                            <span class="action-button-text">К заданиям</span>
+                        </a>
+                        <a href="/map" class="action-button">
+                            <span class="action-button-icon">🗺️</span>
+                            <span class="action-button-text">На карту</span>
+                        </a>
+                        {% if session.role == 'admin' %}
+                        <a href="/admin" class="action-button">
+                            <span class="action-button-icon">⚙️</span>
+                            <span class="action-button-text">Управление системой</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </nav>
+
+            <!-- User Info -->
+            <div class="sidebar-user">
+                {% if 'username' in session %}
+                <div class="user-profile">
+                    <div class="user-avatar-large">
+                        {{ session.username[0]|upper }}
+                    </div>
+                    <div class="user-info-compact">
+                        <div class="user-name">{{ session.username }}</div>
+                        <div class="user-role">{{ session.role }}</div>
+                    </div>
+                    <a href="/logout" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8em;">Выйти</a>
+                </div>
+                {% else %}
+                <div style="display: flex; gap: 8px; flex-direction: column;">
+                    <a href="/login" class="btn" style="width: 100%; text-align: center;">Войти</a>
+                    <a href="/register" class="btn btn-outline" style="width: 100%; text-align: center;">Регистрация</a>
+                </div>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <section class="panel">
+                <h1 class="title">📖 Правила системы RGG QUEST</h1>
+                <p class="subtitle">Официальный документ, описывающий правила использования системы</p>
+
+                <!-- Оглавление -->
+                <div class="rules-toc">
+                    <h3>Содержание:</h3>
+                    <ol>
+                        <li><a href="#section1">Общие положения</a></li>
+                        <li><a href="#section2">Регистрация и аккаунт</a></li>
+                        <li><a href="#section3">Система задач</a></li>
+                        <li><a href="#section4">Карта прогресса</a></li>
+                        <li><a href="#section5">Достижения и награды</a></li>
+                        <li><a href="#section6">Права и обязанности</a></li>
+                        <li><a href="#section7">Администрирование</a></li>
+                    </ol>
+                </div>
+
+                <!-- Содержание правил -->
+                <div class="rules-content">
+
+                    <section id="section1" class="rule-section">
+                        <h2>1. Общие положения</h2>
+                        <div class="rule-card">
+                            <h3>1.1. Назначение системы</h3>
+                            <p>RGG QUEST - это система управления задачами и отслеживания прогресса, предназначенная для организации личного и командного развития.</p>
+                        </div>
+
+                        <div class="rule-card">
+                            <h3>1.2. Основные принципы</h3>
+                            <ul>
+                                <li>✅ <strong>Добросовестность</strong> - выполнение задач должно быть честным</li>
+                                <li>✅ <strong>Регулярность</strong> - систематическая работа над задачами</li>
+                                <li>✅ <strong>Прогресс</strong> - постоянное движение вперед</li>
+                                <li>✅ <strong>Сообщество</strong> - взаимопомощь и поддержка</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="section2" class="rule-section">
+                        <h2>2. Регистрация и аккаунт</h2>
+
+                        <div class="rule-card">
+                            <h3>2.1. Создание аккаунта</h3>
+                            <p>Для использования системы необходимо зарегистрировать аккаунт, предоставив уникальное имя пользователя и пароль.</p>
+                        </div>
+
+                        <div class="rule-card">
+                            <h3>2.2. Ответственность за аккаунт</h3>
+                            <p>Пользователь несет полную ответственность за безопасность своего аккаунта и всех действий, совершенных под его именем.</p>
+                        </div>
+
+                        <div class="rule-card">
+                            <h3>2.3. Множественные аккаунты</h3>
+                            <p>Запрещено создание нескольких аккаунтов одним пользователем без уважительной причины.</p>
+                        </div>
+                    </section>
+
+                    <section id="section3" class="rule-section">
+                        <h2>3. Система задач</h2>
+
+                        <div class="rule-card">
+                            <h3>3.1. Типы задач</h3>
+                            <ul>
+                                <li><strong>Ежедневные задачи</strong> - обновляются каждый день</li>
+                                <li><strong>Задачи с доски</strong> - могут быть взяты любым пользователем</li>
+                                <li><strong>Персональные задачи</strong> - создаются пользователем</li>
+                            </ul>
+                        </div>
+
+                        <div class="rule-card">
+                            <h3>3.2. Выполнение задач</h3>
+                            <p>Задача считается выполненной после отметки пользователем и проверки (если требуется).</p>
+                        </div>
+
+                        <div class="rule-card">
+                            <h3>3.3. Сложность задач</h3>
+                            <p>Задачи имеют три уровня сложности:
+                                <span class="difficulty difficulty-лёгкая">Лёгкая</span>
+                                <span class="difficulty difficulty-средняя">Средняя</span>
+                                <span class="difficulty difficulty-сложная">Сложная</span>
+                            </p>
+                        </div>
+                    </section>
+
+                    <section id="section4" class="rule-section">
+                        <h2>4. Карта прогресса</h2>
+
+                        <div class="rule-card">
+                            <h3>4.1. Назначение карты</h3>
+                            <p>Карта прогресса визуализирует достижения пользователя и позволяет отслеживать продвижение по маршруту развития.</p>
+                        </div>
+
+                        <div class="rule-card">
+                            <h3>4.2. Механика перемещения</h3>
+                            <ul>
+                                <li>Перемещение по точкам с помощью кнопок или кликов</li>
+                                <li>Сохранение позиции для продолжения с последнего места</li>
+                                <li>Возможность видеть позиции других пользователей</li>
+                            </ul>
+                        </div>
+
+                        <div class="rule-card">
+                            <h3>4.3. Контрольные точки</h3>
+                            <p>Особые точки на карте, отмечающие ключевые этапы прогресса.</p>
+                        </div>
+                    </section>
+
+                    <section id="section5" class="rule-section">
+                        <h2>5. Достижения и награды</h2>
+
+                        <div class="rule-card">
+                            <h3>5.1. Система достижений</h3>
+                            <p>За выполнение определенных условий пользователь получает достижения:</p>
+                            <ul>
+                                <li>🎯 <strong>Первые шаги</strong> - за первую выполненную задачу</li>
+                                <li>🔥 <strong>Стабильность</strong> - за 5 выполненных задач</li>
+                                <li>⚡ <strong>Эксперт</strong> - за 10 выполненных задач</li>
+                                <li>🌟 <strong>Мастер</strong> - за 20 выполненных задач</li>
+                                <li>🚀 <strong>Легенда</strong> - за 30 выполненных задач</li>
+                            </ul>
+                        </div>
+
+                        <div class="rule-card">
+                            <h3>5.2. Уровни пользователя</h3>
+                            <p>В зависимости от количества выполненных задач пользователь получает уровень:</p>
+                            <ul>
+                                <li>🟢 <strong>Новичок</strong> - 0-4 задач</li>
+                                <li>🔵 <strong>Исследователь</strong> - 5-9 задач</li>
+                                <li>🟣 <strong>Мастер</strong> - 10-19 задач</li>
+                                <li>🟠 <strong>Эксперт</strong> - 20-29 задач</li>
+                                <li>🔴 <strong>Легенда</strong> - 30+ задач</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="section6" class="rule-section">
+                        <h2>6. Права и обязанности</h2>
+
+                        <div class="rule-card warning">
+                            <h3>6.1. Запрещенные действия</h3>
+                            <ul>
+                                <li>❌ Использование нецензурной лексики</li>
+                                <li>❌ Оскорбление других пользователей</li>
+                                <li>❌ Намеренная порча системы</li>
+                                <li>❌ Обман и мошенничество</li>
+                                <li>❌ Распространение личной информации</li>
+                            </ul>
+                        </div>
+
+                        <div class="rule-card success">
+                            <h3>6.2. Поощряемые действия</h3>
+                            <ul>
+                                <li>✅ Помощь другим пользователям</li>
+                                <li>✅ Активное участие в системе</li>
+                                <li>✅ Предложение улучшений</li>
+                                <li>✅ Соблюдение дедлайнов</li>
+                                <li>✅ Честное выполнение задач</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="section7" class="rule-section">
+                        <h2>7. Администрирование</h2>
+
+                        <div class="rule-card">
+                            <h3>7.1. Роли пользователей</h3>
+                            <ul>
+                                <li><strong>Обычный пользователь</strong> - базовый доступ к системе</li>
+                                <li><strong>Администратор</strong> - полный доступ к управлению системой</li>
+                            </ul>
+                        </div>
+
+                        <div class="rule-card">
+                            <h3>7.2. Функции администратора</h3>
+                            <ul>
+                                <li>Управление задачами и их категориями</li>
+                                <li>Настройка карты прогресса</li>
+                                <li>Модерация контента</li>
+                                <li>Просмотр статистики системы</li>
+                                <li>Обновление ежедневных задач</li>
+                            </ul>
+                        </div>
+
+                        <div class="rule-card">
+                            <h3>7.3. Санкции</h3>
+                            <p>За нарушение правил администратор может применить санкции:</p>
+                            <ul>
+                                <li>Предупреждение</li>
+                                <li>Временная блокировка</li>
+                                <li>Полная блокировка аккаунта</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- Подпись и дата -->
+                <div class="rules-footer">
+                    <div class="signature">
+                        <p><strong>Дата вступления в силу:</strong> 2024 год</p>
+                        <p><strong>Последнее обновление:</strong> {{ current_date }}</p>
+                    </div>
+                    <div class="accept-rules">
+                        <button class="btn btn-success" onclick="acceptRules()">✅ Я принимаю правила</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+
+        // Close sidebar when clicking on a link (mobile)
+        document.querySelectorAll('.sidebar-link, .action-button').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        // Плавная прокрутка к якорям
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Принятие правил
+        function acceptRules() {
+            localStorage.setItem('rulesAccepted', 'true');
+            alert('✅ Правила приняты! Спасибо за соблюдение правил системы.');
+        }
+
+        // Проверка принятия правил при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!localStorage.getItem('rulesAccepted')) {
+                setTimeout(() => {
+                    alert('📖 Добро пожаловать! Пожалуйста, ознакомьтесь с правилами системы.');
+                }, 1000);
+            }
+
+            // Update active link based on current page
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

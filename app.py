@@ -656,6 +656,11 @@ def archive():
     board_data = [t for t in load_board() if t['status'] == 'done']
     return render_template('archive.html', board=board_data)
 
+@app.route('/rules')
+def rules():
+    current_date = datetime.now().strftime('%d.%m.%Y')
+    return render_template('rules.html', current_date=current_date)
+
 
 @app.route('/mark_daily_done', methods=['POST'])
 def mark_daily_done_route():
