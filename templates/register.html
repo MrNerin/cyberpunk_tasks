@@ -5,284 +5,147 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация - RGG QUEST</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👤</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
 </head>
 <body>
-    <!-- Mobile Menu Toggle -->
-    <div class="mobile-menu-toggle" onclick="toggleSidebar()">
-        <span>☰</span>
-        <span>Меню</span>
-    </div>
+    <div class="auth-container">
+        <div class="auth-background">
+            <div class="auth-gradient"></div>
+        </div>
 
-    <!-- Mobile Overlay -->
-    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
-
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-title">RGG QUEST</div>
-                <div class="sidebar-subtitle">Управление задачами</div>
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <div class="logo-icon">🌟</div>
+                    <h1 class="logo-text">RGG QUEST</h1>
+                </div>
+                <p class="auth-subtitle">Начните своё приключение</p>
             </div>
 
-            <nav class="sidebar-nav">
-                <!-- Основная навигация -->
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Навигация</div>
-                    <a href="/" class="sidebar-link">
-                        <span class="sidebar-link-icon">📋</span>
-                        <span class="sidebar-link-text">Главная</span>
-                    </a>
-                    <a href="/map" class="sidebar-link">
-                        <span class="sidebar-link-icon">🗺️</span>
-                        <span class="sidebar-link-text">Карта прогресса</span>
-                    </a>
-                    <a href="/archive" class="sidebar-link">
-                        <span class="sidebar-link-icon">📚</span>
-                        <span class="sidebar-link-text">Архив задач</span>
-                    </a>
+            <form method="POST" class="auth-form">
+                <div class="form-group">
+                    <label for="username" class="form-label">Имя пользователя</label>
+                    <input type="text" id="username" name="username" class="form-input" required
+                           placeholder="Придумайте уникальное имя">
+                    <div class="form-icon">👤</div>
+                    <div class="form-hint">От 3 до 20 символов</div>
                 </div>
 
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Аккаунт</div>
-                    <a href="/login" class="sidebar-link">
-                        <span class="sidebar-link-icon">🔐</span>
-                        <span class="sidebar-link-text">Вход</span>
-                    </a>
-                    <a href="/register" class="sidebar-link active">
-                        <span class="sidebar-link-icon">👤</span>
-                        <span class="sidebar-link-text">Регистрация</span>
-                    </a>
+                <div class="form-group">
+                    <label for="password" class="form-label">Пароль</label>
+                    <input type="password" id="password" name="password" class="form-input" required
+                           placeholder="Создайте надежный пароль">
+                    <div class="form-icon">🔑</div>
+                    <div class="form-hint">Не менее 6 символов</div>
                 </div>
-            </nav>
 
-            <!-- User Info -->
-            <div class="sidebar-user">
-                <div style="text-align: center; color: var(--text-secondary); padding: 16px;">
-                    <p>Создайте аккаунт для доступа ко всем функциям</p>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="auth-container">
-                <!-- Левая часть - форма -->
-                <div class="auth-form-container">
-                    <div class="auth-header">
-                        <h1 class="title">Создать аккаунт</h1>
-                        <p class="subtitle">Присоединяйтесь к RGG QUEST</p>
+                <div class="password-strength">
+                    <div class="strength-bar">
+                        <div class="strength-fill" id="strengthFill"></div>
                     </div>
+                    <div class="strength-text" id="strengthText">Надежность пароля</div>
+                </div>
 
-                    <form method="POST" class="auth-form">
-                        {% with messages = get_flashed_messages() %}
-                            {% if messages %}
-                                <div class="alert alert-error">
-                                    {{ messages[0] }}
-                                </div>
-                            {% endif %}
-                        {% endwith %}
-
-                        <div class="form-group">
-                            <label for="username" class="form-label">
-                                <span class="form-label-icon">👤</span>
-                                Имя пользователя
-                            </label>
-                            <input type="text"
-                                   id="username"
-                                   name="username"
-                                   class="form-input"
-                                   placeholder="Придумайте username"
-                                   required
-                                   autocomplete="username">
-                            <div class="form-hint">
-                                От 3 до 20 символов (только буквы, цифры и _)
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password" class="form-label">
-                                <span class="form-label-icon">🔒</span>
-                                Пароль
-                            </label>
-                            <input type="password"
-                                   id="password"
-                                   name="password"
-                                   class="form-input"
-                                   placeholder="Создайте надежный пароль"
-                                   required
-                                   autocomplete="new-password">
-                            <div class="form-hint">
-                                Минимум 6 символов
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="confirm_password" class="form-label">
-                                <span class="form-label-icon">✅</span>
-                                Подтверждение пароля
-                            </label>
-                            <input type="password"
-                                   id="confirm_password"
-                                   name="confirm_password"
-                                   class="form-input"
-                                   placeholder="Повторите пароль"
-                                   required
-                                   autocomplete="new-password">
-                        </div>
-
-                        <div class="form-options">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="terms" class="checkbox" required>
-                                <span class="checkmark"></span>
-                                Я согласен с <a href="#" class="terms-link">условиями использования</a>
-                            </label>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary auth-submit">
-                            <span class="btn-icon">🚀</span>
-                            Создать аккаунт
-                        </button>
-
-                        <div class="auth-links">
-                            <p>Уже есть аккаунт? <a href="/login" class="auth-link">Войти</a></p>
-                        </div>
-                    </form>
-
-                    <!-- Преимущества -->
-                    <div class="benefits">
-                        <div class="benefits-header">
-                            <span class="benefits-icon">⭐</span>
-                            <span>Преимущества регистрации:</span>
-                        </div>
-                        <div class="benefits-list">
-                            <div class="benefit-item">
-                                <span class="benefit-icon">📊</span>
-                                <span>Отслеживание прогресса</span>
-                            </div>
-                            <div class="benefit-item">
-                                <span class="benefit-icon">🗺️</span>
-                                <span>Карта достижений</span>
-                            </div>
-                            <div class="benefit-item">
-                                <span class="benefit-icon">🏆</span>
-                                <span>Система достижений</span>
-                            </div>
-                            <div class="benefit-item">
-                                <span class="benefit-icon">📈</span>
-                                <span>Статистика выполнения</span>
-                            </div>
-                        </div>
+                <div class="form-features">
+                    <div class="feature-item">
+                        <span class="feature-icon">🎮</span>
+                        <span class="feature-text">Интерактивная карта прогресса</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📊</span>
+                        <span class="feature-text">Статистика выполнения задач</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🏆</span>
+                        <span class="feature-text">Система достижений</span>
                     </div>
                 </div>
 
-                <!-- Правая часть - иллюстрация -->
-                <div class="auth-hero">
-                    <div class="hero-content">
-                        <div class="hero-icon">🎯</div>
-                        <h2 class="hero-title">Начните свое путешествие!</h2>
-                        <p class="hero-text">
-                            Присоединяйтесь к сообществу RGG QUEST и откройте для себя
-                            новый способ управления задачами и отслеживания прогресса.
-                        </p>
-                        <div class="hero-features">
-                            <div class="feature">
-                                <span class="feature-icon">🎮</span>
-                                <span>Геймификация обучения</span>
-                            </div>
-                            <div class="feature">
-                                <span class="feature-icon">📱</span>
-                                <span>Доступ с любого устройства</span>
-                            </div>
-                            <div class="feature">
-                                <span class="feature-icon">🆓</span>
-                                <span>Полностью бесплатно</span>
-                            </div>
-                        </div>
+                <button type="submit" class="auth-btn">
+                    <span class="btn-icon">🚀</span>
+                    Начать путешествие
+                </button>
 
-                        <!-- Статистика -->
-                        <div class="stats-preview">
-                            <div class="stat-preview">
-                                <div class="stat-preview-value">500+</div>
-                                <div class="stat-preview-label">пользователей</div>
-                            </div>
-                            <div class="stat-preview">
-                                <div class="stat-preview-value">10k+</div>
-                                <div class="stat-preview-label">выполненных задач</div>
-                            </div>
-                            <div class="stat-preview">
-                                <div class="stat-preview-value">95%</div>
-                                <div class="stat-preview-label">довольных</div>
-                            </div>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div class="auth-message error">
+                            {{ messages[0] }}
                         </div>
-                    </div>
-                </div>
+                    {% endif %}
+                {% endwith %}
+            </form>
+
+            <div class="auth-footer">
+                <p>Уже есть аккаунт? <a href="{{ url_for('login') }}" class="auth-link">Войти</a></p>
+                <a href="/" class="back-link">← Вернуться на главную</a>
             </div>
-        </main>
+        </div>
     </div>
 
     <script>
-        // Mobile sidebar toggle
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('mobileOverlay');
-            sidebar.classList.toggle('mobile-open');
-            overlay.classList.toggle('active');
-        }
+        // Анимация появления
+        document.addEventListener('DOMContentLoaded', function() {
+            const authCard = document.querySelector('.auth-card');
+            authCard.style.opacity = '0';
+            authCard.style.transform = 'translateY(20px)';
 
-        // Close sidebar when clicking on a link (mobile)
-        document.querySelectorAll('.sidebar-link').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
-                    toggleSidebar();
+            setTimeout(() => {
+                authCard.style.transition = 'all 0.6s ease';
+                authCard.style.opacity = '1';
+                authCard.style.transform = 'translateY(0)';
+            }, 100);
+
+            // Проверка силы пароля
+            const passwordInput = document.getElementById('password');
+            const strengthFill = document.getElementById('strengthFill');
+            const strengthText = document.getElementById('strengthText');
+
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                let strength = 0;
+                let text = '';
+                let color = '';
+
+                if (password.length >= 6) strength++;
+                if (password.length >= 8) strength++;
+                if (/[A-Z]/.test(password)) strength++;
+                if (/[0-9]/.test(password)) strength++;
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+                switch(strength) {
+                    case 0:
+                    case 1:
+                        text = 'Слабый';
+                        color = '#ff4757';
+                        break;
+                    case 2:
+                    case 3:
+                        text = 'Средний';
+                        color = '#ffa502';
+                        break;
+                    case 4:
+                    case 5:
+                        text = 'Сильный';
+                        color = '#2ed573';
+                        break;
                 }
+
+                strengthFill.style.width = (strength * 20) + '%';
+                strengthFill.style.background = color;
+                strengthText.textContent = text;
+                strengthText.style.color = color;
             });
         });
 
-        // Form validation
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('.auth-form');
-            const submitBtn = form.querySelector('.auth-submit');
-            const password = document.getElementById('password');
-            const confirmPassword = document.getElementById('confirm_password');
-
-            // Password confirmation check
-            function validatePasswords() {
-                if (password.value !== confirmPassword.value) {
-                    confirmPassword.style.borderColor = '#ef5350';
-                    return false;
-                } else {
-                    confirmPassword.style.borderColor = 'var(--border-color)';
-                    return true;
-                }
-            }
-
-            confirmPassword.addEventListener('input', validatePasswords);
-            password.addEventListener('input', validatePasswords);
-
-            form.addEventListener('submit', function(e) {
-                if (!validatePasswords()) {
-                    e.preventDefault();
-                    alert('Пароли не совпадают!');
-                    return;
-                }
-
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<span class="loading-spinner"></span> Регистрация...';
-                submitBtn.disabled = true;
-
-                setTimeout(() => {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                }, 2000);
+        // Интерактивность полей ввода
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
             });
 
-            // Update active link based on current page
-            const currentPath = window.location.pathname;
-            document.querySelectorAll('.sidebar-link').forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('active');
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentElement.classList.remove('focused');
                 }
             });
         });
