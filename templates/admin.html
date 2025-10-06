@@ -3,296 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Редактор карты - RGG QUEST</title>
+    <title>Панель управления - RGG QUEST</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
-    <style>
-        .map-editor {
-            margin-top: 20px;
-        }
-
-        .editor-controls {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            padding: 16px;
-            background: var(--bg-card);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .editor-mode {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .mode-btn {
-            padding: 8px 16px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-panel);
-            color: var(--text-secondary);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .mode-btn.active {
-            background: var(--text-accent);
-            color: white;
-            border-color: var(--text-accent);
-        }
-
-        .cell-info {
-            padding: 12px;
-            background: var(--bg-panel);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            margin-top: 16px;
-        }
-
-        .cell-coordinates {
-            font-family: 'JetBrains Mono', monospace;
-            background: var(--bg-dark);
-            padding: 8px 12px;
-            border-radius: 4px;
-            margin: 8px 0;
-        }
-
-        .editable-map {
-            position: relative;
-            width: 100%;
-            max-width: 1000px;
-            margin: 0 auto;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            overflow: hidden;
-            cursor: crosshair;
-        }
-
-        .map-image {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .map-markers {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .marker {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            cursor: pointer;
-            pointer-events: auto;
-            transition: all 0.3s ease;
-            z-index: 10;
-        }
-
-        .marker:hover {
-            transform: translate(-50%, -50%) scale(1.2);
-            z-index: 20;
-        }
-
-        .marker-start {
-            width: 20px;
-            height: 20px;
-            background: var(--text-accent);
-            border: 3px solid white;
-            border-radius: 50%;
-            box-shadow: 0 0 15px var(--text-accent), 0 0 30px rgba(100, 181, 246, 0.5);
-            animation: pulse 2s infinite;
-        }
-
-        .marker-active {
-            width: 12px;
-            height: 12px;
-            background: var(--text-success);
-            border: 2px solid white;
-            border-radius: 50%;
-            box-shadow: 0 0 8px var(--text-success);
-        }
-
-        .marker-checkpoint {
-            width: 16px;
-            height: 16px;
-            background: var(--text-warning);
-            border: 3px solid white;
-            border-radius: 50%;
-            box-shadow: 0 0 12px var(--text-warning);
-        }
-
-        .checkpoint-editor {
-            margin-top: 20px;
-            padding: 16px;
-            background: var(--bg-card);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .checkpoint-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
-            margin-top: 12px;
-        }
-
-        .checkpoint-item {
-            padding: 12px;
-            background: var(--bg-panel);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .checkpoint-details {
-            flex: 1;
-        }
-
-        .checkpoint-coords {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8em;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
-
-        .checkpoint-actions {
-            display: flex;
-            gap: 6px;
-        }
-
-        .mini-btn {
-            padding: 6px 10px;
-            font-size: 0.7em;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-remove {
-            background: #ef5350;
-            color: white;
-        }
-
-        .btn-remove:hover {
-            background: #d32f2f;
-        }
-
-        .btn-edit {
-            background: var(--text-accent);
-            color: white;
-        }
-
-        .btn-edit:hover {
-            background: #1976d2;
-        }
-
-        .coordinates-display {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(15, 15, 26, 0.9);
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9em;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-        }
-
-        .stats-panel {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.5em;
-            font-weight: 600;
-            color: var(--text-accent);
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.8em;
-        }
-
-        @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.1); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
-
-        .checkpoint-form {
-            margin-top: 16px;
-            padding: 16px;
-            background: var(--bg-panel);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .form-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .form-input-small {
-            padding: 8px 12px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
-            flex: 1;
-            min-width: 120px;
-        }
-    </style>
 </head>
 <body>
-    <!-- Mobile Menu Toggle -->
-    <div class="mobile-menu-toggle" onclick="toggleSidebar()">
-        <span>☰</span>
-        <span>Меню</span>
-    </div>
-
-    <!-- Mobile Overlay -->
-    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
-
     <div class="app-container">
         <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
+        <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-title">RGG QUEST</div>
-                <div class="sidebar-subtitle">Редактор карты</div>
+                <div class="sidebar-subtitle">Панель управления</div>
             </div>
 
             <nav class="sidebar-nav">
                 <div class="sidebar-section">
-                    <div class="sidebar-section-title">Навигация</div>
+                    <div class="sidebar-section-title">Управление</div>
+                    <a href="/admin" class="sidebar-link active">
+                        <span class="sidebar-link-icon">⚙️</span>
+                        <span class="sidebar-link-text">Панель управления</span>
+                    </a>
                     <a href="/" class="sidebar-link">
                         <span class="sidebar-link-icon">📋</span>
                         <span class="sidebar-link-text">Главная</span>
@@ -301,22 +30,9 @@
                         <span class="sidebar-link-icon">🗺️</span>
                         <span class="sidebar-link-text">Карта прогресса</span>
                     </a>
-                    <a href="/archive" class="sidebar-link">
-                        <span class="sidebar-link-icon">📚</span>
-                        <span class="sidebar-link-text">Архив задач</span>
-                    </a>
-                </div>
-
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Администрирование</div>
-                    <a href="/admin" class="sidebar-link active">
-                        <span class="sidebar-link-icon">⚙️</span>
-                        <span class="sidebar-link-text">Редактор карты</span>
-                    </a>
                 </div>
             </nav>
 
-            <!-- User Info -->
             <div class="sidebar-user">
                 {% if 'username' in session %}
                 <div class="user-profile">
@@ -335,529 +51,165 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Заголовок -->
-            <div style="margin-bottom: 32px;">
-                <h1 class="title">Редактор карты</h1>
-                <p class="subtitle">Свободное размещение точек на карте</p>
-            </div>
+            <h1 class="title">Панель управления</h1>
+            <p class="subtitle">Управление задачами и настройками системы</p>
 
-            <!-- Статистика -->
-            <div class="stats-panel">
-                <div class="stat-card">
-                    <div class="stat-value" id="statActive">0</div>
-                    <div class="stat-label">Активных точек</div>
+            <!-- Управление ежедневными задачами -->
+            <section class="panel">
+                <h2 class="section-title">📅 Ежедневные задачи</h2>
+                <div class="form-group">
+                    <label class="form-label">Текущие ежедневные задачи:</label>
+                    <ul>
+                        {% for task in daily_tasks %}
+                        <li>{{ task }}</li>
+                        {% endfor %}
+                    </ul>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="statCheckpoints">0</div>
-                    <div class="stat-label">Контрольных точек</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="statStart">-</div>
-                    <div class="stat-label">Стартовая точка</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">Свободно</div>
-                    <div class="stat-label">Режим размещения</div>
-                </div>
-            </div>
+           <form action="/admin/update_daily" method="POST">
+    <button type="submit" class="btn btn-secondary">🔄 Сгенерировать новые ежедневные задачи</button>
+</form>
 
-            <form method="POST" action="/admin/save_map" id="map-form">
-                <!-- Редактор карты -->
-                <section class="panel">
-                    <h2 class="section-title">🗺️ Редактор карты</h2>
-
-                    <div class="editor-controls">
-                        <div class="editor-mode">
-                            <span style="color: var(--text-secondary);">Режим:</span>
-                            <button type="button" class="mode-btn active" data-mode="start">
-                                📍 Старт (клик на карте)
-                            </button>
-                            <button type="button" class="mode-btn" data-mode="active">
-                                ✅ Активная точка (клик)
-                            </button>
-                            <button type="button" class="mode-btn" data-mode="checkpoint">
-                                🏁 Контрольная точка (клик)
-                            </button>
-                            <button type="button" class="mode-btn" data-mode="delete">
-                                🗑️ Удалить (клик на маркер)
-                            </button>
+            <!-- Управление задачами по кнопкам -->
+            <section class="panel">
+                <h2 class="section-title">🎯 Задачи по категориям</h2>
+                <form action="/admin/save_tasks" method="POST">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                        <!-- Кнопка 1 -->
+                        <div class="form-group">
+                            <label class="form-label">Кнопка 1 задачи:</label>
+                            {% for i in range(3) %}
+                            <input type="text"
+                                   name="button1[]"
+                                   value="{{ tasks.button1[i] if tasks.button1[i] else '' }}"
+                                   class="form-input"
+                                   placeholder="Задача {{ i+1 }}">
+                            {% endfor %}
                         </div>
 
-                        <div style="display: flex; gap: 8px; align-items: center;">
-                            <button type="button" class="btn btn-outline" onclick="clearAllPoints()">
-                                🗑️ Очистить всё
-                            </button>
-                            <button type="button" class="btn btn-outline" onclick="loadDefaultConfig()">
-                                📥 Загрузить по умолчанию
-                            </button>
+                        <!-- Кнопка 2 -->
+                        <div class="form-group">
+                            <label class="form-label">Кнопка 2 задачи:</label>
+                            {% for i in range(3) %}
+                            <input type="text"
+                                   name="button2[]"
+                                   value="{{ tasks.button2[i] if tasks.button2[i] else '' }}"
+                                   class="form-input"
+                                   placeholder="Задача {{ i+1 }}">
+                            {% endfor %}
+                        </div>
+
+                        <!-- Кнопка 3 -->
+                        <div class="form-group">
+                            <label class="form-label">Кнопка 3 задачи:</label>
+                            {% for i in range(3) %}
+                            <input type="text"
+                                   name="button3[]"
+                                   value="{{ tasks.button3[i] if tasks.button3[i] else '' }}"
+                                   class="form-input"
+                                   placeholder="Задача {{ i+1 }}">
+                            {% endfor %}
                         </div>
                     </div>
+                    <button type="submit" class="btn">💾 Сохранить задачи</button>
+                </form>
+            </section>
 
-                    <div class="map-editor">
-                        <div class="coordinates-display" id="coordinatesDisplay">
-                            X: -, Y: -
-                        </div>
-
-                        <div class="editable-map" id="editableMap">
-                            <img src="{{ url_for('static', filename='images/map.png') }}"
-                                 alt="Карта"
-                                 class="map-image"
-                                 id="mapImage">
-                            <div class="map-markers" id="mapMarkers"></div>
-                        </div>
-
-                        <div class="cell-info">
-                            <div><strong>Инструкция:</strong></div>
-                            <div>1. Выберите режим выше</div>
-                            <div>2. Кликните на карте в нужное место</div>
-                            <div>3. Для удаления - выберите режим "Удалить" и кликните на маркер</div>
-                            <div>4. Координаты указываются в процентах от размеров карты</div>
-                        </div>
-                    </div>
-
-                    <!-- Скрытые поля для сохранения данных -->
-                    <input type="hidden" name="start_point" id="startPoint" value="">
-                    <input type="hidden" name="active_points" id="activePoints" value="">
-                    <input type="hidden" name="checkpoints" id="checkpointsData" value="">
-                </section>
-
-                <!-- Управление контрольными точками -->
-                <section class="panel checkpoint-editor">
-                    <h3 class="section-title">🏁 Контрольные точки</h3>
-
-                    <div class="checkpoint-list" id="checkpointList">
-                        <!-- Список будет заполняться JavaScript -->
-                    </div>
-
-                    <!-- Форма редактирования контрольной точки -->
-                    <div class="checkpoint-form" id="checkpointForm" style="display: none;">
-                        <h4>Редактирование контрольной точки</h4>
-                        <div class="form-row">
-                            <input type="text" id="cpName" class="form-input-small" placeholder="Название точки">
-                            <input type="number" id="cpRequired" class="form-input-small" placeholder="Требуется задач" min="0">
-                            <select id="cpIcon" class="form-input-small">
-                                <option value="🏁">🏁 Флаг</option>
-                                <option value="🏕️">🏕️ Лагерь</option>
-                                <option value="🏔️">🏔️ Гора</option>
-                                <option value="🏰">🏰 Замок</option>
-                                <option value="🌲">🌲 Лес</option>
-                                <option value="🚀">🚀 Ракета</option>
+            <!-- Доска задач -->
+            <section class="panel">
+                <h2 class="section-title">📋 Доска задач</h2>
+                <form action="/admin/save_board" method="POST">
+                    <div class="form-group">
+                        <label class="form-label">Задачи на доске:</label>
+                        {% for i in range(5) %}
+                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 10px;">
+                            <input type="text"
+                                   name="board_tasks[]"
+                                   value="{{ board[i].text if board[i] else '' }}"
+                                   class="form-input"
+                                   placeholder="Текст задачи">
+                            <select name="board_difficulties[]" class="form-input">
+                                <option value="лёгкая" {% if board[i] and board[i].difficulty == 'лёгкая' %}selected{% endif %}>лёгкая</option>
+                                <option value="средняя" {% if board[i] and board[i].difficulty == 'средняя' %}selected{% endif %}>средняя</option>
+                                <option value="сложная" {% if board[i] and board[i].difficulty == 'сложная' %}selected{% endif %}>сложная</option>
                             </select>
                         </div>
-                        <div class="form-row">
-                            <button type="button" class="btn" onclick="saveCheckpointSettings()">💾 Сохранить</button>
-                            <button type="button" class="btn btn-outline" onclick="cancelCheckpointEdit()">❌ Отмена</button>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn">💾 Сохранить доску задач</button>
+                </form>
+            </section>
+
+            <!-- Управление картой -->
+            <section class="panel">
+                <h2 class="section-title">🗺️ Управление картой</h2>
+                <form action="/admin/save_map" method="POST">
+
+                    <!-- Стартовая точка -->
+                    <div class="form-group">
+                        <label class="form-label">Стартовая точка:</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <input type="number" step="0.1" name="start_x" value="{{ map_config.start_point.x }}" class="form-input" placeholder="X координата">
+                            <input type="number" step="0.1" name="start_y" value="{{ map_config.start_point.y }}" class="form-input" placeholder="Y координата">
                         </div>
                     </div>
-                </section>
 
-                <!-- Действия -->
-                <section class="panel">
-                    <h2 class="section-title">⚡ Действия</h2>
-                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <button type="submit" class="btn btn-success" id="save-btn">
-                            💾 Сохранить карту
-                        </button>
-
-                        <button type="button" class="btn" onclick="previewMap()">
-                            👁️ Предпросмотр
-                        </button>
-
-                        <button type="button" class="btn btn-outline" onclick="exportMapConfig()">
-                            📤 Экспорт конфигурации
-                        </button>
+                    <!-- Активные точки -->
+                    <div class="form-group">
+                        <label class="form-label">Активные точки пути (первые 5):</label>
+                        <input type="hidden" name="active_points_count" value="5">
+                        {% for i in range(5) %}
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <input type="number" step="0.1" name="active_x_{{ i }}"
+                                   value="{{ map_config.active_points[i].x if map_config.active_points[i] else '' }}"
+                                   class="form-input" placeholder="X {{ i+1 }}">
+                            <input type="number" step="0.1" name="active_y_{{ i }}"
+                                   value="{{ map_config.active_points[i].y if map_config.active_points[i] else '' }}"
+                                   class="form-input" placeholder="Y {{ i+1 }}">
+                        </div>
+                        {% endfor %}
                     </div>
 
-                    <div id="message-area" style="margin-top: 16px;"></div>
-                </section>
-            </form>
+                    <!-- Контрольные точки -->
+                    <div class="form-group">
+                        <label class="form-label">Контрольные точки (первые 3):</label>
+                        <input type="hidden" name="checkpoints_count" value="3">
+                        {% for i in range(3) %}
+                        <div style="display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 10px; margin-bottom: 10px;">
+                            <input type="number" step="0.1" name="checkpoint_x_{{ i }}"
+                                   value="{{ map_config.checkpoints[i].x if map_config.checkpoints[i] else '' }}"
+                                   class="form-input" placeholder="X">
+                            <input type="number" step="0.1" name="checkpoint_y_{{ i }}"
+                                   value="{{ map_config.checkpoints[i].y if map_config.checkpoints[i] else '' }}"
+                                   class="form-input" placeholder="Y">
+                            <input type="text" name="checkpoint_name_{{ i }}"
+                                   value="{{ map_config.checkpoints[i].name if map_config.checkpoints[i] else '' }}"
+                                   class="form-input" placeholder="Название">
+                            <input type="number" name="checkpoint_required_{{ i }}"
+                                   value="{{ map_config.checkpoints[i].required if map_config.checkpoints[i] else '' }}"
+                                   class="form-input" placeholder="Требуется">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" name="checkpoint_icon_{{ i }}"
+                                   value="{{ map_config.checkpoints[i].icon if map_config.checkpoints[i] else '📍' }}"
+                                   class="form-input" placeholder="Эмодзи иконка">
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit" class="btn">💾 Сохранить настройки карты</button>
+                </form>
+
+                <!-- Информация о карте -->
+                <div style="margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: 8px;">
+                    <h4>Информация о карте:</h4>
+                    <p><strong>Обновлено:</strong> {{ map_config.updated_at }}</p>
+                    <p><strong>Кем:</strong> {{ map_config.updated_by }}</p>
+                    <p><strong>Активных точек:</strong> {{ map_config.active_points|length }}</p>
+                    <p><strong>Контрольных точек:</strong> {{ map_config.checkpoints|length }}</p>
+                </div>
+            </section>
+
         </main>
     </div>
-
-    <script>
-        // Конфигурация карты
-        let mapConfig = {
-            startPoint: null,      // {x: 15, y: 75}
-            activePoints: [],      // [{x: 20, y: 80}, {x: 25, y: 75}, ...]
-            checkpoints: []        // [{x: 40, y: 50, name: "Лес", required: 5, icon: "🌲"}, ...]
-        };
-
-        let currentMode = 'start';
-        let selectedCheckpoint = null;
-        let mapRect = null;
-
-        // Инициализация редактора
-        function initMapEditor() {
-            setupEventListeners();
-            updateMapDisplay();
-            loadDefaultConfig();
-        }
-
-        // Настройка обработчиков событий
-        function setupEventListeners() {
-            const mapElement = document.getElementById('editableMap');
-            const mapImage = document.getElementById('mapImage');
-
-            // Клик по карте
-            mapElement.addEventListener('click', function(e) {
-                if (currentMode === 'delete') return;
-
-                const rect = mapElement.getBoundingClientRect();
-                const x = ((e.clientX - rect.left) / rect.width) * 100;
-                const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-                handleMapClick(x, y);
-            });
-
-            // Отслеживание координат мыши
-            mapElement.addEventListener('mousemove', function(e) {
-                const rect = mapElement.getBoundingClientRect();
-                const x = ((e.clientX - rect.left) / rect.width) * 100;
-                const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-                document.getElementById('coordinatesDisplay').textContent =
-                    `X: ${x.toFixed(1)}%, Y: ${y.toFixed(1)}%`;
-            });
-
-            // Переключение режимов
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentMode = this.dataset.mode;
-
-                    // Обновляем подсказку в координатах
-                    const display = document.getElementById('coordinatesDisplay');
-                    if (currentMode === 'delete') {
-                        display.innerHTML = 'Режим удаления: кликните на маркер';
-                    } else {
-                        display.innerHTML = 'X: -, Y: -';
-                    }
-                });
-            });
-
-            // Обработка отправки формы
-            document.getElementById('map-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                saveMapConfig();
-            });
-        }
-
-        // Обработка клика по карте
-        function handleMapClick(x, y) {
-            const point = { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
-
-            switch (currentMode) {
-                case 'start':
-                    mapConfig.startPoint = point;
-                    showMessage(`Стартовая точка установлена: (${point.x}%, ${point.y}%)`, 'success');
-                    break;
-
-                case 'active':
-                    // Проверяем, нет ли уже точки в этом месте
-                    const existingActive = mapConfig.activePoints.find(p =>
-                        Math.abs(p.x - point.x) < 1 && Math.abs(p.y - point.y) < 1
-                    );
-
-                    if (!existingActive) {
-                        mapConfig.activePoints.push(point);
-                        showMessage(`Активная точка добавлена: (${point.x}%, ${point.y}%)`, 'success');
-                    } else {
-                        showMessage('Точка уже существует в этом месте', 'info');
-                    }
-                    break;
-
-                case 'checkpoint':
-                    // Проверяем, нет ли уже точки в этом месте
-                    const existingCheckpoint = mapConfig.checkpoints.find(cp =>
-                        Math.abs(cp.x - point.x) < 1 && Math.abs(cp.y - point.y) < 1
-                    );
-
-                    if (!existingCheckpoint) {
-                        const newCheckpoint = {
-                            ...point,
-                            name: `Точка ${mapConfig.checkpoints.length + 1}`,
-                            required: mapConfig.checkpoints.length + 1,
-                            icon: '🏁'
-                        };
-                        mapConfig.checkpoints.push(newCheckpoint);
-                        showMessage(`Контрольная точка добавлена: (${point.x}%, ${point.y}%)`, 'success');
-                    } else {
-                        showMessage('Контрольная точка уже существует в этом месте', 'info');
-                    }
-                    break;
-            }
-
-            updateMapDisplay();
-            updateHiddenFields();
-        }
-
-        // Удаление точки
-        function deletePoint(x, y, type) {
-            switch (type) {
-                case 'start':
-                    mapConfig.startPoint = null;
-                    showMessage('Стартовая точка удалена', 'info');
-                    break;
-
-                case 'active':
-                    mapConfig.activePoints = mapConfig.activePoints.filter(p =>
-                        !(Math.abs(p.x - x) < 1 && Math.abs(p.y - y) < 1)
-                    );
-                    showMessage('Активная точка удалена', 'info');
-                    break;
-
-                case 'checkpoint':
-                    mapConfig.checkpoints = mapConfig.checkpoints.filter(cp =>
-                        !(Math.abs(cp.x - x) < 1 && Math.abs(cp.y - y) < 1)
-                    );
-                    showMessage('Контрольная точка удалена', 'info');
-                    break;
-            }
-
-            updateMapDisplay();
-            updateHiddenFields();
-        }
-
-        // Обновление отображения карты
-        function updateMapDisplay() {
-            const markersContainer = document.getElementById('mapMarkers');
-            markersContainer.innerHTML = '';
-
-            // Стартовая точка
-            if (mapConfig.startPoint) {
-                createMarker(mapConfig.startPoint, 'start', 'Старт');
-            }
-
-            // Активные точки
-            mapConfig.activePoints.forEach(point => {
-                createMarker(point, 'active', 'Активная точка');
-            });
-
-            // Контрольные точки
-            mapConfig.checkpoints.forEach(checkpoint => {
-                createMarker(checkpoint, 'checkpoint', checkpoint.name);
-            });
-
-            // Обновляем статистику
-            updateStatistics();
-            updateCheckpointList();
-        }
-
-        // Создание маркера
-        function createMarker(point, type, title) {
-            const marker = document.createElement('div');
-            marker.className = `marker marker-${type}`;
-            marker.style.left = point.x + '%';
-            marker.style.top = point.y + '%';
-            marker.title = `${title} (${point.x}%, ${point.y}%)`;
-
-            // Для контрольных точек добавляем иконку
-            if (type === 'checkpoint') {
-                const icon = document.createElement('div');
-                icon.textContent = point.icon;
-                icon.style.position = 'absolute';
-                icon.style.top = '-8px';
-                icon.style.left = '-8px';
-                icon.style.fontSize = '12px';
-                marker.appendChild(icon);
-            }
-
-            marker.addEventListener('click', function(e) {
-                e.stopPropagation();
-
-                if (currentMode === 'delete') {
-                    deletePoint(point.x, point.y, type);
-                } else if (type === 'checkpoint') {
-                    editCheckpoint(point);
-                }
-            });
-
-            document.getElementById('mapMarkers').appendChild(marker);
-        }
-
-        // Редактирование контрольной точки
-        function editCheckpoint(point) {
-            const checkpoint = mapConfig.checkpoints.find(cp =>
-                Math.abs(cp.x - point.x) < 1 && Math.abs(cp.y - point.y) < 1
-            );
-
-            if (checkpoint) {
-                selectedCheckpoint = checkpoint;
-                document.getElementById('cpName').value = checkpoint.name;
-                document.getElementById('cpRequired').value = checkpoint.required;
-                document.getElementById('cpIcon').value = checkpoint.icon;
-                document.getElementById('checkpointForm').style.display = 'block';
-            }
-        }
-
-        // Сохранение настроек контрольной точки
-        function saveCheckpointSettings() {
-            if (selectedCheckpoint) {
-                selectedCheckpoint.name = document.getElementById('cpName').value;
-                selectedCheckpoint.required = parseInt(document.getElementById('cpRequired').value);
-                selectedCheckpoint.icon = document.getElementById('cpIcon').value;
-
-                document.getElementById('checkpointForm').style.display = 'none';
-                updateMapDisplay();
-                updateHiddenFields();
-                showMessage('Настройки контрольной точки сохранены', 'success');
-            }
-        }
-
-        // Отмена редактирования
-        function cancelCheckpointEdit() {
-            document.getElementById('checkpointForm').style.display = 'none';
-            selectedCheckpoint = null;
-        }
-
-        // Обновление статистики
-        function updateStatistics() {
-            document.getElementById('statActive').textContent = mapConfig.activePoints.length;
-            document.getElementById('statCheckpoints').textContent = mapConfig.checkpoints.length;
-            document.getElementById('statStart').textContent = mapConfig.startPoint ? '✓' : '-';
-        }
-
-        // Обновление списка контрольных точек
-        function updateCheckpointList() {
-            const list = document.getElementById('checkpointList');
-            list.innerHTML = '';
-
-            mapConfig.checkpoints.forEach((checkpoint, index) => {
-                const item = document.createElement('div');
-                item.className = 'checkpoint-item';
-                item.innerHTML = `
-                    <div class="checkpoint-details">
-                        <strong>${checkpoint.icon} ${checkpoint.name}</strong>
-                        <div class="checkpoint-coords">(${checkpoint.x}%, ${checkpoint.y}%) - требуется задач: ${checkpoint.required}</div>
-                    </div>
-                    <div class="checkpoint-actions">
-                        <button type="button" class="mini-btn btn-edit" onclick="editCheckpoint({x: ${checkpoint.x}, y: ${checkpoint.y}})">✏️</button>
-                        <button type="button" class="mini-btn btn-remove" onclick="deletePoint(${checkpoint.x}, ${checkpoint.y}, 'checkpoint')">🗑️</button>
-                    </div>
-                `;
-                list.appendChild(item);
-            });
-        }
-
-        // Обновление скрытых полей
-        function updateHiddenFields() {
-            document.getElementById('startPoint').value = JSON.stringify(mapConfig.startPoint);
-            document.getElementById('activePoints').value = JSON.stringify(mapConfig.activePoints);
-            document.getElementById('checkpointsData').value = JSON.stringify(mapConfig.checkpoints);
-        }
-
-        // Очистка всех точек
-        function clearAllPoints() {
-            if (confirm('Вы уверены, что хотите удалить ВСЕ точки с карты?')) {
-                mapConfig.startPoint = null;
-                mapConfig.activePoints = [];
-                mapConfig.checkpoints = [];
-
-                updateMapDisplay();
-                updateHiddenFields();
-                showMessage('Все точки удалены', 'success');
-            }
-        }
-
-// Загрузка конфигурации с сервера
-function loadSavedConfig() {
-    fetch('/api/map/config')
-        .then(response => response.json())
-        .then(config => {
-            mapConfig = {
-                startPoint: config.start_point,
-                activePoints: config.active_points || [],
-                checkpoints: config.checkpoints || []
-            };
-
-            updateMapDisplay();
-            updateHiddenFields();
-            showMessage('Конфигурация загружена с сервера', 'success');
-        })
-        .catch(error => {
-            console.error('Error loading map config:', error);
-            loadDefaultConfig();
-        });
-}
-
-// Обновите инициализацию
-function initMapEditor() {
-    setupEventListeners();
-    updateMapDisplay();
-    loadSavedConfig();  // Загружаем с сервера вместо дефолтной
-}
-        // Предпросмотр карты
-        function previewMap() {
-            const preview = JSON.stringify(mapConfig, null, 2);
-            alert('Предпросмотр конфигурации:\n\n' + preview);
-        }
-
-        // Экспорт конфигурации
-        function exportMapConfig() {
-            const dataStr = JSON.stringify(mapConfig, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = 'map_config.json';
-            link.click();
-
-            showMessage('Конфигурация экспортирована', 'success');
-        }
-
-        // Сохранение конфигурации
-        function saveMapConfig() {
-            const saveBtn = document.getElementById('save-btn');
-            const originalText = saveBtn.innerHTML;
-
-            saveBtn.innerHTML = '<span class="loading-spinner"></span> Сохранение...';
-            saveBtn.disabled = true;
-
-            // Здесь будет отправка на сервер
-            setTimeout(() => {
-                saveBtn.innerHTML = originalText;
-                saveBtn.disabled = false;
-                showMessage('Карта успешно сохранена!', 'success');
-            }, 1500);
-        }
-
-        // Показать сообщение
-        function showMessage(text, type) {
-            const messageArea = document.getElementById('message-area');
-            const messageClass = type === 'success' ? 'success-message' : 'error-message';
-
-            messageArea.innerHTML = `
-                <div class="${messageClass}" style="${type === 'error' ? 'background: rgba(239, 83, 80, 0.1); border: 1px solid #ef5350; color: #ef5350;' : ''}">
-                    ${text}
-                </div>
-            `;
-
-            setTimeout(() => {
-                messageArea.innerHTML = '';
-            }, 3000);
-        }
-
-        // Mobile sidebar toggle
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('mobileOverlay');
-            sidebar.classList.toggle('mobile-open');
-            overlay.classList.toggle('active');
-        }
-
-        // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            initMapEditor();
-
-            const currentPath = window.location.pathname;
-            document.querySelectorAll('.sidebar-link').forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('active');
-                }
-            });
-        });
-    </script>
 </body>
 </html>
