@@ -731,5 +731,4 @@ if __name__ == '__main__':
     print(f"🚀 TaskFlow запущен: http://localhost:{port}")
     print("🗺️  Редактор карты: http://localhost:{port}/admin")
     print("👤 Админ: admin / password")
-    print("👥 Пользователи: user1 / pass1, user2 / pass2")
     app.run(host='0.0.0.0', port=port)
