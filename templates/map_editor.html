@@ -483,7 +483,7 @@
                     const response = await fetch('/api/map/config');
                     const config = await response.json();
 
-                    this.points.start = config.start_point || { x: 15, y: 75, type: 'start' };
+                    this.points.start = config.start_point || { x: 8.41773, y: 2.31483, type: 'start' };
                     this.points.active = config.active_points || [];
                     this.points.checkpoints = config.checkpoints || [];
                     this.points.end = config.end_point || { x: 85, y: 35, type: 'end' };

@@ -342,8 +342,8 @@
         function resetPosition() {
             if (confirm('Вернуться на стартовую позицию?')) {
                 userPin = document.getElementById('userPin');
-                userPin.style.left = '15%';
-                userPin.style.top = '75%';
+                userPin.style.left = '8.41773%';
+                userPin.style.top = '2.31483%';
 
                 fetch('/map/save_position', {
                     method: 'POST',
@@ -351,8 +351,8 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        x: 15,
-                        y: 75
+                        x: 8.41773,
+                        y: 2.31483
                     })
                 })
                 .then(response => response.json())
