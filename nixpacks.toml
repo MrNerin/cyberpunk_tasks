@@ -1,11 +1,14 @@
 [phases.setup]
-cmds = ["apt-get update && apt-get install -y libpq-dev gcc"]
+cmds = [
+    "python -m venv /opt/venv",
+    "export PATH=/opt/venv/bin:$PATH"
+]
 
 [phases.install]
-cmds = ["pip install -r requirements.txt"]
-
-[phases.build]
-cmds = ["echo 'Build complete'"]
+cmds = [
+    "pip install --upgrade pip",
+    "pip install -r requirements.txt"
+]
 
 [start]
 cmd = "python app.py"

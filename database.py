@@ -3,6 +3,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import json
 from datetime import datetime
+import time
 
 
 class Database:
@@ -12,37 +13,29 @@ class Database:
 
     def connect(self):
         """Подключение к базе данных"""
-        max_retries = 5
-        retry_delay = 2
+        try:
+            # Получаем DATABASE_URL из переменных окружения Railway
+            database_url = os.environ.get('DATABASE_URL')
 
-        for attempt in range(max_retries):
-            try:
-                # Получаем DATABASE_URL из переменных окружения Railway
-                database_url = os.environ.get('DATABASE_URL')
+            if not database_url:
+                print("❌ DATABASE_URL не найден в переменных окружения")
+                return False
 
-                if not database_url:
-                    print("❌ DATABASE_URL не найден в переменных окружения")
-                    return
+            # Конвертируем postgres:// в postgresql:// если нужно
+            if database_url.startswith('postgres://'):
+                database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
-                # Конвертируем postgres:// в postgresql:// если нужно
-                if database_url.startswith('postgres://'):
-                    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+            self.conn = psycopg2.connect(
+                database_url,
+                cursor_factory=RealDictCursor
+            )
+            print("✅ Подключение к PostgreSQL установлено")
+            self.init_tables()
+            return True
 
-                self.conn = psycopg2.connect(
-                    database_url,
-                    cursor_factory=RealDictCursor
-                )
-                print("✅ Подключение к PostgreSQL установлено")
-                self.init_tables()
-                return
-
-            except Exception as e:
-                print(f"❌ Попытка {attempt + 1}/{max_retries}: Ошибка подключения к PostgreSQL: {e}")
-                if attempt < max_retries - 1:
-                    print(f"⏳ Повторная попытка через {retry_delay} секунд...")
-                    time.sleep(retry_delay)
-                else:
-                    print("❌ Не удалось подключиться к PostgreSQL после всех попыток")
+        except Exception as e:
+            print(f"❌ Ошибка подключения к PostgreSQL: {e}")
+            return False
 
     def create_in_memory_storage(self):
         """Создает временное хранилище в памяти для тестирования"""
@@ -85,10 +78,6 @@ class Database:
 
     def init_tables(self):
         """Инициализация таблиц"""
-        if self.conn is None:
-            print("❌ Нет подключения к БД, пропускаем инициализацию таблиц")
-            return
-
         commands = [
             """
             CREATE TABLE IF NOT EXISTS users (

@@ -516,9 +516,39 @@ def api_map_config():
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    print(f"🚀 RGG QUEST запущен: http://localhost:{port}")
-    print(f"🗺️  Редактор карты: http://localhost:{port}/map_editor")
+    port = int(os.environ.get('PORT', 8000))
+    print(f"🚀 RGG QUEST запущен на порту: {port}")
     print("👤 Админ: admin / password")
     print("👥 Пользователи: user1 / pass1, user2 / pass2")
-    app.run(host='0.0.0.0', port=port, debug=True)
+
+    # Для продакшена используем gunicorn, для разработки - встроенный сервер
+    if os.environ.get('RAILWAY_ENVIRONMENT'):
+        # В Railway используем gunicorn
+        from gunicorn.app.base import BaseApplication
+
+
+        class FlaskApplication(BaseApplication):
+            def __init__(self, app, options=None):
+                self.options = options or {}
+                self.application = app
+                super().__init__()
+
+            def load_config(self):
+                for key, value in self.options.items():
+                    self.cfg.set(key, value)
+
+            def load(self):
+                return self.application
+
+
+        options = {
+            'bind': f'0.0.0.0:{port}',
+            'workers': 1,
+            'threads': 8,
+            'timeout': 0
+        }
+
+        FlaskApplication(app, options).run()
+    else:
+        # Локальная разработка
+        app.run(host='0.0.0.0', port=port, debug=False)
