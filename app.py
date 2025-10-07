@@ -5,7 +5,9 @@ import os
 import random
 from datetime import datetime, date
 import functools
+import time
 from database import db
+
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'taskflow_secret_key_2024')
@@ -14,6 +16,31 @@ app.secret_key = os.environ.get('SECRET_KEY', 'taskflow_secret_key_2024')
 _data_cache = {}
 _cache_timeout = {}
 
+
+# Ждем пока база данных подключится
+def wait_for_db():
+    max_retries = 10
+    retry_delay = 3
+
+    for attempt in range(max_retries):
+        try:
+            # Проверяем подключение к БД
+            db.connect()
+            if db.conn and not db.conn.closed:
+                print("✅ База данных готова")
+                return True
+        except Exception as e:
+            print(f"❌ Попытка {attempt + 1}/{max_retries}: База данных не готова: {e}")
+            if attempt < max_retries - 1:
+                print(f"⏳ Ожидание {retry_delay} секунд...")
+                time.sleep(retry_delay)
+
+    print("❌ Не удалось подключиться к базе данных")
+    return False
+
+
+# Ждем подключения к БД при запуске
+wait_for_db()
 
 def cached_data(key, timeout=60):
     def decorator(func):

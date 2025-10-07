@@ -12,32 +12,37 @@ class Database:
 
     def connect(self):
         """Подключение к базе данных"""
-        try:
-            # Получаем DATABASE_URL из переменных окружения
-            database_url = os.environ.get('DATABASE_URL')
+        max_retries = 5
+        retry_delay = 2
 
-            if not database_url:
-                print("❌ DATABASE_URL не найден в переменных окружения")
-                # Для локальной разработки - создаем тестовую строку подключения
-                database_url = "postgresql://localhost:5432/test_db"
-                print(f"⚠️  Используется тестовая строка подключения: {database_url}")
+        for attempt in range(max_retries):
+            try:
+                # Получаем DATABASE_URL из переменных окружения Railway
+                database_url = os.environ.get('DATABASE_URL')
 
-            # Если это Railway URL, преобразуем его из postgres:// в postgresql://
-            if database_url.startswith('postgres://'):
-                database_url = database_url.replace('postgres://', 'postgresql://', 1)
+                if not database_url:
+                    print("❌ DATABASE_URL не найден в переменных окружения")
+                    return
 
-            self.conn = psycopg2.connect(
-                database_url,
-                cursor_factory=RealDictCursor
-            )
-            print("✅ Подключение к PostgreSQL установлено")
-            self.init_tables()
+                # Конвертируем postgres:// в postgresql:// если нужно
+                if database_url.startswith('postgres://'):
+                    database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
-        except Exception as e:
-            print(f"❌ Ошибка подключения к PostgreSQL: {e}")
-            print("💡 Создаем временное хранилище в памяти...")
-            # Создаем временное хранилище в памяти для тестирования
-            self.in_memory_storage = self.create_in_memory_storage()
+                self.conn = psycopg2.connect(
+                    database_url,
+                    cursor_factory=RealDictCursor
+                )
+                print("✅ Подключение к PostgreSQL установлено")
+                self.init_tables()
+                return
+
+            except Exception as e:
+                print(f"❌ Попытка {attempt + 1}/{max_retries}: Ошибка подключения к PostgreSQL: {e}")
+                if attempt < max_retries - 1:
+                    print(f"⏳ Повторная попытка через {retry_delay} секунд...")
+                    time.sleep(retry_delay)
+                else:
+                    print("❌ Не удалось подключиться к PostgreSQL после всех попыток")
 
     def create_in_memory_storage(self):
         """Создает временное хранилище в памяти для тестирования"""
