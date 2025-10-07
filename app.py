@@ -6,15 +6,13 @@ import random
 from datetime import datetime, date
 import functools
 import time
-from database import db
 
-
+# Создаем приложение Flask ПЕРВЫМ
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'taskflow_secret_key_2024')
 
-# Кэширование
-_data_cache = {}
-_cache_timeout = {}
+# Импортируем базу данных ПОСЛЕ создания app
+from database import db
 
 
 # Ждем пока база данных подключится
@@ -41,6 +39,11 @@ def wait_for_db():
 
 # Ждем подключения к БД при запуске
 wait_for_db()
+
+# Кэширование
+_data_cache = {}
+_cache_timeout = {}
+
 
 def cached_data(key, timeout=60):
     def decorator(func):
@@ -71,6 +74,7 @@ def load_daily_tasks():
     daily_tasks = db.get_daily_tasks(today)
 
     if not daily_tasks:
+        print("🔄 Генерация новых ежедневных задач...")
         generate_daily_tasks()
         daily_tasks = db.get_daily_tasks(today)
 
@@ -520,35 +524,4 @@ if __name__ == '__main__':
     print(f"🚀 RGG QUEST запущен на порту: {port}")
     print("👤 Админ: admin / password")
     print("👥 Пользователи: user1 / pass1, user2 / pass2")
-
-    # Для продакшена используем gunicorn, для разработки - встроенный сервер
-    if os.environ.get('RAILWAY_ENVIRONMENT'):
-        # В Railway используем gunicorn
-        from gunicorn.app.base import BaseApplication
-
-
-        class FlaskApplication(BaseApplication):
-            def __init__(self, app, options=None):
-                self.options = options or {}
-                self.application = app
-                super().__init__()
-
-            def load_config(self):
-                for key, value in self.options.items():
-                    self.cfg.set(key, value)
-
-            def load(self):
-                return self.application
-
-
-        options = {
-            'bind': f'0.0.0.0:{port}',
-            'workers': 1,
-            'threads': 8,
-            'timeout': 0
-        }
-
-        FlaskApplication(app, options).run()
-    else:
-        # Локальная разработка
-        app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=False)
