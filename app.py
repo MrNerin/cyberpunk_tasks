@@ -254,13 +254,22 @@ def map_page():
 
     map_config = load_map_config()
 
+    # Получаем данные всех пользователей
+    all_users = db.get_all_users_with_positions()
+
+    # Добавляем прогресс для каждого пользователя
+    for username, user_data in all_users.items():
+        user_progress = calculate_user_position(username)
+        user_data['progress'] = user_progress
+
     return render_template('map.html',
                            total_completed=user_position['total_completed'],
                            current_level=user_position['current_level'],
                            user_position=(saved_position['x'], saved_position['y']),
                            progress_percentage=user_position['progress_percentage'],
                            user_coins=user_coins,
-                           map_config=map_config)
+                           map_config=map_config,
+                           all_users=all_users)
 
 
 @app.route('/map/save_position', methods=['POST'])
@@ -303,6 +312,7 @@ def api_save_map():
         return jsonify({'error': str(e)}), 500
 
 
+# Добавляем новый маршрут для API
 @app.route('/api/map/users')
 def api_map_users():
     """API для получения всех пользователей с их позициями на карте"""
