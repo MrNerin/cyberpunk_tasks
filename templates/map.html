@@ -49,6 +49,10 @@
                         <span class="sidebar-link-icon">⚙️</span>
                         <span class="sidebar-link-text">Панель управления</span>
                     </a>
+                    <a href="/map_editor" class="sidebar-link">
+                        <span class="sidebar-link-icon">🎨</span>
+                        <span class="sidebar-link-text">Редактор карты</span>
+                    </a>
                 </div>
                 {% endif %}
 
@@ -84,13 +88,14 @@
                     <div class="user-info-compact">
                         <div class="user-name">{{ session.username }}</div>
                         <div class="user-role">{{ session.role }}</div>
+                        <div class="user-coins">💰 {{ user_coins }} монет</div>
                     </div>
-                    <a href="/logout" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8em;">Выйти</a>
+                    <a href="/logout" class="btn btn-outline logout-btn">Выйти</a>
                 </div>
                 {% else %}
-                <div style="display: flex; gap: 8px; flex-direction: column;">
-                    <a href="/login" class="btn" style="width: 100%; text-align: center;">Войти</a>
-                    <a href="/register" class="btn btn-outline" style="width: 100%; text-align: center;">Регистрация</a>
+                <div class="auth-buttons">
+                    <a href="/login" class="btn login-btn">Войти</a>
+                    <a href="/register" class="btn btn-outline register-btn">Регистрация</a>
                 </div>
                 {% endif %}
             </div>
@@ -98,24 +103,20 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            {% if 'username' in session %}
             <!-- Основная статистика -->
+            {% if 'username' in session %}
             <div class="stats-panel">
+                <div class="stat-card coins-stat">
+                    <div class="stat-value">💰 {{ user_coins }}</div>
+                    <div class="stat-label">Монеток</div>
+                </div>
                 <div class="stat-card">
                     <div class="stat-value">{{ total_completed }}</div>
                     <div class="stat-label">Выполнено задач</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="currentPosition">0</div>
-                    <div class="stat-label">Текущая позиция</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="onlineUsers">1</div>
-                    <div class="stat-label">Игроков онлайн</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="totalPoints">0</div>
-                    <div class="stat-label">Всего точек</div>
+                    <div class="stat-value">{{ (user_daily_done|length / daily|length * 100)|round|int if daily|length > 0 else 0 }}%</div>
+                    <div class="stat-label">Прогресс сегодня</div>
                 </div>
             </div>
 
@@ -123,72 +124,83 @@
             <section class="panel">
                 <div class="map-container">
                     <div class="map-controls">
-                        <button class="btn btn-outline" onclick="moveToStart()">В начало</button>
-                        <button class="btn btn-outline" onclick="moveBack()">← Назад</button>
-                        <button class="btn" onclick="moveForward()">Вперед →</button>
-                        <button class="btn btn-secondary" onclick="savePosition()">Сохранить позицию</button>
+                        <button class="btn btn-secondary" onclick="enableMovement()">
+                            🎯 Режим перемещения
+                        </button>
+                        <button class="btn" onclick="savePosition()" id="saveBtn" disabled>
+                            📍 Закрепить позицию
+                        </button>
+                        <button class="btn btn-outline" onclick="resetPosition()">
+                            🔄 Сбросить позицию
+                        </button>
                     </div>
 
                     <div class="map-wrapper" id="mapWrapper">
-                        <img src="{{ url_for('static', filename='images/map.png') }}"
-                             alt="Карта прогресса RGG" class="map-image" id="mapImage">
+                        <img src="{{ url_for('static', filename='images/map.png') }}" alt="Карта прогресса RGG" class="map-image" id="mapImage">
 
-                        <!-- Линии маршрута -->
-                        <svg class="map-path" id="mapPath"></svg>
+                        <!-- Точки карты -->
+                        <div class="points-container">
+                            <!-- Старт -->
+                            <div class="map-point start-point" style="left: {{ map_config.start_point.x }}%; top: {{ map_config.start_point.y }}%;">
+                                <div class="point-marker">🏁</div>
+                                <div class="point-info">
+                                    <strong>Старт</strong><br>
+                                    Начало путешествия
+                                </div>
+                            </div>
 
-                        <!-- Контейнер для всех фишек -->
-                        <div class="map-pins-container" id="pinsContainer">
-                            <!-- Фишка текущего пользователя -->
-                            <div class="map-pin user-pin crystal-pin-1" id="userPin"
-                                 style="left: {{ user_position[0] }}%; top: {{ user_position[1] }}%;">
-                                <div class="pin-crystal">
-                                    <div class="crystal-core"></div>
-                                    <div class="crystal-shine"></div>
+                            <!-- Контрольные точки -->
+                            {% for checkpoint in map_config.checkpoints %}
+                            <div class="map-point checkpoint-point {% if total_completed >= checkpoint.required %}unlocked{% else %}locked{% endif %}"
+                                 style="left: {{ checkpoint.x }}%; top: {{ checkpoint.y }}%;">
+                                <div class="point-marker">
+                                    {% if total_completed >= checkpoint.required %}{{ checkpoint.icon }}{% else %}🔒{% endif %}
+                                </div>
+                                <div class="point-info">
+                                    <strong>{{ checkpoint.name }}</strong><br>
+                                    Требуется: {{ checkpoint.required }}+ задач<br>
+                                    Ваш прогресс: {{ total_completed }}
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            <!-- Финиш -->
+                            <div class="map-point end-point" style="left: {{ map_config.end_point.x }}%; top: {{ map_config.end_point.y }}%;">
+                                <div class="point-marker">🏆</div>
+                                <div class="point-info">
+                                    <strong>Финиш</strong><br>
+                                    Конец путешествия
+                                </div>
+                            </div>
+
+                            <!-- Миниатюрная фишка пользователя -->
+                            <div class="map-pin user-pin miniature" id="userPin"
+                                 style="left: {{ user_position[0] }}%; top: {{ user_position[1] }}%;"
+                                 data-x="{{ user_position[0] }}" data-y="{{ user_position[1] }}">
+                                <div class="pin-icon">
+                                    {% if total_completed >= 30 %}🚀{% elif total_completed >= 20 %}⭐{% elif total_completed >= 10 %}🔵{% else %}📍{% endif %}
                                 </div>
                                 <div class="pin-label">{{ session.username }}</div>
                             </div>
-                        </div>
-
-                        <!-- Точки маршрута (скрытые) -->
-                        {% for point in all_points %}
-                        <div class="hidden-point"
-                             style="left: {{ point.x }}%; top: {{ point.y }}%;"
-                             data-index="{{ loop.index0 }}"
-                             onclick="moveToPoint({{ loop.index0 }})"
-                             title="Точка {{ loop.index0 }}"></div>
-                        {% endfor %}
-                    </div>
-
-                    <div class="map-progress">
-                        <div class="progress-label">
-                            <span>Позиция на карте: <span id="positionText">0</span>/<span id="totalPointsText">0</span></span>
-                            <span id="pathPercentage">0%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="pathProgress" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Легенда пользователей -->
-                    <div class="users-legend" id="usersLegend">
-                        <div class="user-legend-item">
-                            <div class="user-legend-crystal crystal-1"></div>
-                            <span>{{ session.username }} (Вы)</span>
                         </div>
                     </div>
 
                     <div class="map-legend">
                         <div class="legend-item">
-                            <span class="legend-crystal crystal-1"></span>
-                            <span>Положение игроков</span>
+                            <span class="legend-marker">📍</span>
+                            <span>Ваше текущее положение</span>
                         </div>
                         <div class="legend-item">
-                            <span class="legend-marker" style="color: #64b5f6;">●</span>
-                            <span>Точки маршрута</span>
+                            <span class="legend-marker">🏁</span>
+                            <span>Старт</span>
                         </div>
                         <div class="legend-item">
-                            <span class="legend-marker completed">⭐</span>
+                            <span class="legend-marker completed">🎯</span>
                             <span>Контрольные точки</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-marker">🏆</span>
+                            <span>Финиш</span>
                         </div>
                     </div>
                 </div>
@@ -242,7 +254,9 @@
                     <div class="empty-state-icon">🗺️</div>
                     <h3>Карта прогресса</h3>
                     <p>Войдите в систему, чтобы увидеть своё путешествие</p>
-                    <a href="/login" class="btn" style="margin-top: 16px;">Войти в систему</a>
+                    <div class="auth-buttons-center">
+                        <a href="/login" class="btn">Войти в систему</a>
+                    </div>
                 </div>
             </section>
             {% endif %}
@@ -250,22 +264,8 @@
     </div>
 
     <script>
-        let currentPosition = 0;
-        const points = [
-            {% for point in all_points %}
-            {x: {{ point.x }}, y: {{ point.y }} },
-            {% endfor %}
-        ];
-
-        // Цвета кристаллов для пользователей
-        const crystalColors = [
-            { class: 'crystal-pin-1', legend: 'crystal-1', name: 'Синий кристалл' },
-            { class: 'crystal-pin-2', legend: 'crystal-2', name: 'Зеленый кристалл' },
-            { class: 'crystal-pin-3', legend: 'crystal-3', name: 'Фиолетовый кристалл' },
-            { class: 'crystal-pin-4', legend: 'crystal-4', name: 'Золотой кристалл' },
-            { class: 'crystal-pin-5', legend: 'crystal-5', name: 'Розовый кристалл' },
-            { class: 'crystal-pin-6', legend: 'crystal-6', name: 'Бирюзовый кристалл' }
-        ];
+        let isMovementEnabled = false;
+        let userPin = null;
 
         // Mobile sidebar toggle
         function toggleSidebar() {
@@ -276,261 +276,195 @@
         }
 
         // Close sidebar when clicking on a link (mobile)
-        document.querySelectorAll('.sidebar-link, .action-button').forEach(link => {
-            link.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-link, .action-button, .btn, .logout-btn, .login-btn, .register-btn').forEach(link => {
+            link.addEventListener('click', (e) => {
                 if (window.innerWidth <= 768) {
                     toggleSidebar();
                 }
             });
         });
 
-        function initMap() {
-            console.log('Initializing map with', points.length, 'points');
-            console.log('Points array:', points);
+        function enableMovement() {
+            isMovementEnabled = true;
+            userPin = document.getElementById('userPin');
+            document.getElementById('saveBtn').disabled = false;
 
-            // Обновляем общее количество точек
-            document.getElementById('totalPoints').textContent = points.length;
-            document.getElementById('totalPointsText').textContent = points.length;
-
-            // Загружаем сохраненную позицию
-            const savedPosition = localStorage.getItem('userMapPosition');
-            if (savedPosition !== null && savedPosition !== 'null') {
-                currentPosition = parseInt(savedPosition);
-                console.log('Loaded saved position:', currentPosition);
-            } else {
-                // Если нет сохраненной позиции, ставим на старт (позиция 0)
-                currentPosition = 0;
-                console.log('No saved position, starting from position 0 (start)');
-            }
-
-            // Проверяем валидность позиции
-            if (currentPosition >= points.length) {
-                currentPosition = points.length - 1;
-                console.log('Position corrected to last point:', currentPosition);
-            }
-            if (currentPosition < 0) {
-                currentPosition = 0;
-                console.log('Position corrected to first point:', currentPosition);
-            }
-
-            console.log('Final position:', currentPosition);
-            console.log('Start point position:', points[0]);
-
-            updatePosition();
-            drawPath();
-            loadOtherUsers();
-
-            // Анимация фишки текущего пользователя
-            const userPin = document.getElementById('userPin');
             if (userPin) {
-                userPin.classList.add('miniature');
+                userPin.style.cursor = 'move';
+                userPin.style.zIndex = '100';
+
+                // Анимация включения режима
+                userPin.style.animation = 'glow 1s ease-in-out';
                 setTimeout(() => {
-                    userPin.classList.add('pin-move');
-                    setTimeout(() => {
-                        userPin.classList.remove('pin-move');
-                    }, 1500);
-                }, 800);
+                    userPin.style.animation = '';
+                }, 1000);
             }
+
+            alert('🎯 Режим перемещения включен! Перетащите свою фишку в нужное место и нажмите "Закрепить позицию"');
         }
 
-        function updatePosition() {
-            if (points.length === 0) {
-                console.error('No points available');
+        function savePosition() {
+            if (!isMovementEnabled || !userPin) {
+                alert('Сначала включите режим перемещения!');
                 return;
             }
 
-            const userPin = document.getElementById('userPin');
-            const currentPoint = points[currentPosition];
+            const x = parseFloat(userPin.style.left);
+            const y = parseFloat(userPin.style.top);
 
-            console.log('Moving to position', currentPosition, 'at', currentPoint);
-
-            userPin.style.left = currentPoint.x + '%';
-            userPin.style.top = currentPoint.y + '%';
-
-            // Обновляем статистику
-            document.getElementById('currentPosition').textContent = currentPosition;
-            document.getElementById('positionText').textContent = currentPosition;
-
-            // Обновляем прогресс
-            const progress = points.length > 1 ? (currentPosition / (points.length - 1)) * 100 : 0;
-            document.getElementById('pathProgress').style.width = progress + '%';
-            document.getElementById('pathPercentage').textContent = Math.round(progress) + '%';
-
-            // Сохраняем позицию
-            localStorage.setItem('userMapPosition', currentPosition);
-
-            // Сохраняем позицию на сервере
-            saveUserPositionToServer(currentPosition);
-        }
-
-        function drawPath() {
-            const svg = document.getElementById('mapPath');
-            svg.innerHTML = '';
-
-            if (points.length < 2) {
-                console.log('Not enough points to draw path');
-                return;
-            }
-
-            console.log('Drawing path with', points.length, 'points');
-
-            let pathData = `M ${points[0].x}% ${points[0].y}% `;
-
-            for (let i = 1; i < points.length; i++) {
-                pathData += `L ${points[i].x}% ${points[i].y}% `;
-            }
-
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d', pathData);
-            path.setAttribute('fill', 'none');
-            path.setAttribute('stroke', 'rgba(100, 181, 246, 0.5)');
-            path.setAttribute('stroke-width', '2');
-            path.setAttribute('stroke-dasharray', '4,3');
-
-            svg.appendChild(path);
-        }
-
-        async function loadOtherUsers() {
-            try {
-                const response = await fetch('/api/users/positions');
-                const usersPositions = await response.json();
-
-                const pinsContainer = document.getElementById('pinsContainer');
-                const usersLegend = document.getElementById('usersLegend');
-                const currentUser = '{{ current_user }}';
-
-                let colorIndex = 1; // Начинаем со второго цвета (первый для текущего пользователя)
-                let onlineCount = 1; // Текущий пользователь уже онлайн
-
-                for (const [username, userData] of Object.entries(usersPositions)) {
-                    // Пропускаем текущего пользователя (его фишка уже есть)
-                    if (username === currentUser) continue;
-
-                    if (colorIndex < crystalColors.length) {
-                        const userPoint = points[userData.position] || points[0];
-
-                        // Создаем фишку пользователя
-                        const userPin = document.createElement('div');
-                        userPin.className = `map-pin user-pin ${crystalColors[colorIndex].class} miniature`;
-                        userPin.style.left = userPoint.x + '%';
-                        userPin.style.top = userPoint.y + '%';
-                        userPin.innerHTML = `
-                            <div class="pin-crystal">
-                                <div class="crystal-core"></div>
-                                <div class="crystal-shine"></div>
-                            </div>
-                            <div class="pin-label">${username}</div>
-                        `;
-                        pinsContainer.appendChild(userPin);
-
-                        // Добавляем в легенду
-                        const legendItem = document.createElement('div');
-                        legendItem.className = 'user-legend-item';
-                        legendItem.innerHTML = `
-                            <div class="user-legend-crystal ${crystalColors[colorIndex].legend}"></div>
-                            <span>${username}</span>
-                        `;
-                        usersLegend.appendChild(legendItem);
-
-                        colorIndex++;
-                        onlineCount++;
-                    }
+            fetch('/map/save_position', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    x: x,
+                    y: y
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Позиция успешно сохранена!');
+                    isMovementEnabled = false;
+                    userPin.style.cursor = 'default';
+                    document.getElementById('saveBtn').disabled = true;
+                } else {
+                    alert('❌ Ошибка при сохранении позиции');
                 }
-
-                // Обновляем счетчик онлайн пользователей
-                document.getElementById('onlineUsers').textContent = onlineCount;
-
-            } catch (error) {
-                console.error('Error loading other users:', error);
-            }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('❌ Ошибка сети');
+            });
         }
 
-        async function saveUserPositionToServer(position) {
-            try {
-                const response = await fetch('/api/user/position', {
+        function resetPosition() {
+            if (confirm('Вернуться на стартовую позицию?')) {
+                userPin = document.getElementById('userPin');
+                userPin.style.left = '15%';
+                userPin.style.top = '75%';
+
+                fetch('/map/save_position', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ position: position })
+                    body: JSON.stringify({
+                        x: 15,
+                        y: 75
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ Позиция сброшена!');
+                    }
                 });
-
-                const result = await response.json();
-                if (result.success) {
-                    console.log('Position saved to server:', position);
-                } else {
-                    console.error('Error saving position to server:', result.error);
-                }
-            } catch (error) {
-                console.error('Error saving position to server:', error);
             }
         }
 
-        function moveToPoint(index) {
-            if (index >= 0 && index < points.length) {
-                console.log('Moving to point', index, 'at position:', points[index]);
-                currentPosition = index;
-                updatePosition();
-            } else {
-                console.error('Invalid point index:', index);
+        // Drag & Drop для фишки пользователя
+        function initMap() {
+            userPin = document.getElementById('userPin');
+            let isDragging = false;
+            let offsetX, offsetY;
+
+            if (userPin) {
+                userPin.addEventListener('mousedown', startDrag);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', stopDrag);
+
+                // Touch events для мобильных устройств
+                userPin.addEventListener('touchstart', startDragTouch);
+                document.addEventListener('touchmove', dragTouch);
+                document.addEventListener('touchend', stopDrag);
             }
-        }
 
-        function moveForward() {
-            if (currentPosition < points.length - 1) {
-                currentPosition++;
-                console.log('Moving forward to position', currentPosition);
-                updatePosition();
-            } else {
-                console.log('Already at the end');
+            function startDrag(e) {
+                if (!isMovementEnabled) return;
+                isDragging = true;
+                const rect = userPin.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                userPin.style.transition = 'none';
+                e.preventDefault();
             }
-        }
 
-        function moveBack() {
-            if (currentPosition > 0) {
-                currentPosition--;
-                console.log('Moving back to position', currentPosition);
-                updatePosition();
-            } else {
-                console.log('Already at the start');
+            function startDragTouch(e) {
+                if (!isMovementEnabled) return;
+                isDragging = true;
+                const touch = e.touches[0];
+                const rect = userPin.getBoundingClientRect();
+                offsetX = touch.clientX - rect.left;
+                offsetY = touch.clientY - rect.top;
+                userPin.style.transition = 'none';
+                e.preventDefault();
             }
-        }
 
-        function moveToStart() {
-            console.log('Moving to start position 0');
-            currentPosition = 0;
-            updatePosition();
-        }
+            function drag(e) {
+                if (!isDragging || !isMovementEnabled) return;
 
-        function savePosition() {
-            localStorage.setItem('userMapPosition', currentPosition);
-            console.log('Position saved:', currentPosition);
+                const mapWrapper = document.getElementById('mapWrapper');
+                const mapRect = mapWrapper.getBoundingClientRect();
 
-            // Показываем сообщение об успехе
-            const btn = event.target;
-            const originalText = btn.textContent;
-            btn.textContent = '✓ Сохранено!';
-            btn.classList.add('btn-success');
+                let x = e.clientX - mapRect.left - offsetX;
+                let y = e.clientY - mapRect.top - offsetY;
 
+                // Ограничиваем перемещение в пределах карты
+                x = Math.max(0, Math.min(x, mapRect.width - userPin.offsetWidth));
+                y = Math.max(0, Math.min(y, mapRect.height - userPin.offsetHeight));
+
+                // Конвертируем в проценты
+                const percentX = (x / mapRect.width) * 100;
+                const percentY = (y / mapRect.height) * 100;
+
+                userPin.style.left = percentX + '%';
+                userPin.style.top = percentY + '%';
+            }
+
+            function dragTouch(e) {
+                if (!isDragging || !isMovementEnabled) return;
+
+                const touch = e.touches[0];
+                const mapWrapper = document.getElementById('mapWrapper');
+                const mapRect = mapWrapper.getBoundingClientRect();
+
+                let x = touch.clientX - mapRect.left - offsetX;
+                let y = touch.clientY - mapRect.top - offsetY;
+
+                // Ограничиваем перемещение в пределах карта
+                x = Math.max(0, Math.min(x, mapRect.width - userPin.offsetWidth));
+                y = Math.max(0, Math.min(y, mapRect.height - userPin.offsetHeight));
+
+                // Конвертируем в проценты
+                const percentX = (x / mapRect.width) * 100;
+                const percentY = (y / mapRect.height) * 100;
+
+                userPin.style.left = percentX + '%';
+                userPin.style.top = percentY + '%';
+
+                e.preventDefault();
+            }
+
+            function stopDrag() {
+                if (!isDragging) return;
+                isDragging = false;
+                userPin.style.transition = 'all 0.3s ease';
+            }
+
+            // Анимация фишки при загрузке
             setTimeout(() => {
-                btn.textContent = originalText;
-                btn.classList.remove('btn-success');
-            }, 2000);
+                if (userPin) {
+                    userPin.classList.add('pin-move');
+                    setTimeout(() => {
+                        userPin.classList.remove('pin-move');
+                    }, 1500);
+                }
+            }, 800);
         }
-
-        // Обработчики клавиш
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight') {
-                moveForward();
-            } else if (e.key === 'ArrowLeft') {
-                moveBack();
-            } else if (e.key === 'Home') {
-                moveToStart();
-            }
-        });
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing map...');
             initMap();
 
             // Update active link based on current page

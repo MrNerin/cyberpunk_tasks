@@ -1,0 +1,559 @@
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import json
+from datetime import datetime
+
+
+class Database:
+    def __init__(self):
+        self.conn = None
+        self.connect()
+
+    def connect(self):
+        """Подключение к базе данных"""
+        try:
+            # Получаем DATABASE_URL из переменных окружения
+            database_url = os.environ.get('DATABASE_URL')
+
+            if not database_url:
+                print("❌ DATABASE_URL не найден в переменных окружения")
+                # Для локальной разработки - создаем тестовую строку подключения
+                database_url = "postgresql://localhost:5432/test_db"
+                print(f"⚠️  Используется тестовая строка подключения: {database_url}")
+
+            # Если это Railway URL, преобразуем его из postgres:// в postgresql://
+            if database_url.startswith('postgres://'):
+                database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+            self.conn = psycopg2.connect(
+                database_url,
+                cursor_factory=RealDictCursor
+            )
+            print("✅ Подключение к PostgreSQL установлено")
+            self.init_tables()
+
+        except Exception as e:
+            print(f"❌ Ошибка подключения к PostgreSQL: {e}")
+            print("💡 Создаем временное хранилище в памяти...")
+            # Создаем временное хранилище в памяти для тестирования
+            self.in_memory_storage = self.create_in_memory_storage()
+
+    def create_in_memory_storage(self):
+        """Создает временное хранилище в памяти для тестирования"""
+        return {
+            'users': {
+                "admin": {"password": "password", "role": "admin", "coins": 100},
+                "user1": {"password": "pass1", "role": "user", "coins": 50},
+                "user2": {"password": "pass2", "role": "user", "coins": 30}
+            },
+            'tasks_config': {
+                "button1": ["Изучить новый фреймворк", "Прочитать документацию", "Написать тесты"],
+                "button2": ["Создать прототип интерфейса", "Оптимизировать базу данных", "Настроить CI/CD"],
+                "button3": ["Изучить алгоритмы", "Попрактиковаться в английском", "Посмотреть вебинар"]
+            },
+            'daily_tasks': {},
+            'board_tasks': [],
+            'user_progress': {},
+            'map_config': {
+                'start_point': {'x': 15, 'y': 75, 'type': 'start'},
+                'active_points': [
+                    {'x': 25, 'y': 70, 'type': 'active'},
+                    {'x': 35, 'y': 65, 'type': 'active'},
+                    {'x': 45, 'y': 60, 'type': 'active'}
+                ],
+                'checkpoints': [
+                    {'x': 75, 'y': 45, 'type': 'checkpoint', 'name': "Первый уровень", 'required': 5, 'icon': "🎯"},
+                    {'x': 85, 'y': 40, 'type': 'checkpoint', 'name': "Второй уровень", 'required': 10, 'icon': "⭐"}
+                ],
+                'end_point': {'x': 95, 'y': 35, 'type': 'end'},
+                'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'updated_by': 'system'
+            },
+            'user_positions': {}
+        }
+
+    def ensure_connection(self):
+        """Проверяет подключение и переподключается при необходимости"""
+        if self.conn is None or self.conn.closed:
+            self.connect()
+
+    def init_tables(self):
+        """Инициализация таблиц"""
+        if self.conn is None:
+            print("❌ Нет подключения к БД, пропускаем инициализацию таблиц")
+            return
+
+        commands = [
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                username VARCHAR(50) PRIMARY KEY,
+                password VARCHAR(100) NOT NULL,
+                role VARCHAR(20) NOT NULL DEFAULT 'user',
+                coins INTEGER NOT NULL DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS tasks_config (
+                id SERIAL PRIMARY KEY,
+                button1 JSONB NOT NULL,
+                button2 JSONB NOT NULL,
+                button3 JSONB NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS daily_tasks (
+                id SERIAL PRIMARY KEY,
+                date DATE UNIQUE NOT NULL,
+                tasks JSONB NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS board_tasks (
+                id SERIAL PRIMARY KEY,
+                text TEXT NOT NULL,
+                difficulty VARCHAR(20) NOT NULL,
+                status VARCHAR(20) NOT NULL DEFAULT 'free',
+                user_taken VARCHAR(50),
+                taken_at TIMESTAMP,
+                done_at TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS user_progress (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(50) NOT NULL,
+                date DATE NOT NULL,
+                tasks_done JSONB NOT NULL,
+                UNIQUE(username, date)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS map_config (
+                id SERIAL PRIMARY KEY,
+                start_point JSONB NOT NULL,
+                active_points JSONB NOT NULL,
+                checkpoints JSONB NOT NULL,
+                end_point JSONB NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_by VARCHAR(50)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS user_positions (
+                username VARCHAR(50) PRIMARY KEY,
+                x FLOAT NOT NULL,
+                y FLOAT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        ]
+
+        try:
+            cur = self.conn.cursor()
+            for command in commands:
+                cur.execute(command)
+            self.conn.commit()
+            cur.close()
+            print("✅ Таблицы инициализированы")
+            self.insert_initial_data()
+        except Exception as e:
+            print(f"❌ Ошибка инициализации таблиц: {e}")
+
+    def insert_initial_data(self):
+        """Вставка начальных данных"""
+        if self.conn is None:
+            print("❌ Нет подключения к БД, пропускаем начальные данные")
+            return
+
+        try:
+            cur = self.conn.cursor()
+
+            # Проверяем, есть ли уже пользователи
+            cur.execute("SELECT COUNT(*) as count FROM users")
+            if cur.fetchone()['count'] == 0:
+                # Добавляем начальных пользователей
+                users = [
+                    ('admin', 'password', 'admin', 100),
+                    ('user1', 'pass1', 'user', 50),
+                    ('user2', 'pass2', 'user', 30)
+                ]
+                for user in users:
+                    cur.execute(
+                        "INSERT INTO users (username, password, role, coins) VALUES (%s, %s, %s, %s)",
+                        user
+                    )
+
+            # Проверяем конфигурацию задач
+            cur.execute("SELECT COUNT(*) as count FROM tasks_config")
+            if cur.fetchone()['count'] == 0:
+                default_tasks = {
+                    "button1": ["Изучить новый фреймворк", "Прочитать документацию", "Написать тесты"],
+                    "button2": ["Создать прототип интерфейса", "Оптимизировать базу данных", "Настроить CI/CD"],
+                    "button3": ["Изучить алгоритмы", "Попрактиковаться в английском", "Посмотреть вебинар"]
+                }
+                cur.execute(
+                    "INSERT INTO tasks_config (button1, button2, button3) VALUES (%s, %s, %s)",
+                    (json.dumps(default_tasks['button1']),
+                     json.dumps(default_tasks['button2']),
+                     json.dumps(default_tasks['button3']))
+                )
+
+            # Проверяем конфигурацию карты
+            cur.execute("SELECT COUNT(*) as count FROM map_config")
+            if cur.fetchone()['count'] == 0:
+                default_map = {
+                    'start_point': {'x': 15, 'y': 75, 'type': 'start'},
+                    'active_points': [
+                        {'x': 25, 'y': 70, 'type': 'active'},
+                        {'x': 35, 'y': 65, 'type': 'active'},
+                        {'x': 45, 'y': 60, 'type': 'active'}
+                    ],
+                    'checkpoints': [
+                        {'x': 75, 'y': 45, 'type': 'checkpoint', 'name': "Первый уровень", 'required': 5, 'icon': "🎯"},
+                        {'x': 85, 'y': 40, 'type': 'checkpoint', 'name': "Второй уровень", 'required': 10, 'icon': "⭐"}
+                    ],
+                    'end_point': {'x': 95, 'y': 35, 'type': 'end'}
+                }
+                cur.execute(
+                    "INSERT INTO map_config (start_point, active_points, checkpoints, end_point, updated_by) VALUES (%s, %s, %s, %s, %s)",
+                    (json.dumps(default_map['start_point']),
+                     json.dumps(default_map['active_points']),
+                     json.dumps(default_map['checkpoints']),
+                     json.dumps(default_map['end_point']),
+                     'system')
+                )
+
+            self.conn.commit()
+            cur.close()
+            print("✅ Начальные данные добавлены")
+
+        except Exception as e:
+            print(f"❌ Ошибка добавления начальных данных: {e}")
+            self.conn.rollback()
+
+    # Методы для работы с пользователями
+    def get_user(self, username):
+        if self.conn is None:
+            return self.in_memory_storage['users'].get(username)
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute("SELECT * FROM users WHERE username = %s", (username,))
+            user = cur.fetchone()
+            cur.close()
+            return user
+        except Exception as e:
+            print(f"❌ Ошибка получения пользователя: {e}")
+            return self.in_memory_storage['users'].get(username)
+
+    def get_all_users(self):
+        if self.conn is None:
+            return self.in_memory_storage['users']
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute("SELECT * FROM users ORDER BY username")
+            users = cur.fetchall()
+            cur.close()
+            return {user['username']: dict(user) for user in users}
+        except Exception as e:
+            print(f"❌ Ошибка получения пользователей: {e}")
+            return self.in_memory_storage['users']
+
+    def update_user_coins(self, username, coins):
+        if self.conn is None:
+            if username in self.in_memory_storage['users']:
+                self.in_memory_storage['users'][username]['coins'] = coins
+            return
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute("UPDATE users SET coins = %s WHERE username = %s", (coins, username))
+            self.conn.commit()
+            cur.close()
+        except Exception as e:
+            print(f"❌ Ошибка обновления монет: {e}")
+
+    def create_user(self, username, password, role='user', coins=0):
+        if self.conn is None:
+            self.in_memory_storage['users'][username] = {
+                'password': password,
+                'role': role,
+                'coins': coins
+            }
+            return
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute(
+                "INSERT INTO users (username, password, role, coins) VALUES (%s, %s, %s, %s)",
+                (username, password, role, coins)
+            )
+            self.conn.commit()
+            cur.close()
+        except Exception as e:
+            print(f"❌ Ошибка создания пользователя: {e}")
+
+    # Методы для работы с задачами
+    def get_tasks_config(self):
+        if self.conn is None:
+            return self.in_memory_storage['tasks_config']
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute("SELECT * FROM tasks_config ORDER BY id DESC LIMIT 1")
+            config = cur.fetchone()
+            cur.close()
+            if config:
+                return {
+                    "button1": config['button1'],
+                    "button2": config['button2'],
+                    "button3": config['button3']
+                }
+            return {"button1": [], "button2": [], "button3": []}
+        except Exception as e:
+            print(f"❌ Ошибка получения конфигурации задач: {e}")
+            return self.in_memory_storage['tasks_config']
+
+    def update_tasks_config(self, tasks):
+        if self.conn is None:
+            self.in_memory_storage['tasks_config'] = tasks
+            return
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute(
+                "INSERT INTO tasks_config (button1, button2, button3) VALUES (%s, %s, %s)",
+                (json.dumps(tasks['button1']), json.dumps(tasks['button2']), json.dumps(tasks['button3']))
+            )
+            self.conn.commit()
+            cur.close()
+        except Exception as e:
+            print(f"❌ Ошибка обновления конфигурации задач: {e}")
+
+    def get_daily_tasks(self, date):
+        if self.conn is None:
+            return self.in_memory_storage['daily_tasks'].get(date)
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute("SELECT tasks FROM daily_tasks WHERE date = %s", (date,))
+            result = cur.fetchone()
+            cur.close()
+            return result['tasks'] if result else None
+        except Exception as e:
+            print(f"❌ Ошибка получения ежедневных задач: {e}")
+            return self.in_memory_storage['daily_tasks'].get(date)
+
+    def save_daily_tasks(self, date, tasks):
+        if self.conn is None:
+            self.in_memory_storage['daily_tasks'][date] = tasks
+            return
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute(
+                "INSERT INTO daily_tasks (date, tasks) VALUES (%s, %s) ON CONFLICT (date) DO UPDATE SET tasks = %s",
+                (date, json.dumps(tasks), json.dumps(tasks))
+            )
+            self.conn.commit()
+            cur.close()
+        except Exception as e:
+            print(f"❌ Ошибка сохранения ежедневных задач: {e}")
+
+    def get_board_tasks(self):
+        if self.conn is None:
+            return self.in_memory_storage['board_tasks']
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute("SELECT * FROM board_tasks ORDER BY id")
+            tasks = cur.fetchall()
+            cur.close()
+            return [dict(task) for task in tasks]
+        except Exception as e:
+            print(f"❌ Ошибка получения задач доски: {e}")
+            return self.in_memory_storage['board_tasks']
+
+    def save_board_tasks(self, tasks):
+        if self.conn is None:
+            self.in_memory_storage['board_tasks'] = tasks
+            return
+
+        try:
+            cur = self.conn.cursor()
+            # Очищаем старые задачи
+            cur.execute("DELETE FROM board_tasks")
+            # Добавляем новые
+            for task in tasks:
+                cur.execute(
+                    "INSERT INTO board_tasks (text, difficulty, status, user_taken, taken_at, done_at) VALUES (%s, %s, %s, %s, %s, %s)",
+                    (task['text'], task['difficulty'], task['status'], task.get('user'), task.get('taken_at'),
+                     task.get('done_at'))
+                )
+            self.conn.commit()
+            cur.close()
+        except Exception as e:
+            print(f"❌ Ошибка сохранения задач доски: {e}")
+
+    def update_board_task(self, task_id, updates):
+        if self.conn is None:
+            # Обновляем в памяти
+            for task in self.in_memory_storage['board_tasks']:
+                if task['id'] == task_id:
+                    task.update(updates)
+                    break
+            return
+
+        try:
+            cur = self.conn.cursor()
+            set_clause = ", ".join([f"{key} = %s" for key in updates.keys()])
+            values = list(updates.values())
+            values.append(task_id)
+            cur.execute(f"UPDATE board_tasks SET {set_clause} WHERE id = %s", values)
+            self.conn.commit()
+            cur.close()
+        except Exception as e:
+            print(f"❌ Ошибка обновления задачи доски: {e}")
+
+    # Методы для прогресса пользователей
+    def get_user_progress(self, username, date):
+        if self.conn is None:
+            user_progress = self.in_memory_storage['user_progress']
+            key = f"{username}_{date}"
+            return user_progress.get(key, [])
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute("SELECT tasks_done FROM user_progress WHERE username = %s AND date = %s", (username, date))
+            result = cur.fetchone()
+            cur.close()
+            return result['tasks_done'] if result else []
+        except Exception as e:
+            print(f"❌ Ошибка получения прогресса пользователя: {e}")
+            user_progress = self.in_memory_storage['user_progress']
+            key = f"{username}_{date}"
+            return user_progress.get(key, [])
+
+    def save_user_progress(self, username, date, tasks_done):
+        if self.conn is None:
+            key = f"{username}_{date}"
+            self.in_memory_storage['user_progress'][key] = tasks_done
+            return
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute(
+                "INSERT INTO user_progress (username, date, tasks_done) VALUES (%s, %s, %s) ON CONFLICT (username, date) DO UPDATE SET tasks_done = %s",
+                (username, date, json.dumps(tasks_done), json.dumps(tasks_done))
+            )
+            self.conn.commit()
+            cur.close()
+        except Exception as e:
+            print(f"❌ Ошибка сохранения прогресса пользователя: {e}")
+
+    def get_user_all_progress(self, username):
+        if self.conn is None:
+            # Собираем все задачи пользователя из памяти
+            all_tasks = []
+            for key, tasks in self.in_memory_storage['user_progress'].items():
+                if key.startswith(username + '_'):
+                    all_tasks.extend(tasks)
+            return all_tasks
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute("SELECT tasks_done FROM user_progress WHERE username = %s", (username,))
+            results = cur.fetchall()
+            cur.close()
+            return [task for result in results for task in result['tasks_done']]
+        except Exception as e:
+            print(f"❌ Ошибка получения всего прогресса пользователя: {e}")
+            return []
+
+    # Методы для карты
+    def get_map_config(self):
+        if self.conn is None:
+            return self.in_memory_storage['map_config']
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute("SELECT * FROM map_config ORDER BY id DESC LIMIT 1")
+            config = cur.fetchone()
+            cur.close()
+            if config:
+                return {
+                    'start_point': config['start_point'],
+                    'active_points': config['active_points'],
+                    'checkpoints': config['checkpoints'],
+                    'end_point': config['end_point'],
+                    'updated_at': config['updated_at'].strftime('%Y-%m-%d %H:%M:%S'),
+                    'updated_by': config['updated_by']
+                }
+            return None
+        except Exception as e:
+            print(f"❌ Ошибка получения конфигурации карты: {e}")
+            return self.in_memory_storage['map_config']
+
+    def save_map_config(self, config, updated_by):
+        if self.conn is None:
+            self.in_memory_storage['map_config'] = {
+                **config,
+                'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'updated_by': updated_by
+            }
+            return
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute(
+                "INSERT INTO map_config (start_point, active_points, checkpoints, end_point, updated_by) VALUES (%s, %s, %s, %s, %s)",
+                (json.dumps(config['start_point']),
+                 json.dumps(config['active_points']),
+                 json.dumps(config['checkpoints']),
+                 json.dumps(config['end_point']),
+                 updated_by)
+            )
+            self.conn.commit()
+            cur.close()
+        except Exception as e:
+            print(f"❌ Ошибка сохранения конфигурации карты: {e}")
+
+    def get_user_position(self, username):
+        if self.conn is None:
+            return self.in_memory_storage['user_positions'].get(username, {'x': 15, 'y': 75})
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute("SELECT x, y FROM user_positions WHERE username = %s", (username,))
+            result = cur.fetchone()
+            cur.close()
+            return {'x': 15, 'y': 75} if not result else dict(result)
+        except Exception as e:
+            print(f"❌ Ошибка получения позиции пользователя: {e}")
+            return self.in_memory_storage['user_positions'].get(username, {'x': 15, 'y': 75})
+
+    def save_user_position(self, username, x, y):
+        if self.conn is None:
+            self.in_memory_storage['user_positions'][username] = {'x': x, 'y': y}
+            return
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute(
+                "INSERT INTO user_positions (username, x, y) VALUES (%s, %s, %s) ON CONFLICT (username) DO UPDATE SET x = %s, y = %s",
+                (username, x, y, x, y)
+            )
+            self.conn.commit()
+            cur.close()
+        except Exception as e:
+            print(f"❌ Ошибка сохранения позиции пользователя: {e}")
+
+
+# Глобальный объект базы данных
+db = Database()

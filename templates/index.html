@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RGG - QUEST</title>
+    <title>RGG QUEST - Управление задачами</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
 </head>
@@ -26,22 +26,16 @@
             </div>
 
             <nav class="sidebar-nav">
-                <!-- Основная навигация -->
                 <div class="sidebar-section">
-                    <div class="sidebar-section-title">Навигация</div>
+                    <div class="sidebar-section-title">Основное</div>
                     <a href="/" class="sidebar-link active">
                         <span class="sidebar-link-icon">📋</span>
                         <span class="sidebar-link-text">Главная</span>
                     </a>
-
                     <a href="/map" class="sidebar-link">
                         <span class="sidebar-link-icon">🗺️</span>
                         <span class="sidebar-link-text">Карта прогресса</span>
                     </a>
-                    <a href="/rules" class="sidebar-link">
-    <span class="sidebar-link-icon">📖</span>
-    <span class="sidebar-link-text">Правила</span>
-</a>
                     <a href="/archive" class="sidebar-link">
                         <span class="sidebar-link-icon">📚</span>
                         <span class="sidebar-link-text">Архив задач</span>
@@ -55,8 +49,33 @@
                         <span class="sidebar-link-icon">⚙️</span>
                         <span class="sidebar-link-text">Панель управления</span>
                     </a>
+                    <a href="/map_editor" class="sidebar-link">
+                        <span class="sidebar-link-icon">🎨</span>
+                        <span class="sidebar-link-text">Редактор карты</span>
+                    </a>
                 </div>
                 {% endif %}
+
+                <!-- Быстрые действия -->
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Быстрые действия</div>
+                    <div class="quick-actions">
+                        <a href="/map" class="action-button">
+                            <span class="action-button-icon">🗺️</span>
+                            <span class="action-button-text">На карту</span>
+                        </a>
+                        <a href="/archive" class="action-button">
+                            <span class="action-button-icon">📚</span>
+                            <span class="action-button-text">История выполненных</span>
+                        </a>
+                        {% if session.role == 'admin' %}
+                        <a href="/admin" class="action-button">
+                            <span class="action-button-icon">⚙️</span>
+                            <span class="action-button-text">Управление системой</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
             </nav>
 
             <!-- User Info -->
@@ -69,13 +88,14 @@
                     <div class="user-info-compact">
                         <div class="user-name">{{ session.username }}</div>
                         <div class="user-role">{{ session.role }}</div>
+                        <div class="user-coins">💰 {{ user_coins }} монет</div>
                     </div>
-                    <a href="/logout" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8em;">Выйти</a>
+                    <a href="/logout" class="btn btn-outline logout-btn">Выйти</a>
                 </div>
                 {% else %}
-                <div style="display: flex; gap: 8px; flex-direction: column;">
-                    <a href="/login" class="btn" style="width: 100%; text-align: center;">Войти</a>
-                    <a href="/register" class="btn btn-outline" style="width: 100%; text-align: center;">Регистрация</a>
+                <div class="auth-buttons">
+                    <a href="/login" class="btn login-btn">Войти</a>
+                    <a href="/register" class="btn btn-outline register-btn">Регистрация</a>
                 </div>
                 {% endif %}
             </div>
@@ -83,139 +103,135 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Заголовок главной страницы -->
-            <div style="margin-bottom: 32px;">
-                <h1 class="title">Попытка в RGG</h1>
-                <p class="subtitle">Ежедневные задания и управление задачами</p>
-            </div>
+            <h1 class="title">RGG QUEST</h1>
+            <p class="subtitle">Система управления задачами и отслеживания прогресса</p>
 
-            <!-- User Stats -->
+            <!-- Статистика -->
             {% if 'username' in session %}
             <div class="stats-panel">
-                <div class="stat-card">
-                    <div class="stat-value">{{ user_daily_done|length }}/3</div>
-                    <div class="stat-label">Выполнено сегодня</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: {{ (user_daily_done|length / 3 * 100) | round | int }}%"></div>
-                    </div>
+                <div class="stat-card coins-stat">
+                    <div class="stat-value">💰 {{ user_coins }}</div>
+                    <div class="stat-label">Монеток</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">{{ total_completed }}</div>
-                    <div class="stat-label">Всего выполнено</div>
+                    <div class="stat-label">Выполнено задач</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">{{ session.role|upper }}</div>
-                    <div class="stat-label">Ваш уровень доступа</div>
+                    <div class="stat-value">{{ daily|length - user_daily_done|length }}</div>
+                    <div class="stat-label">Осталось сегодня</div>
                 </div>
             </div>
-            {% endif %}
 
-            <!-- Daily Tasks -->
-            <section class="panel">
-                <h2 class="section-title">📅 Ежедневные задачи</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 20px;">
-                    Выполняйте ежедневные задачи для поддержания прогресса
-                </p>
-
-                {% if daily %}
-                <div class="tasks-list">
+            <!-- Ежедневные задачи -->
+            <section class="panel daily-tasks-panel">
+                <div class="panel-header">
+                    <h2 class="section-title">📅 Ежедневные задачи</h2>
+                    <div class="date-badge">{{ today_date }}</div>
+                </div>
+                <div class="daily-tasks-grid">
                     {% for task in daily %}
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="card-text">{{ task }}</div>
-                            <div class="card-actions">
-                                {% if 'username' in session %}
-                                    {% if task not in user_daily_done %}
-                                    <form method="post" action="/mark_daily_done" style="display: inline;">
-                                        <input type="hidden" name="task" value="{{ task }}">
-                                        <button type="submit" class="btn btn-success">
-                                            ✅ Выполнить
-                                        </button>
-                                    </form>
-                                    {% else %}
-                                    <span class="status status-done">Выполнено</span>
-                                    {% endif %}
+                    <div class="daily-task-card {% if task in user_daily_done %}completed{% endif %}">
+                        <div class="task-main-content">
+                            <div class="task-checkbox">
+                                {% if task in user_daily_done %}
+                                <div class="checkbox checked">✓</div>
                                 {% else %}
-                                    <a href="/login" class="btn btn-outline">Войти для выполнения</a>
+                                <div class="checkbox"></div>
                                 {% endif %}
                             </div>
+                            <div class="task-text-content">
+                                <div class="task-text">{{ task }}</div>
+                                <div class="task-status">
+                                    {% if task in user_daily_done %}
+                                    <span class="status-completed">Выполнено</span>
+                                    {% else %}
+                                    <span class="status-pending">Не выполнено</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            {% if task not in user_daily_done %}
+                            <form action="/mark_daily_done" method="POST" class="task-form">
+                                <input type="hidden" name="task" value="{{ task }}">
+                                <button type="submit" class="btn-action btn-complete" title="Отметить выполненным">
+                                    ✅
+                                </button>
+                            </form>
+                            {% else %}
+                            <form action="/unmark_daily_done" method="POST" class="task-form">
+                                <input type="hidden" name="task" value="{{ task }}">
+                                <button type="submit" class="btn-action btn-cancel" title="Отменить выполнение">
+                                    ❌
+                                </button>
+                            </form>
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-                {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">📅</div>
-                    <p>На сегодня задач нет</p>
-                </div>
-                {% endif %}
             </section>
 
-            <!-- Task Board -->
+            <!-- Доска задач -->
             <section class="panel">
                 <h2 class="section-title">📋 Доска задач</h2>
-
-                {% if board %}
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Задача</th>
-                                <th>Сложность</th>
-                                <th>Статус</th>
-                                <th>Исполнитель</th>
-                                <th>Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for task in board %}
-                            {% if task.status != 'done' %}
-                            <tr>
-                                <td>{{ task.text }}</td>
-                                <td>
-                                    <span class="difficulty difficulty-{{ task.difficulty|lower }}">
-                                        {{ task.difficulty }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="status status-{{ task.status }}">
-                                        {% if task.status == 'free' %}Свободна{% endif %}
-                                        {% if task.status == 'taken' %}В работе{% endif %}
-                                        {% if task.status == 'done' %}Выполнена{% endif %}
-                                    </span>
-                                </td>
-                                <td>{{ task.user or '—' }}</td>
-                                <td>
-                                    {% if 'username' not in session %}
-                                        <a href="/login" class="btn btn-outline">Войти</a>
-                                    {% elif task.status == 'free' %}
-                                        <form method="post" action="/board/take/{{ task.id }}" style="display: inline;">
-                                            <button type="submit" class="btn">Взять задачу</button>
-                                        </form>
-                                    {% elif task.status == 'taken' and task.user == session.get('username') %}
-                                        <form method="post" action="/board/done/{{ task.id }}" style="display: inline;">
-                                            <button type="submit" class="btn btn-success">Завершить</button>
-                                        </form>
-                                    {% elif task.status == 'taken' %}
-                                        <span style="color: var(--text-secondary);">Занято: {{ task.user }}</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
+                <div class="board-tasks">
+                    {% for task in board %}
+                    <div class="board-task-card {% if task.status == 'done' %}completed{% elif task.status == 'taken' %}taken{% endif %}">
+                        <div class="task-header">
+                            <span class="task-difficulty {{ task.difficulty }}">{{ task.difficulty }}</span>
+                            <span class="task-id">#{{ task.id }}</span>
+                        </div>
+                        <div class="task-text">{{ task.text }}</div>
+                        <div class="task-info">
+                            {% if task.status == 'free' %}
+                            <form action="/board/take/{{ task.id }}" method="POST">
+                                <button type="submit" class="btn btn-secondary">📥 Взять задачу</button>
+                            </form>
+                            {% elif task.status == 'taken' %}
+                            <div class="task-status-info">
+                                <span>Взята: <span class="user-link">{{ task.user }}</span></span>
+                                {% if task.user == session.username %}
+                                <form action="/board/done/{{ task.id }}" method="POST">
+                                    <button type="submit" class="btn btn-success">✅ Завершить</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="task-status-info completed">
+                                <span>Выполнена: <span class="user-link">{{ task.user }}</span></span>
+                                <span class="task-date">{{ task.done_at }}</span>
+                            </div>
                             {% endif %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">📋</div>
-                    <p>На доске пока нет активных задач</p>
-                    {% if session.role == 'admin' %}
-                    <a href="/admin" class="btn" style="margin-top: 16px;">Добавить задачи</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% if not board %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <h3>Нет задач на доске</h3>
+                        <p>Задачи появятся здесь скоро</p>
+                    </div>
                     {% endif %}
                 </div>
-                {% endif %}
             </section>
+
+            {% else %}
+            <!-- Приветствие для неавторизованных -->
+            <section class="panel">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🚀</div>
+                    <h3>Добро пожаловать в RGG QUEST!</h3>
+                    <p>Войдите в систему, чтобы начать свой путь к мастерству</p>
+                    <div class="auth-buttons-center">
+                        <a href="/login" class="btn">Войти в систему</a>
+                        <a href="/register" class="btn btn-outline">Регистрация</a>
+                    </div>
+                </div>
+            </section>
+            {% endif %}
         </main>
     </div>
 
@@ -229,44 +245,19 @@
         }
 
         // Close sidebar when clicking on a link (mobile)
-        document.querySelectorAll('.sidebar-link').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
-                    toggleSidebar();
+        document.querySelectorAll('.sidebar-link, .action-button, .btn, .logout-btn, .login-btn, .register-btn').forEach(link => {
+            link.addEventListener('click', (e) => {
+                // Проверяем, что это не кнопка действия в задаче
+                if (!e.target.closest('.btn-action') && !e.target.closest('.task-form')) {
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
                 }
             });
         });
 
+        // Анимация для чекбоксов
         document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.card');
-            cards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-2px)';
-                });
-
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                });
-            });
-
-            // Form handling
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                form.addEventListener('submit', function() {
-                    const submitBtn = this.querySelector('button[type="submit"]');
-                    if (submitBtn) {
-                        const originalText = submitBtn.innerHTML;
-                        submitBtn.innerHTML = '<span class="loading-spinner"></span> Обработка...';
-                        submitBtn.disabled = true;
-
-                        setTimeout(() => {
-                            submitBtn.innerHTML = originalText;
-                            submitBtn.disabled = false;
-                        }, 2000);
-                    }
-                });
-            });
-
             // Update active link based on current page
             const currentPath = window.location.pathname;
             document.querySelectorAll('.sidebar-link').forEach(link => {
@@ -274,6 +265,19 @@
                 if (link.getAttribute('href') === currentPath) {
                     link.classList.add('active');
                 }
+            });
+
+            // Добавляем анимацию для чекбоксов
+            document.querySelectorAll('.checkbox').forEach(checkbox => {
+                checkbox.addEventListener('click', function() {
+                    const taskCard = this.closest('.daily-task-card');
+                    const isCompleted = taskCard.classList.contains('completed');
+                    const form = taskCard.querySelector('.task-form');
+
+                    if (form) {
+                        form.submit();
+                    }
+                });
             });
         });
     </script>

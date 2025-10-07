@@ -1,0 +1,17 @@
+{
+  "admin": {
+    "password": "password",
+    "role": "admin",
+    "coins": 100
+  },
+  "user1": {
+    "password": "pass1",
+    "role": "user",
+    "coins": 50
+  },
+  "user2": {
+    "password": "pass2",
+    "role": "user",
+    "coins": 30
+  }
+}

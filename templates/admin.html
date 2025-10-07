@@ -22,6 +22,10 @@
                         <span class="sidebar-link-icon">⚙️</span>
                         <span class="sidebar-link-text">Панель управления</span>
                     </a>
+                    <a href="/map_editor" class="sidebar-link">
+                        <span class="sidebar-link-icon">🎨</span>
+                        <span class="sidebar-link-text">Редактор карты</span>
+                    </a>
                     <a href="/" class="sidebar-link">
                         <span class="sidebar-link-icon">📋</span>
                         <span class="sidebar-link-text">Главная</span>
@@ -42,6 +46,7 @@
                     <div class="user-info-compact">
                         <div class="user-name">{{ session.username }}</div>
                         <div class="user-role">{{ session.role }}</div>
+                        <div class="user-coins">💰 {{ session.coins }}</div>
                     </div>
                     <a href="/logout" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8em;">Выйти</a>
                 </div>
@@ -52,7 +57,45 @@
         <!-- Main Content -->
         <main class="main-content">
             <h1 class="title">Панель управления</h1>
-            <p class="subtitle">Управление задачами и настройками системы</p>
+            <p class="subtitle">Управление задачами, монетками и настройками системы</p>
+
+            <!-- Управление монетками -->
+            <section class="panel">
+                <h2 class="section-title">💰 Управление монетками</h2>
+                <div class="form-group">
+                    <label class="form-label">Балансы пользователей:</label>
+                    <form action="/admin/update_coins" method="POST">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
+                            <div>
+                                <label class="form-label">Пользователь:</label>
+                                <select name="username" class="form-input" required>
+                                    <option value="">Выберите пользователя</option>
+                                    {% for username, user_data in users.items() %}
+                                    <option value="{{ username }}">{{ username }} ({{ user_data.role }}) - {{ user_data.coins }} монет</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Новое количество монет:</label>
+                                <input type="number" name="coins" class="form-input" min="0" required placeholder="Количество монет">
+                            </div>
+                            <div>
+                                <button type="submit" class="btn">💾 Обновить баланс</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div style="margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: 8px;">
+                    <h4>Текущие балансы:</h4>
+                    {% for username, user_data in users.items() %}
+                    <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border-color);">
+                        <span>{{ username }} ({{ user_data.role }})</span>
+                        <strong>💰 {{ user_data.coins }} монет</strong>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
 
             <!-- Управление ежедневными задачами -->
             <section class="panel">
@@ -65,9 +108,10 @@
                         {% endfor %}
                     </ul>
                 </div>
-           <form action="/admin/update_daily" method="POST">
-    <button type="submit" class="btn btn-secondary">🔄 Сгенерировать новые ежедневные задачи</button>
-</form>
+                <form action="/admin/update_daily" method="POST">
+                    <button type="submit" class="btn btn-secondary">🔄 Сгенерировать новые ежедневные задачи</button>
+                </form>
+            </section>
 
             <!-- Управление задачами по кнопкам -->
             <section class="panel">
@@ -137,76 +181,6 @@
                     </div>
                     <button type="submit" class="btn">💾 Сохранить доску задач</button>
                 </form>
-            </section>
-
-            <!-- Управление картой -->
-            <section class="panel">
-                <h2 class="section-title">🗺️ Управление картой</h2>
-                <form action="/admin/save_map" method="POST">
-
-                    <!-- Стартовая точка -->
-                    <div class="form-group">
-                        <label class="form-label">Стартовая точка:</label>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <input type="number" step="0.1" name="start_x" value="{{ map_config.start_point.x }}" class="form-input" placeholder="X координата">
-                            <input type="number" step="0.1" name="start_y" value="{{ map_config.start_point.y }}" class="form-input" placeholder="Y координата">
-                        </div>
-                    </div>
-
-                    <!-- Активные точки -->
-                    <div class="form-group">
-                        <label class="form-label">Активные точки пути (первые 5):</label>
-                        <input type="hidden" name="active_points_count" value="5">
-                        {% for i in range(5) %}
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                            <input type="number" step="0.1" name="active_x_{{ i }}"
-                                   value="{{ map_config.active_points[i].x if map_config.active_points[i] else '' }}"
-                                   class="form-input" placeholder="X {{ i+1 }}">
-                            <input type="number" step="0.1" name="active_y_{{ i }}"
-                                   value="{{ map_config.active_points[i].y if map_config.active_points[i] else '' }}"
-                                   class="form-input" placeholder="Y {{ i+1 }}">
-                        </div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Контрольные точки -->
-                    <div class="form-group">
-                        <label class="form-label">Контрольные точки (первые 3):</label>
-                        <input type="hidden" name="checkpoints_count" value="3">
-                        {% for i in range(3) %}
-                        <div style="display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 10px; margin-bottom: 10px;">
-                            <input type="number" step="0.1" name="checkpoint_x_{{ i }}"
-                                   value="{{ map_config.checkpoints[i].x if map_config.checkpoints[i] else '' }}"
-                                   class="form-input" placeholder="X">
-                            <input type="number" step="0.1" name="checkpoint_y_{{ i }}"
-                                   value="{{ map_config.checkpoints[i].y if map_config.checkpoints[i] else '' }}"
-                                   class="form-input" placeholder="Y">
-                            <input type="text" name="checkpoint_name_{{ i }}"
-                                   value="{{ map_config.checkpoints[i].name if map_config.checkpoints[i] else '' }}"
-                                   class="form-input" placeholder="Название">
-                            <input type="number" name="checkpoint_required_{{ i }}"
-                                   value="{{ map_config.checkpoints[i].required if map_config.checkpoints[i] else '' }}"
-                                   class="form-input" placeholder="Требуется">
-                        </div>
-                        <div style="margin-bottom: 15px;">
-                            <input type="text" name="checkpoint_icon_{{ i }}"
-                                   value="{{ map_config.checkpoints[i].icon if map_config.checkpoints[i] else '📍' }}"
-                                   class="form-input" placeholder="Эмодзи иконка">
-                        </div>
-                        {% endfor %}
-                    </div>
-
-                    <button type="submit" class="btn">💾 Сохранить настройки карты</button>
-                </form>
-
-                <!-- Информация о карте -->
-                <div style="margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: 8px;">
-                    <h4>Информация о карте:</h4>
-                    <p><strong>Обновлено:</strong> {{ map_config.updated_at }}</p>
-                    <p><strong>Кем:</strong> {{ map_config.updated_by }}</p>
-                    <p><strong>Активных точек:</strong> {{ map_config.active_points|length }}</p>
-                    <p><strong>Контрольных точек:</strong> {{ map_config.checkpoints|length }}</p>
-                </div>
             </section>
 
         </main>

@@ -1,3771 +1,4707 @@
 {
-  "checkpoints": [
-    {
-      "x": 65.1,
-      "y": 94.6,
-      "name": "Точка 1",
-      "required": 1,
-      "icon": "🏁"
-    }
-  ],
   "start_point": {
-    "x": 11.1,
-    "y": 2.2
+    "x": 8.707518987937837,
+    "y": 1.4467666247459348,
+    "type": "start"
   },
   "active_points": [
     {
+      "type": "active",
       "x": 11.2,
       "y": 3.6
     },
     {
+      "type": "active",
       "x": 5.1,
       "y": 3.6
     },
     {
+      "type": "active",
       "x": 5,
       "y": 5
     },
     {
+      "type": "active",
       "x": 5.1,
       "y": 6.3
     },
     {
+      "type": "active",
       "x": 4.9,
       "y": 7.7
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 7.7
     },
     {
+      "type": "active",
       "x": 11,
       "y": 6.3
     },
     {
+      "type": "active",
       "x": 11,
       "y": 4.9
     },
     {
+      "type": "active",
       "x": 17.3,
       "y": 5
     },
     {
+      "type": "active",
       "x": 17,
       "y": 6.3
     },
     {
+      "type": "active",
       "x": 23,
       "y": 6.4
     },
     {
+      "type": "active",
       "x": 23.1,
       "y": 5
     },
     {
+      "type": "active",
       "x": 29.1,
       "y": 5
     },
     {
+      "type": "active",
       "x": 35,
       "y": 5
     },
     {
+      "type": "active",
       "x": 41,
       "y": 5
     },
     {
+      "type": "active",
       "x": 47,
       "y": 5
     },
     {
+      "type": "active",
       "x": 52.9,
       "y": 5
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 5
     },
     {
+      "type": "active",
       "x": 65,
       "y": 5
     },
     {
+      "type": "active",
       "x": 65,
       "y": 6.3
     },
     {
+      "type": "active",
       "x": 64.8,
       "y": 7.7
     },
     {
+      "type": "active",
       "x": 59.1,
       "y": 7.7
     },
     {
+      "type": "active",
       "x": 53.1,
       "y": 7.8
     },
     {
+      "type": "active",
       "x": 47.8,
       "y": 7.8
     },
     {
+      "type": "active",
       "x": 41.1,
       "y": 7.8
     },
     {
+      "type": "active",
       "x": 35.1,
       "y": 7.8
     },
     {
+      "type": "active",
       "x": 28.8,
       "y": 7.7
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 7.8
     },
     {
+      "type": "active",
       "x": 71,
       "y": 6.4
     },
     {
+      "type": "active",
       "x": 71,
       "y": 5.1
     },
     {
+      "type": "active",
       "x": 71.1,
       "y": 3.5
     },
     {
+      "type": "active",
       "x": 65.1,
       "y": 3.6
     },
     {
+      "type": "active",
       "x": 59,
       "y": 3.6
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 2.2
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 0.8
     },
     {
+      "type": "active",
       "x": 65.2,
       "y": 0.8
     },
     {
+      "type": "active",
       "x": 64.8,
       "y": 2.2
     },
     {
+      "type": "active",
       "x": 71,
       "y": 2.2
     },
     {
+      "type": "active",
       "x": 71.3,
       "y": 0.9
     },
     {
+      "type": "active",
       "x": 77,
       "y": 0.8
     },
     {
+      "type": "active",
       "x": 77.1,
       "y": 2.2
     },
     {
+      "type": "active",
       "x": 77.1,
       "y": 3.5
     },
     {
+      "type": "active",
       "x": 83.3,
       "y": 3.4
     },
     {
+      "type": "active",
       "x": 83,
       "y": 5.1
     },
     {
+      "type": "active",
       "x": 89.1,
       "y": 5
     },
     {
+      "type": "active",
       "x": 88.8,
       "y": 3.7
     },
     {
+      "type": "active",
       "x": 89.2,
       "y": 2.2
     },
     {
+      "type": "active",
       "x": 83.1,
       "y": 2.2
     },
     {
+      "type": "active",
       "x": 83,
       "y": 0.8
     },
     {
+      "type": "active",
       "x": 89,
       "y": 1
     },
     {
+      "type": "active",
       "x": 95.4,
       "y": 0.8
     },
     {
+      "type": "active",
       "x": 94.6,
       "y": 2.3
     },
     {
+      "type": "active",
       "x": 95.2,
       "y": 3.6
     },
     {
+      "type": "active",
       "x": 95.2,
       "y": 4.9
     },
     {
+      "type": "active",
       "x": 95,
       "y": 6.3
     },
     {
+      "type": "active",
       "x": 89.1,
       "y": 6.4
     },
     {
+      "type": "active",
       "x": 89,
       "y": 7.7
     },
     {
+      "type": "active",
       "x": 95.1,
       "y": 7.7
     },
     {
+      "type": "active",
       "x": 95.1,
       "y": 9.1
     },
     {
+      "type": "active",
       "x": 89.1,
       "y": 9.1
     },
     {
+      "type": "active",
       "x": 88.9,
       "y": 10.5
     },
     {
+      "type": "active",
       "x": 95,
       "y": 10.5
     },
     {
+      "type": "active",
       "x": 95.1,
       "y": 11.9
     },
     {
+      "type": "active",
       "x": 95.1,
       "y": 13.2
     },
     {
+      "type": "active",
       "x": 89.1,
       "y": 13.2
     },
     {
+      "type": "active",
       "x": 83,
       "y": 13.2
     },
     {
+      "type": "active",
       "x": 83.2,
       "y": 11.9
     },
     {
+      "type": "active",
       "x": 77,
       "y": 11.9
     },
     {
+      "type": "active",
       "x": 76.8,
       "y": 10.5
     },
     {
+      "type": "active",
       "x": 83,
       "y": 10.6
     },
     {
+      "type": "active",
       "x": 83,
       "y": 9.1
     },
     {
+      "type": "active",
       "x": 77.4,
       "y": 9.1
     },
     {
+      "type": "active",
       "x": 71,
       "y": 7.7
     },
     {
+      "type": "active",
       "x": 77.6,
       "y": 7.9
     },
     {
+      "type": "active",
       "x": 77,
       "y": 6.3
     },
     {
+      "type": "active",
       "x": 65,
       "y": 9.1
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 9.1
     },
     {
+      "type": "active",
       "x": 59.1,
       "y": 10.5
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 11.9
     },
     {
+      "type": "active",
       "x": 59,
       "y": 13.2
     },
     {
+      "type": "active",
       "x": 64.9,
       "y": 13.2
     },
     {
+      "type": "active",
       "x": 65,
       "y": 11.9
     },
     {
+      "type": "active",
       "x": 65,
       "y": 10.5
     },
     {
+      "type": "active",
       "x": 71,
       "y": 10.5
     },
     {
+      "type": "active",
       "x": 71,
       "y": 11.8
     },
     {
+      "type": "active",
       "x": 70.9,
       "y": 13.2
     },
     {
+      "type": "active",
       "x": 17.1,
       "y": 7.7
     },
     {
+      "type": "active",
       "x": 16.9,
       "y": 9.1
     },
     {
+      "type": "active",
       "x": 22.8,
       "y": 9.1
     },
     {
+      "type": "active",
       "x": 23,
       "y": 10.4
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 11.8
     },
     {
+      "type": "active",
       "x": 17.1,
       "y": 11.9
     },
     {
+      "type": "active",
       "x": 17.2,
       "y": 10.5
     },
     {
+      "type": "active",
       "x": 11,
       "y": 10.4
     },
     {
+      "type": "active",
       "x": 10.9,
       "y": 11.8
     },
     {
+      "type": "active",
       "x": 4.9,
       "y": 11.9
     },
     {
+      "type": "active",
       "x": 5.3,
       "y": 10.5
     },
     {
+      "type": "active",
       "x": 4.7,
       "y": 9.1
     },
     {
+      "type": "active",
       "x": 29,
       "y": 9.1
     },
     {
+      "type": "active",
       "x": 28.8,
       "y": 10.4
     },
     {
+      "type": "active",
       "x": 34.7,
       "y": 10.5
     },
     {
+      "type": "active",
       "x": 35.3,
       "y": 9
     },
     {
+      "type": "active",
       "x": 40.6,
       "y": 9.1
     },
     {
+      "type": "active",
       "x": 41,
       "y": 10.6
     },
     {
+      "type": "active",
       "x": 46.5,
       "y": 10.5
     },
     {
+      "type": "active",
       "x": 46.9,
       "y": 9.2
     },
     {
+      "type": "active",
       "x": 53,
       "y": 9.2
     },
     {
+      "type": "active",
       "x": 52.8,
       "y": 10.5
     },
     {
+      "type": "active",
       "x": 53.2,
       "y": 11.9
     },
     {
+      "type": "active",
       "x": 47.3,
       "y": 11.9
     },
     {
+      "type": "active",
       "x": 29,
       "y": 11.8
     },
     {
+      "type": "active",
       "x": 41,
       "y": 11.9
     },
     {
+      "type": "active",
       "x": 35.1,
       "y": 13.3
     },
     {
+      "type": "active",
       "x": 29,
       "y": 13.2
     },
     {
+      "type": "active",
       "x": 23,
       "y": 13.3
     },
     {
+      "type": "active",
       "x": 17.2,
       "y": 13.2
     },
     {
+      "type": "active",
       "x": 10.9,
       "y": 13.3
     },
     {
+      "type": "active",
       "x": 5.1,
       "y": 13.2
     },
     {
+      "type": "active",
       "x": 5,
       "y": 14.6
     },
     {
+      "type": "active",
       "x": 5,
       "y": 16
     },
     {
+      "type": "active",
       "x": 10.8,
       "y": 16.1
     },
     {
+      "type": "active",
       "x": 17.1,
       "y": 16.1
     },
     {
+      "type": "active",
       "x": 17.5,
       "y": 14.6
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 14.6
     },
     {
+      "type": "active",
       "x": 23,
       "y": 15.9
     },
     {
+      "type": "active",
       "x": 28.8,
       "y": 16
     },
     {
+      "type": "active",
       "x": 35,
       "y": 14.6
     },
     {
+      "type": "active",
       "x": 35,
       "y": 16
     },
     {
+      "type": "active",
       "x": 41.2,
       "y": 16
     },
     {
+      "type": "active",
       "x": 41.1,
       "y": 14.6
     },
     {
+      "type": "active",
       "x": 41,
       "y": 13.3
     },
     {
+      "type": "active",
       "x": 47,
       "y": 13.3
     },
     {
+      "type": "active",
       "x": 53,
       "y": 13.3
     },
     {
+      "type": "active",
       "x": 52.9,
       "y": 14.6
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 14.6
     },
     {
+      "type": "active",
       "x": 65,
       "y": 14.6
     },
     {
+      "type": "active",
       "x": 71.1,
       "y": 14.6
     },
     {
+      "type": "active",
       "x": 77.3,
       "y": 14.6
     },
     {
+      "type": "active",
       "x": 83.1,
       "y": 14.6
     },
     {
+      "type": "active",
       "x": 70.9,
       "y": 16
     },
     {
+      "type": "active",
       "x": 76.6,
       "y": 16
     },
     {
+      "type": "active",
       "x": 83,
       "y": 16
     },
     {
+      "type": "active",
       "x": 88.7,
       "y": 16.1
     },
     {
+      "type": "active",
       "x": 89,
       "y": 14.7
     },
     {
+      "type": "active",
       "x": 47,
       "y": 16
     },
     {
+      "type": "active",
       "x": 52.9,
       "y": 16
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 16
     },
     {
+      "type": "active",
       "x": 65,
       "y": 16
     },
     {
+      "type": "active",
       "x": 64.9,
       "y": 17.4
     },
     {
+      "type": "active",
       "x": 71,
       "y": 17.4
     },
     {
+      "type": "active",
       "x": 76.9,
       "y": 17.4
     },
     {
+      "type": "active",
       "x": 82.9,
       "y": 17.4
     },
     {
+      "type": "active",
       "x": 89,
       "y": 17.4
     },
     {
+      "type": "active",
       "x": 89,
       "y": 18.8
     },
     {
+      "type": "active",
       "x": 83.1,
       "y": 18.8
     },
     {
+      "type": "active",
       "x": 77,
       "y": 18.7
     },
     {
+      "type": "active",
       "x": 71.2,
       "y": 18.8
     },
     {
+      "type": "active",
       "x": 65.2,
       "y": 18.8
     },
     {
+      "type": "active",
       "x": 59.3,
       "y": 18.7
     },
     {
+      "type": "active",
       "x": 52.9,
       "y": 18.8
     },
     {
+      "type": "active",
       "x": 47.1,
       "y": 18.7
     },
     {
+      "type": "active",
       "x": 41,
       "y": 18.8
     },
     {
+      "type": "active",
       "x": 41.2,
       "y": 17.4
     },
     {
+      "type": "active",
       "x": 29.2,
       "y": 17.4
     },
     {
+      "type": "active",
       "x": 29.3,
       "y": 18.7
     },
     {
+      "type": "active",
       "x": 34.9,
       "y": 18.8
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 18.8
     },
     {
+      "type": "active",
       "x": 23,
       "y": 17.4
     },
     {
+      "type": "active",
       "x": 17.2,
       "y": 17.4
     },
     {
+      "type": "active",
       "x": 17,
       "y": 18.7
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 18.7
     },
     {
+      "type": "active",
       "x": 10.9,
       "y": 17.5
     },
     {
+      "type": "active",
       "x": 5.3,
       "y": 17.4
     },
     {
+      "type": "active",
       "x": 5,
       "y": 18.8
     },
     {
+      "type": "active",
       "x": 4.9,
       "y": 20.2
     },
     {
+      "type": "active",
       "x": 5,
       "y": 21.5
     },
     {
+      "type": "active",
       "x": 11,
       "y": 21.5
     },
     {
+      "type": "active",
       "x": 16.9,
       "y": 21.5
     },
     {
+      "type": "active",
       "x": 23.1,
       "y": 21.5
     },
     {
+      "type": "active",
       "x": 28.7,
       "y": 21.5
     },
     {
+      "type": "active",
       "x": 29.1,
       "y": 22.8
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 22.8
     },
     {
+      "type": "active",
       "x": 17,
       "y": 22.9
     },
     {
+      "type": "active",
       "x": 11.3,
       "y": 22.9
     },
     {
+      "type": "active",
       "x": 5.3,
       "y": 22.9
     },
     {
+      "type": "active",
       "x": 5.1,
       "y": 24.3
     },
     {
+      "type": "active",
       "x": 11.5,
       "y": 24.3
     },
     {
+      "type": "active",
       "x": 11.3,
       "y": 25.7
     },
     {
+      "type": "active",
       "x": 4.9,
       "y": 25.7
     },
     {
+      "type": "active",
       "x": 17.1,
       "y": 24.4
     },
     {
+      "type": "active",
       "x": 22.9,
       "y": 24.4
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 25.6
     },
     {
+      "type": "active",
       "x": 29.1,
       "y": 24.2
     },
     {
+      "type": "active",
       "x": 35.1,
       "y": 24.3
     },
     {
+      "type": "active",
       "x": 41.2,
       "y": 24.3
     },
     {
+      "type": "active",
       "x": 47.1,
       "y": 24.3
     },
     {
+      "type": "active",
       "x": 52.8,
       "y": 24.3
     },
     {
+      "type": "active",
       "x": 59.2,
       "y": 24.3
     },
     {
+      "type": "active",
       "x": 64.7,
       "y": 24.3
     },
     {
+      "type": "active",
       "x": 70.9,
       "y": 24.3
     },
     {
+      "type": "active",
       "x": 70.9,
       "y": 25.6
     },
     {
+      "type": "active",
       "x": 76.7,
       "y": 25.7
     },
     {
+      "type": "active",
       "x": 77.2,
       "y": 24.3
     },
     {
+      "type": "active",
       "x": 77,
       "y": 22.9
     },
     {
+      "type": "active",
       "x": 76.8,
       "y": 21.6
     },
     {
+      "type": "active",
       "x": 76.9,
       "y": 20.2
     },
     {
+      "type": "active",
       "x": 71,
       "y": 20.2
     },
     {
+      "type": "active",
       "x": 71,
       "y": 21.6
     },
     {
+      "type": "active",
       "x": 65.2,
       "y": 21.5
     },
     {
+      "type": "active",
       "x": 65.1,
       "y": 20.1
     },
     {
+      "type": "active",
       "x": 59,
       "y": 20.1
     },
     {
+      "type": "active",
       "x": 53.1,
       "y": 20.1
     },
     {
+      "type": "active",
       "x": 47.3,
       "y": 20.1
     },
     {
+      "type": "active",
       "x": 41.1,
       "y": 20.1
     },
     {
+      "type": "active",
       "x": 41.2,
       "y": 21.6
     },
     {
+      "type": "active",
       "x": 47,
       "y": 21.5
     },
     {
+      "type": "active",
       "x": 53.2,
       "y": 21.5
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 21.5
     },
     {
+      "type": "active",
       "x": 83,
       "y": 21.6
     },
     {
+      "type": "active",
       "x": 83,
       "y": 20.2
     },
     {
+      "type": "active",
       "x": 89,
       "y": 20.1
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 17.4
     },
     {
+      "type": "active",
       "x": 53,
       "y": 17.4
     },
     {
+      "type": "active",
       "x": 4.8,
       "y": 27.1
     },
     {
+      "type": "active",
       "x": 5.1,
       "y": 28.4
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 28.4
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 27
     },
     {
+      "type": "active",
       "x": 17.2,
       "y": 27.1
     },
     {
+      "type": "active",
       "x": 17.2,
       "y": 28.5
     },
     {
+      "type": "active",
       "x": 23,
       "y": 28.4
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 27
     },
     {
+      "type": "active",
       "x": 29.1,
       "y": 27.1
     },
     {
+      "type": "active",
       "x": 29,
       "y": 28.4
     },
     {
+      "type": "active",
       "x": 34.9,
       "y": 27.1
     },
     {
+      "type": "active",
       "x": 34.9,
       "y": 25.7
     },
     {
+      "type": "active",
       "x": 41,
       "y": 25.6
     },
     {
+      "type": "active",
       "x": 46.7,
       "y": 25.6
     },
     {
+      "type": "active",
       "x": 53.1,
       "y": 25.7
     },
     {
+      "type": "active",
       "x": 52.9,
       "y": 27
     },
     {
+      "type": "active",
       "x": 53.1,
       "y": 28.4
     },
     {
+      "type": "active",
       "x": 47.1,
       "y": 28.4
     },
     {
+      "type": "active",
       "x": 41.2,
       "y": 28.4
     },
     {
+      "type": "active",
       "x": 41.1,
       "y": 29.8
     },
     {
+      "type": "active",
       "x": 35.3,
       "y": 29.8
     },
     {
+      "type": "active",
       "x": 29,
       "y": 29.8
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 29.7
     },
     {
+      "type": "active",
       "x": 23.1,
       "y": 31.1
     },
     {
+      "type": "active",
       "x": 17.1,
       "y": 31.2
     },
     {
+      "type": "active",
       "x": 10.9,
       "y": 31.2
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 29.9
     },
     {
+      "type": "active",
       "x": 5.3,
       "y": 29.8
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 28.4
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 29.8
     },
     {
+      "type": "active",
       "x": 65,
       "y": 29.8
     },
     {
+      "type": "active",
       "x": 64.7,
       "y": 31.2
     },
     {
+      "type": "active",
       "x": 77.1,
       "y": 31.1
     },
     {
+      "type": "active",
       "x": 77,
       "y": 29.8
     },
     {
+      "type": "active",
       "x": 77.3,
       "y": 28.5
     },
     {
+      "type": "active",
       "x": 70.7,
       "y": 28.4
     },
     {
+      "type": "active",
       "x": 70.8,
       "y": 27
     },
     {
+      "type": "active",
       "x": 65.2,
       "y": 27
     },
     {
+      "type": "active",
       "x": 64.8,
       "y": 25.7
     },
     {
+      "type": "active",
       "x": 59.2,
       "y": 25.7
     },
     {
+      "type": "active",
       "x": 77,
       "y": 27
     },
     {
+      "type": "active",
       "x": 83,
       "y": 27
     },
     {
+      "type": "active",
       "x": 83.4,
       "y": 28.4
     },
     {
+      "type": "active",
       "x": 83.1,
       "y": 29.9
     },
     {
+      "type": "active",
       "x": 88.8,
       "y": 29.8
     },
     {
+      "type": "active",
       "x": 89,
       "y": 28.4
     },
     {
+      "type": "active",
       "x": 89,
       "y": 27.1
     },
     {
+      "type": "active",
       "x": 95.1,
       "y": 27.1
     },
     {
+      "type": "active",
       "x": 95.3,
       "y": 25.6
     },
     {
+      "type": "active",
       "x": 88.9,
       "y": 25.6
     },
     {
+      "type": "active",
       "x": 89.1,
       "y": 24.3
     },
     {
+      "type": "active",
       "x": 83,
       "y": 24.3
     },
     {
+      "type": "active",
       "x": 41,
       "y": 31.2
     },
     {
+      "type": "active",
       "x": 41,
       "y": 32.6
     },
     {
+      "type": "active",
       "x": 35,
       "y": 32.6
     },
     {
+      "type": "active",
       "x": 47,
       "y": 32.6
     },
     {
+      "type": "active",
       "x": 53.5,
       "y": 32.6
     },
     {
+      "type": "active",
       "x": 53.3,
       "y": 31.2
     },
     {
+      "type": "active",
       "x": 59.1,
       "y": 32.5
     },
     {
+      "type": "active",
       "x": 64.9,
       "y": 32.6
     },
     {
+      "type": "active",
       "x": 71.3,
       "y": 32.5
     },
     {
+      "type": "active",
       "x": 77.1,
       "y": 32.5
     },
     {
+      "type": "active",
       "x": 83.1,
       "y": 32.5
     },
     {
+      "type": "active",
       "x": 89,
       "y": 32.6
     },
     {
+      "type": "active",
       "x": 94.9,
       "y": 32.6
     },
     {
+      "type": "active",
       "x": 5.1,
       "y": 34
     },
     {
+      "type": "active",
       "x": 11.1,
       "y": 33.9
     },
     {
+      "type": "active",
       "x": 11,
       "y": 32.5
     },
     {
+      "type": "active",
       "x": 17,
       "y": 32.6
     },
     {
+      "type": "active",
       "x": 17.1,
       "y": 33.9
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 33.9
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 32.5
     },
     {
+      "type": "active",
       "x": 28.7,
       "y": 32.6
     },
     {
+      "type": "active",
       "x": 28.9,
       "y": 33.9
     },
     {
+      "type": "active",
       "x": 35,
       "y": 33.9
     },
     {
+      "type": "active",
       "x": 5.1,
       "y": 35.3
     },
     {
+      "type": "active",
       "x": 5,
       "y": 36.7
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 36.7
     },
     {
+      "type": "active",
       "x": 10.9,
       "y": 35.3
     },
     {
+      "type": "active",
       "x": 17,
       "y": 35.4
     },
     {
+      "type": "active",
       "x": 23.1,
       "y": 35.3
     },
     {
+      "type": "active",
       "x": 23.1,
       "y": 36.7
     },
     {
+      "type": "active",
       "x": 29.2,
       "y": 36.8
     },
     {
+      "type": "active",
       "x": 29.1,
       "y": 35.3
     },
     {
+      "type": "active",
       "x": 35.1,
       "y": 35.3
     },
     {
+      "type": "active",
       "x": 41,
       "y": 35.5
     },
     {
+      "type": "active",
       "x": 40.9,
       "y": 36.8
     },
     {
+      "type": "active",
       "x": 41,
       "y": 38.1
     },
     {
+      "type": "active",
       "x": 35.3,
       "y": 38.1
     },
     {
+      "type": "active",
       "x": 35.2,
       "y": 39.4
     },
     {
+      "type": "active",
       "x": 29.2,
       "y": 39.5
     },
     {
+      "type": "active",
       "x": 23,
       "y": 39.4
     },
     {
+      "type": "active",
       "x": 17.5,
       "y": 39.4
     },
     {
+      "type": "active",
       "x": 17.3,
       "y": 38.1
     },
     {
+      "type": "active",
       "x": 11,
       "y": 38.1
     },
     {
+      "type": "active",
       "x": 5.2,
       "y": 38.1
     },
     {
+      "type": "active",
       "x": 47,
       "y": 35.3
     },
     {
+      "type": "active",
       "x": 47.2,
       "y": 33.9
     },
     {
+      "type": "active",
       "x": 47.4,
       "y": 36.6
     },
     {
+      "type": "active",
       "x": 47.1,
       "y": 38.1
     },
     {
+      "type": "active",
       "x": 47.2,
       "y": 39.4
     },
     {
+      "type": "active",
       "x": 41.2,
       "y": 39.4
     },
     {
+      "type": "active",
       "x": 53.7,
       "y": 38.1
     },
     {
+      "type": "active",
       "x": 53.2,
       "y": 36.6
     },
     {
+      "type": "active",
       "x": 53.3,
       "y": 35.4
     },
     {
+      "type": "active",
       "x": 53.1,
       "y": 33.9
     },
     {
+      "type": "active",
       "x": 59.5,
       "y": 33.9
     },
     {
+      "type": "active",
       "x": 65,
       "y": 34
     },
     {
+      "type": "active",
       "x": 71.2,
       "y": 33.9
     },
     {
+      "type": "active",
       "x": 76.7,
       "y": 33.9
     },
     {
+      "type": "active",
       "x": 83.7,
       "y": 34
     },
     {
+      "type": "active",
       "x": 89.3,
       "y": 34
     },
     {
+      "type": "active",
       "x": 95.2,
       "y": 33.9
     },
     {
+      "type": "active",
       "x": 95.2,
       "y": 35.4
     },
     {
+      "type": "active",
       "x": 89.2,
       "y": 35.2
     },
     {
+      "type": "active",
       "x": 83,
       "y": 35.3
     },
     {
+      "type": "active",
       "x": 77,
       "y": 35.3
     },
     {
+      "type": "active",
       "x": 71,
       "y": 35.3
     },
     {
+      "type": "active",
       "x": 65,
       "y": 35.3
     },
     {
+      "type": "active",
       "x": 65,
       "y": 36.7
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 36.7
     },
     {
+      "type": "active",
       "x": 71,
       "y": 36.6
     },
     {
+      "type": "active",
       "x": 71,
       "y": 38.1
     },
     {
+      "type": "active",
       "x": 65,
       "y": 38
     },
     {
+      "type": "active",
       "x": 59,
       "y": 38.1
     },
     {
+      "type": "active",
       "x": 59.3,
       "y": 39.4
     },
     {
+      "type": "active",
       "x": 65,
       "y": 39.4
     },
     {
+      "type": "active",
       "x": 70.9,
       "y": 39.4
     },
     {
+      "type": "active",
       "x": 77,
       "y": 39.4
     },
     {
+      "type": "active",
       "x": 77.2,
       "y": 38
     },
     {
+      "type": "active",
       "x": 82.7,
       "y": 38.1
     },
     {
+      "type": "active",
       "x": 83,
       "y": 36.7
     },
     {
+      "type": "active",
       "x": 89.1,
       "y": 36.7
     },
     {
+      "type": "active",
       "x": 94.8,
       "y": 36.8
     },
     {
+      "type": "active",
       "x": 95,
       "y": 38.1
     },
     {
+      "type": "active",
       "x": 89,
       "y": 38
     },
     {
+      "type": "active",
       "x": 89,
       "y": 39.4
     },
     {
+      "type": "active",
       "x": 83,
       "y": 39.5
     },
     {
+      "type": "active",
       "x": 83,
       "y": 40.7
     },
     {
+      "type": "active",
       "x": 77.2,
       "y": 40.9
     },
     {
+      "type": "active",
       "x": 70.7,
       "y": 40.8
     },
     {
+      "type": "active",
       "x": 53.3,
       "y": 39.5
     },
     {
+      "type": "active",
       "x": 5.2,
       "y": 39.4
     },
     {
+      "type": "active",
       "x": 11.1,
       "y": 39.4
     },
     {
+      "type": "active",
       "x": 11.1,
       "y": 40.9
     },
     {
+      "type": "active",
       "x": 17,
       "y": 40.8
     },
     {
+      "type": "active",
       "x": 23.1,
       "y": 40.8
     },
     {
+      "type": "active",
       "x": 29.1,
       "y": 40.8
     },
     {
+      "type": "active",
       "x": 34.9,
       "y": 40.9
     },
     {
+      "type": "active",
       "x": 41,
       "y": 40.8
     },
     {
+      "type": "active",
       "x": 52.9,
       "y": 40.8
     },
     {
+      "type": "active",
       "x": 83,
       "y": 31.2
     },
     {
+      "type": "active",
       "x": 89.1,
       "y": 31.2
     },
     {
+      "type": "active",
       "x": 95,
       "y": 31.2
     },
     {
+      "type": "active",
       "x": 47,
       "y": 17.4
     },
     {
+      "type": "active",
       "x": 53,
       "y": 42.2
     },
     {
+      "type": "active",
       "x": 59,
       "y": 42.2
     },
     {
+      "type": "active",
       "x": 65,
       "y": 42.2
     },
     {
+      "type": "active",
       "x": 70.9,
       "y": 42.2
     },
     {
+      "type": "active",
       "x": 77.1,
       "y": 42.2
     },
     {
+      "type": "active",
       "x": 82.8,
       "y": 42.2
     },
     {
+      "type": "active",
       "x": 89,
       "y": 42.2
     },
     {
+      "type": "active",
       "x": 89,
       "y": 43.6
     },
     {
+      "type": "active",
       "x": 95.2,
       "y": 43.6
     },
     {
+      "type": "active",
       "x": 95.1,
       "y": 45
     },
     {
+      "type": "active",
       "x": 88.9,
       "y": 45
     },
     {
+      "type": "active",
       "x": 83,
       "y": 45
     },
     {
+      "type": "active",
       "x": 77,
       "y": 45
     },
     {
+      "type": "active",
       "x": 77.2,
       "y": 43.6
     },
     {
+      "type": "active",
       "x": 71.1,
       "y": 43.6
     },
     {
+      "type": "active",
       "x": 71,
       "y": 45
     },
     {
+      "type": "active",
       "x": 71.2,
       "y": 46.3
     },
     {
+      "type": "active",
       "x": 65.2,
       "y": 46.3
     },
     {
+      "type": "active",
       "x": 65.3,
       "y": 44.9
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 45.1
     },
     {
+      "type": "active",
       "x": 59.1,
       "y": 43.6
     },
     {
+      "type": "active",
       "x": 53.6,
       "y": 43.6
     },
     {
+      "type": "active",
       "x": 47.1,
       "y": 43.6
     },
     {
+      "type": "active",
       "x": 40.7,
       "y": 43.6
     },
     {
+      "type": "active",
       "x": 41,
       "y": 45
     },
     {
+      "type": "active",
       "x": 34.9,
       "y": 45
     },
     {
+      "type": "active",
       "x": 35.1,
       "y": 43.6
     },
     {
+      "type": "active",
       "x": 35.3,
       "y": 42.2
     },
     {
+      "type": "active",
       "x": 29.4,
       "y": 42.2
     },
     {
+      "type": "active",
       "x": 23.5,
       "y": 42.1
     },
     {
+      "type": "active",
       "x": 16.8,
       "y": 42.2
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 42.3
     },
     {
+      "type": "active",
       "x": 5.5,
       "y": 42.2
     },
     {
+      "type": "active",
       "x": 5.1,
       "y": 43.6
     },
     {
+      "type": "active",
       "x": 11.1,
       "y": 43.6
     },
     {
+      "type": "active",
       "x": 17.2,
       "y": 43.6
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 43.6
     },
     {
+      "type": "active",
       "x": 22.9,
       "y": 44.9
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 44.9
     },
     {
+      "type": "active",
       "x": 5.5,
       "y": 45
     },
     {
+      "type": "active",
       "x": 5,
       "y": 46.4
     },
     {
+      "type": "active",
       "x": 5,
       "y": 47.8
     },
     {
+      "type": "active",
       "x": 4.9,
       "y": 49.1
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 49.2
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 47.7
     },
     {
+      "type": "active",
       "x": 11,
       "y": 46.3
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 46.3
     },
     {
+      "type": "active",
       "x": 23.1,
       "y": 47.6
     },
     {
+      "type": "active",
       "x": 29.4,
       "y": 46.4
     },
     {
+      "type": "active",
       "x": 29.2,
       "y": 45
     },
     {
+      "type": "active",
       "x": 35.4,
       "y": 46.3
     },
     {
+      "type": "active",
       "x": 35,
       "y": 47.7
     },
     {
+      "type": "active",
       "x": 41.3,
       "y": 47.7
     },
     {
+      "type": "active",
       "x": 41.2,
       "y": 46.3
     },
     {
+      "type": "active",
       "x": 47.4,
       "y": 46.3
     },
     {
+      "type": "active",
       "x": 47.4,
       "y": 47.7
     },
     {
+      "type": "active",
       "x": 53.3,
       "y": 47.8
     },
     {
+      "type": "active",
       "x": 53.2,
       "y": 46.3
     },
     {
+      "type": "active",
       "x": 59.1,
       "y": 46.3
     },
     {
+      "type": "active",
       "x": 59.1,
       "y": 47.7
     },
     {
+      "type": "active",
       "x": 70.9,
       "y": 47.7
     },
     {
+      "type": "active",
       "x": 77.2,
       "y": 47.7
     },
     {
+      "type": "active",
       "x": 83.6,
       "y": 47.7
     },
     {
+      "type": "active",
       "x": 89.1,
       "y": 49.1
     },
     {
+      "type": "active",
       "x": 95.1,
       "y": 47.7
     },
     {
+      "type": "active",
       "x": 95,
       "y": 49
     },
     {
+      "type": "active",
       "x": 77.3,
       "y": 49.1
     },
     {
+      "type": "active",
       "x": 71.1,
       "y": 49.1
     },
     {
+      "type": "active",
       "x": 65.2,
       "y": 49.1
     },
     {
+      "type": "active",
       "x": 34.8,
       "y": 49.1
     },
     {
+      "type": "active",
       "x": 29,
       "y": 50.5
     },
     {
+      "type": "active",
       "x": 22.8,
       "y": 50.5
     },
     {
+      "type": "active",
       "x": 23.3,
       "y": 49.1
     },
     {
+      "type": "active",
       "x": 11,
       "y": 50.4
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 51.9
     },
     {
+      "type": "active",
       "x": 4.7,
       "y": 51.9
     },
     {
+      "type": "active",
       "x": 22.8,
       "y": 51.9
     },
     {
+      "type": "active",
       "x": 29,
       "y": 51.9
     },
     {
+      "type": "active",
       "x": 35.2,
       "y": 51.9
     },
     {
+      "type": "active",
       "x": 35.5,
       "y": 50.5
     },
     {
+      "type": "active",
       "x": 40.8,
       "y": 49.1
     },
     {
+      "type": "active",
       "x": 41.3,
       "y": 50.5
     },
     {
+      "type": "active",
       "x": 41.1,
       "y": 51.9
     },
     {
+      "type": "active",
       "x": 47,
       "y": 51.9
     },
     {
+      "type": "active",
       "x": 47.2,
       "y": 50.5
     },
     {
+      "type": "active",
       "x": 47.1,
       "y": 49.1
     },
     {
+      "type": "active",
       "x": 53,
       "y": 49.1
     },
     {
+      "type": "active",
       "x": 53,
       "y": 50.5
     },
     {
+      "type": "active",
       "x": 53,
       "y": 51.8
     },
     {
+      "type": "active",
       "x": 58.7,
       "y": 51.9
     },
     {
+      "type": "active",
       "x": 59.3,
       "y": 50.5
     },
     {
+      "type": "active",
       "x": 53.2,
       "y": 53.3
     },
     {
+      "type": "active",
       "x": 46.9,
       "y": 53.2
     },
     {
+      "type": "active",
       "x": 40.9,
       "y": 53.3
     },
     {
+      "type": "active",
       "x": 34.9,
       "y": 53.3
     },
     {
+      "type": "active",
       "x": 28.8,
       "y": 53.2
     },
     {
+      "type": "active",
       "x": 29.1,
       "y": 54.7
     },
     {
+      "type": "active",
       "x": 29.2,
       "y": 56
     },
     {
+      "type": "active",
       "x": 35.2,
       "y": 55.9
     },
     {
+      "type": "active",
       "x": 35.3,
       "y": 54.6
     },
     {
+      "type": "active",
       "x": 41.7,
       "y": 54.6
     },
     {
+      "type": "active",
       "x": 41,
       "y": 56
     },
     {
+      "type": "active",
       "x": 47,
       "y": 56.1
     },
     {
+      "type": "active",
       "x": 47.4,
       "y": 54.6
     },
     {
+      "type": "active",
       "x": 53.4,
       "y": 54.6
     },
     {
+      "type": "active",
       "x": 52.8,
       "y": 56
     },
     {
+      "type": "active",
       "x": 58.8,
       "y": 56
     },
     {
+      "type": "active",
       "x": 59,
       "y": 54.7
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 53.3
     },
     {
+      "type": "active",
       "x": 10.9,
       "y": 54.7
     },
     {
+      "type": "active",
       "x": 5.2,
       "y": 54.6
     },
     {
+      "type": "active",
       "x": 4.9,
       "y": 53.3
     },
     {
+      "type": "active",
       "x": 10.9,
       "y": 53.3
     },
     {
+      "type": "active",
       "x": 22.9,
       "y": 53.2
     },
     {
+      "type": "active",
       "x": 23.5,
       "y": 54.6
     },
     {
+      "type": "active",
       "x": 5.4,
       "y": 56.1
     },
     {
+      "type": "active",
       "x": 5.2,
       "y": 57.3
     },
     {
+      "type": "active",
       "x": 5.3,
       "y": 58.7
     },
     {
+      "type": "active",
       "x": 10.8,
       "y": 58.7
     },
     {
+      "type": "active",
       "x": 11.4,
       "y": 57.3
     },
     {
+      "type": "active",
       "x": 11,
       "y": 56.1
     },
     {
+      "type": "active",
       "x": 17,
       "y": 57.4
     },
     {
+      "type": "active",
       "x": 17.3,
       "y": 58.7
     },
     {
+      "type": "active",
       "x": 23.3,
       "y": 57.4
     },
     {
+      "type": "active",
       "x": 23.1,
       "y": 56
     },
     {
+      "type": "active",
       "x": 29.3,
       "y": 57.3
     },
     {
+      "type": "active",
       "x": 35,
       "y": 57.3
     },
     {
+      "type": "active",
       "x": 34.8,
       "y": 58.8
     },
     {
+      "type": "active",
       "x": 41.2,
       "y": 58.7
     },
     {
+      "type": "active",
       "x": 41.1,
       "y": 57.4
     },
     {
+      "type": "active",
       "x": 47.2,
       "y": 57.3
     },
     {
+      "type": "active",
       "x": 47,
       "y": 58.8
     },
     {
+      "type": "active",
       "x": 52.9,
       "y": 58.7
     },
     {
+      "type": "active",
       "x": 52.9,
       "y": 57.5
     },
     {
+      "type": "active",
       "x": 59.2,
       "y": 57.3
     },
     {
+      "type": "active",
       "x": 64.9,
       "y": 57.4
     },
     {
+      "type": "active",
       "x": 71.2,
       "y": 57.4
     },
     {
+      "type": "active",
       "x": 71.2,
       "y": 55.9
     },
     {
+      "type": "active",
       "x": 64.8,
       "y": 56
     },
     {
+      "type": "active",
       "x": 64.8,
       "y": 54.6
     },
     {
+      "type": "active",
       "x": 65,
       "y": 53.3
     },
     {
+      "type": "active",
       "x": 71,
       "y": 53.2
     },
     {
+      "type": "active",
       "x": 71.2,
       "y": 54.7
     },
     {
+      "type": "active",
       "x": 83,
       "y": 54.6
     },
     {
+      "type": "active",
       "x": 76.8,
       "y": 53.2
     },
     {
+      "type": "active",
       "x": 82.9,
       "y": 53.3
     },
     {
+      "type": "active",
       "x": 83.1,
       "y": 51.8
     },
     {
+      "type": "active",
       "x": 77.4,
       "y": 51.8
     },
     {
+      "type": "active",
       "x": 71.4,
       "y": 51.9
     },
     {
+      "type": "active",
       "x": 71,
       "y": 50.5
     },
     {
+      "type": "active",
       "x": 65,
       "y": 50.6
     },
     {
+      "type": "active",
       "x": 77,
       "y": 50.4
     },
     {
+      "type": "active",
       "x": 83,
       "y": 50.5
     },
     {
+      "type": "active",
       "x": 89.2,
       "y": 50.5
     },
     {
+      "type": "active",
       "x": 95.2,
       "y": 50.5
     },
     {
+      "type": "active",
       "x": 95,
       "y": 51.8
     },
     {
+      "type": "active",
       "x": 95,
       "y": 53.2
     },
     {
+      "type": "active",
       "x": 95.3,
       "y": 54.8
     },
     {
+      "type": "active",
       "x": 88.7,
       "y": 54.6
     },
     {
+      "type": "active",
       "x": 89.2,
       "y": 55.9
     },
     {
+      "type": "active",
       "x": 82.8,
       "y": 56.1
     },
     {
+      "type": "active",
       "x": 77.4,
       "y": 55.9
     },
     {
+      "type": "active",
       "x": 76.8,
       "y": 57.4
     },
     {
+      "type": "active",
       "x": 83.1,
       "y": 57.3
     },
     {
+      "type": "active",
       "x": 88.9,
       "y": 57.4
     },
     {
+      "type": "active",
       "x": 95,
       "y": 57.4
     },
     {
+      "type": "active",
       "x": 94.8,
       "y": 56
     },
     {
+      "type": "active",
       "x": 17,
       "y": 60.1
     },
     {
+      "type": "active",
       "x": 22.8,
       "y": 60.1
     },
     {
+      "type": "active",
       "x": 28.9,
       "y": 60.1
     },
     {
+      "type": "active",
       "x": 34.9,
       "y": 60.1
     },
     {
+      "type": "active",
       "x": 52.8,
       "y": 60.2
     },
     {
+      "type": "active",
       "x": 58.7,
       "y": 60.1
     },
     {
+      "type": "active",
       "x": 64.8,
       "y": 58.8
     },
     {
+      "type": "active",
       "x": 71,
       "y": 58.8
     },
     {
+      "type": "active",
       "x": 71,
       "y": 60.1
     },
     {
+      "type": "active",
       "x": 77,
       "y": 60.1
     },
     {
+      "type": "active",
       "x": 76.9,
       "y": 58.8
     },
     {
+      "type": "active",
       "x": 82.8,
       "y": 58.8
     },
     {
+      "type": "active",
       "x": 82.8,
       "y": 60.1
     },
     {
+      "type": "active",
       "x": 89,
       "y": 60.2
     },
     {
+      "type": "active",
       "x": 88.8,
       "y": 58.7
     },
     {
+      "type": "active",
       "x": 94.9,
       "y": 58.7
     },
     {
+      "type": "active",
       "x": 95.4,
       "y": 60
     },
     {
+      "type": "active",
       "x": 94.9,
       "y": 61.5
     },
     {
+      "type": "active",
       "x": 88.8,
       "y": 61.5
     },
     {
+      "type": "active",
       "x": 83.2,
       "y": 61.5
     },
     {
+      "type": "active",
       "x": 77.2,
       "y": 61.5
     },
     {
+      "type": "active",
       "x": 71,
       "y": 61.5
     },
     {
+      "type": "active",
       "x": 71,
       "y": 62.9
     },
     {
+      "type": "active",
       "x": 76.9,
       "y": 62.9
     },
     {
+      "type": "active",
       "x": 83.2,
       "y": 62.9
     },
     {
+      "type": "active",
       "x": 89.2,
       "y": 62.9
     },
     {
+      "type": "active",
       "x": 95,
       "y": 62.9
     },
     {
+      "type": "active",
       "x": 95,
       "y": 64.3
     },
     {
+      "type": "active",
       "x": 89,
       "y": 64.3
     },
     {
+      "type": "active",
       "x": 83,
       "y": 64.3
     },
     {
+      "type": "active",
       "x": 77.2,
       "y": 64.2
     },
     {
+      "type": "active",
       "x": 71.1,
       "y": 64.4
     },
     {
+      "type": "active",
       "x": 65,
       "y": 64.3
     },
     {
+      "type": "active",
       "x": 65.1,
       "y": 62.9
     },
     {
+      "type": "active",
       "x": 65.1,
       "y": 61.6
     },
     {
+      "type": "active",
       "x": 59.2,
       "y": 61.5
     },
     {
+      "type": "active",
       "x": 53.3,
       "y": 61.6
     },
     {
+      "type": "active",
       "x": 53,
       "y": 62.9
     },
     {
+      "type": "active",
       "x": 52.8,
       "y": 64.3
     },
     {
+      "type": "active",
       "x": 58.8,
       "y": 64.4
     },
     {
+      "type": "active",
       "x": 46.8,
       "y": 64.3
     },
     {
+      "type": "active",
       "x": 47.1,
       "y": 62.9
     },
     {
+      "type": "active",
       "x": 47.2,
       "y": 61.5
     },
     {
+      "type": "active",
       "x": 41.2,
       "y": 61.5
     },
     {
+      "type": "active",
       "x": 40.9,
       "y": 62.9
     },
     {
+      "type": "active",
       "x": 35.3,
       "y": 62.9
     },
     {
+      "type": "active",
       "x": 35.1,
       "y": 64.2
     },
     {
+      "type": "active",
       "x": 41.5,
       "y": 64.3
     },
     {
+      "type": "active",
       "x": 29,
       "y": 64.3
     },
     {
+      "type": "active",
       "x": 29.2,
       "y": 62.9
     },
     {
+      "type": "active",
       "x": 29.4,
       "y": 61.5
     },
     {
+      "type": "active",
       "x": 23.1,
       "y": 61.5
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 62.7
     },
     {
+      "type": "active",
       "x": 17.1,
       "y": 62.9
     },
     {
+      "type": "active",
       "x": 17,
       "y": 64.3
     },
     {
+      "type": "active",
       "x": 23.1,
       "y": 64.3
     },
     {
+      "type": "active",
       "x": 5.2,
       "y": 64.3
     },
     {
+      "type": "active",
       "x": 5,
       "y": 62.9
     },
     {
+      "type": "active",
       "x": 4.9,
       "y": 61.4
     },
     {
+      "type": "active",
       "x": 11.4,
       "y": 61.4
     },
     {
+      "type": "active",
       "x": 16.8,
       "y": 61.5
     },
     {
+      "type": "active",
       "x": 5.1,
       "y": 65.7
     },
     {
+      "type": "active",
       "x": 5,
       "y": 67
     },
     {
+      "type": "active",
       "x": 10.9,
       "y": 67.1
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 65.6
     },
     {
+      "type": "active",
       "x": 17.1,
       "y": 65.6
     },
     {
+      "type": "active",
       "x": 17.1,
       "y": 67
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 67
     },
     {
+      "type": "active",
       "x": 22.9,
       "y": 65.6
     },
     {
+      "type": "active",
       "x": 29,
       "y": 65.6
     },
     {
+      "type": "active",
       "x": 29.1,
       "y": 67
     },
     {
+      "type": "active",
       "x": 35.1,
       "y": 67
     },
     {
+      "type": "active",
       "x": 35.3,
       "y": 65.8
     },
     {
+      "type": "active",
       "x": 41.2,
       "y": 65.7
     },
     {
+      "type": "active",
       "x": 41,
       "y": 67.1
     },
     {
+      "type": "active",
       "x": 47.2,
       "y": 67
     },
     {
+      "type": "active",
       "x": 47.1,
       "y": 65.7
     },
     {
+      "type": "active",
       "x": 53,
       "y": 65.6
     },
     {
+      "type": "active",
       "x": 53.2,
       "y": 67
     },
     {
+      "type": "active",
       "x": 59,
       "y": 67
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 65.6
     },
     {
+      "type": "active",
       "x": 64.9,
       "y": 65.6
     },
     {
+      "type": "active",
       "x": 65.5,
       "y": 67.1
     },
     {
+      "type": "active",
       "x": 70.8,
       "y": 67.1
     },
     {
+      "type": "active",
       "x": 77.2,
       "y": 67
     },
     {
+      "type": "active",
       "x": 77.2,
       "y": 65.7
     },
     {
+      "type": "active",
       "x": 82.8,
       "y": 65.6
     },
     {
+      "type": "active",
       "x": 83.2,
       "y": 67
     },
     {
+      "type": "active",
       "x": 88.8,
       "y": 67.1
     },
     {
+      "type": "active",
       "x": 88.8,
       "y": 65.6
     },
     {
+      "type": "active",
       "x": 94.7,
       "y": 65.6
     },
     {
+      "type": "active",
       "x": 5.2,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 5,
       "y": 69.8
     },
     {
+      "type": "active",
       "x": 11,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 17.6,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 17.2,
       "y": 69.8
     },
     {
+      "type": "active",
       "x": 17.2,
       "y": 71.2
     },
     {
+      "type": "active",
       "x": 23.4,
       "y": 71.1
     },
     {
+      "type": "active",
       "x": 23,
       "y": 69.8
     },
     {
+      "type": "active",
       "x": 29,
       "y": 69.8
     },
     {
+      "type": "active",
       "x": 29,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 35.2,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 35.6,
       "y": 69.7
     },
     {
+      "type": "active",
       "x": 35.3,
       "y": 71.1
     },
     {
+      "type": "active",
       "x": 41,
       "y": 71.2
     },
     {
+      "type": "active",
       "x": 41.1,
       "y": 69.8
     },
     {
+      "type": "active",
       "x": 41.2,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 47.3,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 52.8,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 59.3,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 59.1,
       "y": 69.8
     },
     {
+      "type": "active",
       "x": 52.8,
       "y": 69.8
     },
     {
+      "type": "active",
       "x": 53,
       "y": 71.2
     },
     {
+      "type": "active",
       "x": 47,
       "y": 71.1
     },
     {
+      "type": "active",
       "x": 64.6,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 70.9,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 71.3,
       "y": 69.8
     },
     {
+      "type": "active",
       "x": 71,
       "y": 71.1
     },
     {
+      "type": "active",
       "x": 65.2,
       "y": 71.1
     },
     {
+      "type": "active",
       "x": 77,
       "y": 71.2
     },
     {
+      "type": "active",
       "x": 77.2,
       "y": 69.8
     },
     {
+      "type": "active",
       "x": 77.2,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 82.6,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 89.5,
       "y": 68.4
     },
     {
+      "type": "active",
       "x": 94.8,
       "y": 68.5
     },
     {
+      "type": "active",
       "x": 95.2,
       "y": 67.1
     },
     {
+      "type": "active",
       "x": 94.7,
       "y": 69.8
     },
     {
+      "type": "active",
       "x": 89.4,
       "y": 69.8
     },
     {
+      "type": "active",
       "x": 82.4,
       "y": 69.8
     },
     {
+      "type": "active",
       "x": 83.1,
       "y": 71.3
     },
     {
+      "type": "active",
       "x": 95,
       "y": 71.2
     },
     {
+      "type": "active",
       "x": 89,
       "y": 71.1
     },
     {
+      "type": "active",
       "x": 89,
       "y": 72.5
     },
     {
+      "type": "active",
       "x": 82.3,
       "y": 72.5
     },
     {
+      "type": "active",
       "x": 95.3,
       "y": 72.5
     },
     {
+      "type": "active",
       "x": 95.2,
       "y": 73.9
     },
     {
+      "type": "active",
       "x": 89.3,
       "y": 73.9
     },
     {
+      "type": "active",
       "x": 83.2,
       "y": 73.9
     },
     {
+      "type": "active",
       "x": 77.5,
       "y": 73.9
     },
     {
+      "type": "active",
       "x": 76.5,
       "y": 72.5
     },
     {
+      "type": "active",
       "x": 95.1,
       "y": 75.3
     },
     {
+      "type": "active",
       "x": 95,
       "y": 76.7
     },
     {
+      "type": "active",
       "x": 88.8,
       "y": 76.6
     },
     {
+      "type": "active",
       "x": 88.9,
       "y": 75.3
     },
     {
+      "type": "active",
       "x": 83.1,
       "y": 75.3
     },
     {
+      "type": "active",
       "x": 77.4,
       "y": 75.3
     },
     {
+      "type": "active",
       "x": 71.1,
       "y": 75.3
     },
     {
+      "type": "active",
       "x": 71.3,
       "y": 73.8
     },
     {
+      "type": "active",
       "x": 71.1,
       "y": 72.5
     },
     {
+      "type": "active",
       "x": 64.9,
       "y": 72.6
     },
     {
+      "type": "active",
       "x": 65.2,
       "y": 73.9
     },
     {
+      "type": "active",
       "x": 65.2,
       "y": 75.4
     },
     {
+      "type": "active",
       "x": 59.2,
       "y": 73.9
     },
     {
+      "type": "active",
       "x": 53,
       "y": 73.9
     },
     {
+      "type": "active",
       "x": 53.3,
       "y": 75.3
     },
     {
+      "type": "active",
       "x": 46.8,
       "y": 75.3
     },
     {
+      "type": "active",
       "x": 40.9,
       "y": 75.3
     },
     {
+      "type": "active",
       "x": 34.9,
       "y": 73.9
     },
     {
+      "type": "active",
       "x": 41,
       "y": 72.5
     },
     {
+      "type": "active",
       "x": 47.3,
       "y": 72.5
     },
     {
+      "type": "active",
       "x": 35.8,
       "y": 72.5
     },
     {
+      "type": "active",
       "x": 29.2,
       "y": 72.5
     },
     {
+      "type": "active",
       "x": 23.5,
       "y": 72.5
     },
     {
+      "type": "active",
       "x": 16.4,
       "y": 72.5
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 72.5
     },
     {
+      "type": "active",
       "x": 5.1,
       "y": 72.5
     },
     {
+      "type": "active",
       "x": 4.8,
       "y": 71.1
     },
     {
+      "type": "active",
       "x": 10.9,
       "y": 71.2
     },
     {
+      "type": "active",
       "x": 5,
       "y": 75.3
     },
     {
+      "type": "active",
       "x": 11,
       "y": 75.3
     },
     {
+      "type": "active",
       "x": 17.4,
       "y": 75.3
     },
     {
+      "type": "active",
       "x": 17,
       "y": 73.9
     },
     {
+      "type": "active",
       "x": 23,
       "y": 74
     },
     {
+      "type": "active",
       "x": 23.3,
       "y": 75.4
     },
     {
+      "type": "active",
       "x": 29.2,
       "y": 75.3
     },
     {
+      "type": "active",
       "x": 28.7,
       "y": 74
     },
     {
+      "type": "active",
       "x": 34.6,
       "y": 75.3
     },
     {
+      "type": "active",
       "x": 5.1,
       "y": 76.7
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 76.7
     },
     {
+      "type": "active",
       "x": 23.1,
       "y": 76.7
     },
     {
+      "type": "active",
       "x": 29.1,
       "y": 76.7
     },
     {
+      "type": "active",
       "x": 35.1,
       "y": 76.7
     },
     {
+      "type": "active",
       "x": 41,
       "y": 76.7
     },
     {
+      "type": "active",
       "x": 46.9,
       "y": 76.7
     },
     {
+      "type": "active",
       "x": 53.6,
       "y": 76.7
     },
     {
+      "type": "active",
       "x": 53.4,
       "y": 78
     },
     {
+      "type": "active",
       "x": 59,
       "y": 78.1
     },
     {
+      "type": "active",
       "x": 65,
       "y": 78.1
     },
     {
+      "type": "active",
       "x": 71.2,
       "y": 78.1
     },
     {
+      "type": "active",
       "x": 77,
       "y": 78.1
     },
     {
+      "type": "active",
       "x": 77.1,
       "y": 79.4
     },
     {
+      "type": "active",
       "x": 71,
       "y": 79.4
     },
     {
+      "type": "active",
       "x": 82.8,
       "y": 79.4
     },
     {
+      "type": "active",
       "x": 89,
       "y": 79.5
     },
     {
+      "type": "active",
       "x": 89,
       "y": 78
     },
     {
+      "type": "active",
       "x": 95.2,
       "y": 78.1
     },
     {
+      "type": "active",
       "x": 95.1,
       "y": 79.5
     },
     {
+      "type": "active",
       "x": 5,
       "y": 78
     },
     {
+      "type": "active",
       "x": 11.4,
       "y": 78
     },
     {
+      "type": "active",
       "x": 5.6,
       "y": 79.4
     },
     {
+      "type": "active",
       "x": 5.2,
       "y": 80.9
     },
     {
+      "type": "active",
       "x": 11.4,
       "y": 80.8
     },
     {
+      "type": "active",
       "x": 17.4,
       "y": 80.8
     },
     {
+      "type": "active",
       "x": 23.6,
       "y": 80.8
     },
     {
+      "type": "active",
       "x": 29.3,
       "y": 80.8
     },
     {
+      "type": "active",
       "x": 35.4,
       "y": 80.8
     },
     {
+      "type": "active",
       "x": 41.1,
       "y": 80.9
     },
     {
+      "type": "active",
       "x": 41.4,
       "y": 79.5
     },
     {
+      "type": "active",
       "x": 35,
       "y": 79.4
     },
     {
+      "type": "active",
       "x": 35.3,
       "y": 78
     },
     {
+      "type": "active",
       "x": 28.8,
       "y": 78.1
     },
     {
+      "type": "active",
       "x": 29.4,
       "y": 79.6
     },
     {
+      "type": "active",
       "x": 23.4,
       "y": 79.4
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 78
     },
     {
+      "type": "active",
       "x": 47.2,
       "y": 80.9
     },
     {
+      "type": "active",
       "x": 47,
       "y": 79.4
     },
     {
+      "type": "active",
       "x": 52.8,
       "y": 79.4
     },
     {
+      "type": "active",
       "x": 53.3,
       "y": 80.8
     },
     {
+      "type": "active",
       "x": 53.1,
       "y": 82.3
     },
     {
+      "type": "active",
       "x": 59,
       "y": 82.2
     },
     {
+      "type": "active",
       "x": 59.2,
       "y": 80.8
     },
     {
+      "type": "active",
       "x": 65,
       "y": 80.8
     },
     {
+      "type": "active",
       "x": 65.4,
       "y": 82.2
     },
     {
+      "type": "active",
       "x": 71,
       "y": 80.8
     },
     {
+      "type": "active",
       "x": 76.8,
       "y": 80.8
     },
     {
+      "type": "active",
       "x": 77,
       "y": 82.1
     },
     {
+      "type": "active",
       "x": 83,
       "y": 82.2
     },
     {
+      "type": "active",
       "x": 89.6,
       "y": 82.2
     },
     {
+      "type": "active",
       "x": 95.2,
       "y": 82.2
     },
     {
+      "type": "active",
       "x": 95.1,
       "y": 80.8
     },
     {
+      "type": "active",
       "x": 95,
       "y": 83.6
     },
     {
+      "type": "active",
       "x": 89.2,
       "y": 83.5
     },
     {
+      "type": "active",
       "x": 82.8,
       "y": 83.5
     },
     {
+      "type": "active",
       "x": 77,
       "y": 83.6
     },
     {
+      "type": "active",
       "x": 71.4,
       "y": 83.6
     },
     {
+      "type": "active",
       "x": 65.1,
       "y": 83.6
     },
     {
+      "type": "active",
       "x": 58.8,
       "y": 83.5
     },
     {
+      "type": "active",
       "x": 53.6,
       "y": 83.6
     },
     {
+      "type": "active",
       "x": 47.2,
       "y": 83.5
     },
     {
+      "type": "active",
       "x": 40.7,
       "y": 83.5
     },
     {
+      "type": "active",
       "x": 35.3,
       "y": 83.5
     },
     {
+      "type": "active",
       "x": 35.1,
       "y": 82.2
     },
     {
+      "type": "active",
       "x": 11.6,
       "y": 82.2
     },
     {
+      "type": "active",
       "x": 11.1,
       "y": 83.5
     },
     {
+      "type": "active",
       "x": 5.2,
       "y": 83.6
     },
     {
+      "type": "active",
       "x": 5.2,
       "y": 82.3
     },
     {
+      "type": "active",
       "x": 5,
       "y": 97.4
     },
     {
+      "type": "active",
       "x": 5.3,
       "y": 96
     },
     {
+      "type": "active",
       "x": 5,
       "y": 94.6
     },
     {
+      "type": "active",
       "x": 5.2,
       "y": 93.2
     },
     {
+      "type": "active",
       "x": 5.3,
       "y": 91.9
     },
     {
+      "type": "active",
       "x": 5.1,
       "y": 90.5
     },
     {
+      "type": "active",
       "x": 5.2,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 5.3,
       "y": 87.7
     },
     {
+      "type": "active",
       "x": 5.1,
       "y": 86.3
     },
     {
+      "type": "active",
       "x": 5.2,
       "y": 85
     },
     {
+      "type": "active",
       "x": 11,
       "y": 97.3
     },
     {
+      "type": "active",
       "x": 11.4,
       "y": 98.7
     },
     {
+      "type": "active",
       "x": 17.2,
       "y": 98.7
     },
     {
+      "type": "active",
       "x": 23.7,
       "y": 98.7
     },
     {
+      "type": "active",
       "x": 29.7,
       "y": 98.8
     },
     {
+      "type": "active",
       "x": 35.5,
       "y": 98.7
     },
     {
+      "type": "active",
       "x": 35.7,
       "y": 97.3
     },
     {
+      "type": "active",
       "x": 29,
       "y": 97.3
     },
     {
+      "type": "active",
       "x": 23.1,
       "y": 97.4
     },
     {
+      "type": "active",
       "x": 16.9,
       "y": 20.2
     },
     {
+      "type": "active",
       "x": 11,
       "y": 20.1
     },
     {
+      "type": "active",
       "x": 23,
       "y": 20.2
     },
     {
+      "type": "active",
       "x": 29,
       "y": 20.2
     },
     {
+      "type": "active",
       "x": 35.2,
       "y": 20.1
     },
     {
+      "type": "active",
       "x": 41,
       "y": 98.7
     },
     {
+      "type": "active",
       "x": 41,
       "y": 97.4
     },
     {
+      "type": "active",
       "x": 47,
       "y": 97.3
     },
     {
+      "type": "active",
       "x": 47,
       "y": 98.7
     },
     {
+      "type": "active",
       "x": 53.3,
       "y": 98.8
     },
     {
+      "type": "active",
       "x": 53,
       "y": 97.4
     },
     {
+      "type": "active",
       "x": 59.1,
       "y": 97.3
     },
     {
+      "type": "active",
       "x": 59.2,
       "y": 98.7
     },
     {
+      "type": "active",
       "x": 65.3,
       "y": 98.7
     },
     {
+      "type": "active",
       "x": 65,
       "y": 97.4
     },
     {
+      "type": "active",
       "x": 71.2,
       "y": 97.3
     },
     {
+      "type": "active",
       "x": 71,
       "y": 98.7
     },
     {
+      "type": "active",
       "x": 76.8,
       "y": 98.8
     },
     {
+      "type": "active",
       "x": 76.8,
       "y": 97.4
     },
     {
+      "type": "active",
       "x": 82.7,
       "y": 98.8
     },
     {
+      "type": "active",
       "x": 89.2,
       "y": 98.7
     },
     {
+      "type": "active",
       "x": 89.2,
       "y": 97.4
     },
     {
+      "type": "active",
       "x": 95.3,
       "y": 97.4
     },
     {
+      "type": "active",
       "x": 95,
       "y": 96.2
     },
     {
+      "type": "active",
       "x": 95,
       "y": 94.6
     },
     {
+      "type": "active",
       "x": 95.1,
       "y": 93.2
     },
     {
+      "type": "active",
       "x": 94.9,
       "y": 91.9
     },
     {
+      "type": "active",
       "x": 95.1,
       "y": 90.5
     },
     {
+      "type": "active",
       "x": 95.1,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 95,
       "y": 87.6
     },
     {
+      "type": "active",
       "x": 95.2,
       "y": 86.3
     },
     {
+      "type": "active",
       "x": 89.4,
       "y": 86.3
     },
     {
+      "type": "active",
       "x": 89.3,
       "y": 87.6
     },
     {
+      "type": "active",
       "x": 88.8,
       "y": 89.2
     },
     {
+      "type": "active",
       "x": 89.2,
       "y": 90.5
     },
     {
+      "type": "active",
       "x": 89.2,
       "y": 91.9
     },
     {
+      "type": "active",
       "x": 89,
       "y": 93.3
     },
     {
+      "type": "active",
       "x": 89.1,
       "y": 94.6
     },
     {
+      "type": "active",
       "x": 89.3,
       "y": 96
     },
     {
+      "type": "active",
       "x": 83.1,
       "y": 95.9
     },
     {
+      "type": "active",
       "x": 83.2,
       "y": 94.5
     },
     {
+      "type": "active",
       "x": 83.1,
       "y": 93.2
     },
     {
+      "type": "active",
       "x": 83.3,
       "y": 91.7
     },
     {
+      "type": "active",
       "x": 83.2,
       "y": 90.4
     },
     {
+      "type": "active",
       "x": 83.5,
       "y": 86.3
     },
     {
+      "type": "active",
       "x": 77.8,
       "y": 86.3
     },
     {
+      "type": "active",
       "x": 71.2,
       "y": 86.3
     },
     {
+      "type": "active",
       "x": 65,
       "y": 86.4
     },
     {
+      "type": "active",
       "x": 59.1,
       "y": 86.4
     },
     {
+      "type": "active",
       "x": 52.8,
       "y": 86.3
     },
     {
+      "type": "active",
       "x": 46.8,
       "y": 86.4
     },
     {
+      "type": "active",
       "x": 40.8,
       "y": 86.4
     },
     {
+      "type": "active",
       "x": 35.5,
       "y": 86.4
     },
     {
+      "type": "active",
       "x": 29.2,
       "y": 86.3
     },
     {
+      "type": "active",
       "x": 23,
       "y": 86.3
     },
     {
+      "type": "active",
       "x": 17.6,
       "y": 86.3
     },
     {
+      "type": "active",
       "x": 11.6,
       "y": 86.4
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 84.9
     },
     {
+      "type": "active",
       "x": 11.1,
       "y": 87.7
     },
     {
+      "type": "active",
       "x": 11.1,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 11.2,
       "y": 90.5
     },
     {
+      "type": "active",
       "x": 11.4,
       "y": 91.9
     },
     {
+      "type": "active",
       "x": 11.3,
       "y": 93.2
     },
     {
+      "type": "active",
       "x": 16.8,
       "y": 93.2
     },
     {
+      "type": "active",
       "x": 17.4,
       "y": 94.6
     },
     {
+      "type": "active",
       "x": 17.2,
       "y": 96
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 96
     },
     {
+      "type": "active",
       "x": 22.9,
       "y": 94.5
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 93.2
     },
     {
+      "type": "active",
       "x": 23.2,
       "y": 91.8
     },
     {
+      "type": "active",
       "x": 17.2,
       "y": 91.9
     },
     {
+      "type": "active",
       "x": 17.2,
       "y": 90.3
     },
     {
+      "type": "active",
       "x": 17.3,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 22.6,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 29.2,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 29.1,
       "y": 90.4
     },
     {
+      "type": "active",
       "x": 28.8,
       "y": 91.9
     },
     {
+      "type": "active",
       "x": 34.8,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 34.9,
       "y": 90.5
     },
     {
+      "type": "active",
       "x": 35.1,
       "y": 91.9
     },
     {
+      "type": "active",
       "x": 35.2,
       "y": 93.3
     },
     {
+      "type": "active",
       "x": 29.2,
       "y": 93.2
     },
     {
+      "type": "active",
       "x": 29.1,
       "y": 94.6
     },
     {
+      "type": "active",
       "x": 35.2,
       "y": 94.6
     },
     {
+      "type": "active",
       "x": 35.2,
       "y": 95.8
     },
     {
+      "type": "active",
       "x": 41,
       "y": 96
     },
     {
+      "type": "active",
       "x": 41.3,
       "y": 94.5
     },
     {
+      "type": "active",
       "x": 41.1,
       "y": 93.1
     },
     {
+      "type": "active",
       "x": 41.3,
       "y": 91.8
     },
     {
+      "type": "active",
       "x": 41,
       "y": 90.4
     },
     {
+      "type": "active",
       "x": 47.1,
       "y": 90.5
     },
     {
+      "type": "active",
       "x": 46.9,
       "y": 91.8
     },
     {
+      "type": "active",
       "x": 47.2,
       "y": 93.2
     },
     {
+      "type": "active",
       "x": 47.2,
       "y": 94.6
     },
     {
+      "type": "active",
       "x": 47.4,
       "y": 95.9
     },
     {
+      "type": "active",
       "x": 53.3,
       "y": 95.9
     },
     {
+      "type": "active",
       "x": 53.4,
       "y": 94.6
     },
     {
+      "type": "active",
       "x": 52.7,
       "y": 93.2
     },
     {
+      "type": "active",
       "x": 59,
       "y": 93.2
     },
     {
+      "type": "active",
       "x": 59.4,
       "y": 94.5
     },
     {
+      "type": "active",
       "x": 65,
       "y": 93.2
     },
     {
+      "type": "active",
       "x": 65,
       "y": 91.9
     },
     {
+      "type": "active",
       "x": 59.2,
       "y": 91.8
     },
     {
+      "type": "active",
       "x": 53,
       "y": 91.8
     },
     {
+      "type": "active",
       "x": 53.2,
       "y": 90.4
     },
     {
+      "type": "active",
       "x": 58.9,
       "y": 90.5
     },
     {
+      "type": "active",
       "x": 65,
       "y": 90.4
     },
     {
+      "type": "active",
       "x": 71.2,
       "y": 90.5
     },
     {
+      "type": "active",
       "x": 71,
       "y": 91.9
     },
     {
+      "type": "active",
       "x": 77.4,
       "y": 91.8
     },
     {
+      "type": "active",
       "x": 77.1,
       "y": 90.5
     },
     {
+      "type": "active",
       "x": 77,
       "y": 93.3
     },
     {
+      "type": "active",
       "x": 71.3,
       "y": 93.2
     },
     {
+      "type": "active",
       "x": 71,
       "y": 94.6
     },
     {
+      "type": "active",
       "x": 77.2,
       "y": 94.5
     },
     {
+      "type": "active",
       "x": 77,
       "y": 95.9
     },
     {
+      "type": "active",
       "x": 71,
       "y": 96
     },
     {
+      "type": "active",
       "x": 65,
       "y": 96
     },
     {
+      "type": "active",
       "x": 59,
       "y": 95.9
     },
     {
+      "type": "active",
       "x": 41,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 47,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 53,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 59,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 65.1,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 70.7,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 77,
       "y": 89.1
     },
     {
+      "type": "active",
       "x": 77.4,
       "y": 87.6
     },
     {
+      "type": "active",
       "x": 94.9,
       "y": 85
     }
   ],
-  "updated_at": "2025-10-05 23:14:01",
-  "updated_by": "system_fix"
+  "updated_at": "2025-10-07 13:58:00",
+  "updated_by": "admin",
+  "end_point": {
+    "type": "end",
+    "x": 65.31904534333395,
+    "y": 94.56177535499268
+  },
+  "checkpoints": []
 }
