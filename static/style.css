@@ -2374,3 +2374,45 @@ a {
 .legend-marker.other-user {
     color: #667eea;
 }
+/* Базовые стили для иконок */
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
+}
+
+/* Fallback для emoji */
+.pin-icon {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", "EmojiSymbols", sans-serif;
+}
+
+/* Убедимся, что все иконки отображаются */
+.sidebar-link-icon,
+.action-button-icon,
+.logo-icon,
+.form-icon,
+.btn-icon {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", "EmojiSymbols", sans-serif;
+}
+Добавляем JavaScript для проверки иконок
+javascript
+// В map.html добавляем проверку иконок
+function checkIcons() {
+    const icons = document.querySelectorAll('.pin-icon, .sidebar-link-icon, .action-button-icon');
+    icons.forEach(icon => {
+        const computedStyle = window.getComputedStyle(icon);
+        if (computedStyle.fontFamily.includes('Emoji') && icon.textContent.trim() === '') {
+            // Если иконка не отображается, заменяем на текст
+            const altText = icon.getAttribute('data-alt') || '●';
+            icon.textContent = altText;
+            icon.style.fontFamily = 'Arial, sans-serif';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    checkIcons();
+    setTimeout(checkIcons, 1000); // Повторная проверка через секунду
+});
