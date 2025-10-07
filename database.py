@@ -4,17 +4,22 @@ from psycopg2.extras import RealDictCursor
 import json
 from datetime import datetime
 import time
+import logging
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class Database:
     def __init__(self):
         self.conn = None
-        self.connect()
+        self.is_connected = False
 
     def connect(self):
-        """Подключение к базе данных"""
-        max_retries = 5
-        retry_delay = 2
+        """Подключение к базе данных с повторными попытками"""
+        max_retries = 10
+        retry_delay = 5
 
         for attempt in range(max_retries):
             try:
@@ -22,36 +27,49 @@ class Database:
                 database_url = os.environ.get('DATABASE_URL')
 
                 if not database_url:
-                    print("❌ DATABASE_URL не найден в переменных окружения")
-                    # Для локальной разработки - создаем in-memory хранилище
-                    self.create_in_memory_storage()
-                    return
+                    logger.error("❌ DATABASE_URL не найден в переменных окружения")
+                    time.sleep(retry_delay)
+                    continue
+
+                logger.info(f"🔄 Попытка подключения к PostgreSQL (попытка {attempt + 1}/{max_retries})...")
 
                 # Конвертируем postgres:// в postgresql:// если нужно
                 if database_url.startswith('postgres://'):
                     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
+                # Парсим URL для логирования (без пароля)
+                parsed_url = database_url.split('@')[-1] if '@' in database_url else database_url
+                logger.info(f"🔗 Подключаемся к: {parsed_url}")
+
                 self.conn = psycopg2.connect(
                     database_url,
-                    cursor_factory=RealDictCursor
+                    cursor_factory=RealDictCursor,
+                    connect_timeout=10
                 )
-                print("✅ Подключение к PostgreSQL установлено")
+
+                # Проверяем подключение
+                cur = self.conn.cursor()
+                cur.execute("SELECT 1")
+                cur.close()
+
+                self.is_connected = True
+                logger.info("✅ Подключение к PostgreSQL установлено")
                 self.init_tables()
                 return
 
             except Exception as e:
-                print(f"❌ Попытка {attempt + 1}/{max_retries}: Ошибка подключения к PostgreSQL: {e}")
+                logger.error(f"❌ Попытка {attempt + 1}/{max_retries}: Ошибка подключения к PostgreSQL: {e}")
                 if attempt < max_retries - 1:
-                    print(f"⏳ Повторная попытка через {retry_delay} секунд...")
+                    logger.info(f"⏳ Повторная попытка через {retry_delay} секунд...")
                     time.sleep(retry_delay)
                 else:
-                    print("❌ Не удалось подключиться к PostgreSQL после всех попыток")
-                    # Создаем in-memory хранилище как fallback
+                    logger.error("❌ Не удалось подключиться к PostgreSQL после всех попыток")
+                    # Создаем временное хранилище в памяти для демо
                     self.create_in_memory_storage()
 
     def create_in_memory_storage(self):
-        """Создание in-memory хранилища как fallback"""
-        print("🔄 Создание in-memory хранилища...")
+        """Создает временное хранилище в памяти при недоступности PostgreSQL"""
+        logger.warning("🔄 Создаем временное хранилище в памяти (данные будут сброшены после перезапуска)")
         self.in_memory_storage = {
             'users': {
                 "admin": {"password": "password", "role": "admin", "coins": 100},
@@ -84,14 +102,10 @@ class Database:
             'user_positions': {}
         }
 
-    def is_connected(self):
-        """Проверка подключения к базе данных"""
-        return self.conn and not self.conn.closed
-
     def init_tables(self):
-        """Инициализация таблиц"""
-        if not self.is_connected():
-            print("❌ Нет подключения к базе данных")
+        """Инициализация таблиц только если подключение к БД установлено"""
+        if not self.is_connected:
+            logger.warning("⚠️ Пропускаем инициализацию таблиц - нет подключения к БД")
             return
 
         commands = [
@@ -169,15 +183,15 @@ class Database:
                 cur.execute(command)
             self.conn.commit()
             cur.close()
-            print("✅ Таблицы инициализированы")
+            logger.info("✅ Таблицы инициализированы")
             self.insert_initial_data()
         except Exception as e:
-            print(f"❌ Ошибка инициализации таблиц: {e}")
+            logger.error(f"❌ Ошибка инициализации таблиц: {e}")
 
     def insert_initial_data(self):
-        """Вставка начальных данных"""
-        if not self.is_connected():
-            print("❌ Нет подключения к базе данных")
+        """Вставка начальных данных только если подключение к БД установлено"""
+        if not self.is_connected:
+            logger.warning("⚠️ Пропускаем вставку начальных данных - нет подключения к БД")
             return
 
         try:
@@ -240,14 +254,15 @@ class Database:
 
             self.conn.commit()
             cur.close()
-            print("✅ Начальные данные добавлены")
+            logger.info("✅ Начальные данные добавлены")
 
         except Exception as e:
-            print(f"❌ Ошибка добавления начальных данных: {e}")
+            logger.error(f"❌ Ошибка добавления начальных данных: {e}")
+            self.conn.rollback()
 
     # Методы для работы с пользователями
     def get_user(self, username):
-        if not self.is_connected():
+        if not self.is_connected:
             return self.in_memory_storage['users'].get(username)
 
         try:
@@ -257,11 +272,11 @@ class Database:
             cur.close()
             return user
         except Exception as e:
-            print(f"❌ Ошибка получения пользователя {username}: {e}")
-            return self.in_memory_storage['users'].get(username)
+            logger.error(f"❌ Ошибка получения пользователя {username}: {e}")
+            return None
 
     def get_all_users(self):
-        if not self.is_connected():
+        if not self.is_connected:
             return self.in_memory_storage['users']
 
         try:
@@ -271,11 +286,11 @@ class Database:
             cur.close()
             return {user['username']: dict(user) for user in users}
         except Exception as e:
-            print(f"❌ Ошибка получения всех пользователей: {e}")
-            return self.in_memory_storage['users']
+            logger.error(f"❌ Ошибка получения всех пользователей: {e}")
+            return {}
 
     def update_user_coins(self, username, coins):
-        if not self.is_connected():
+        if not self.is_connected:
             if username in self.in_memory_storage['users']:
                 self.in_memory_storage['users'][username]['coins'] = coins
             return True
@@ -287,15 +302,16 @@ class Database:
             cur.close()
             return True
         except Exception as e:
-            print(f"❌ Ошибка обновления монет пользователя {username}: {e}")
+            logger.error(f"❌ Ошибка обновления монет пользователя {username}: {e}")
+            self.conn.rollback()
             return False
 
     def create_user(self, username, password, role='user', coins=0):
-        if not self.is_connected():
+        if not self.is_connected:
             self.in_memory_storage['users'][username] = {
-                "password": password,
-                "role": role,
-                "coins": coins
+                'password': password,
+                'role': role,
+                'coins': coins
             }
             return True
 
@@ -309,12 +325,13 @@ class Database:
             cur.close()
             return True
         except Exception as e:
-            print(f"❌ Ошибка создания пользователя {username}: {e}")
+            logger.error(f"❌ Ошибка создания пользователя {username}: {e}")
+            self.conn.rollback()
             return False
 
     # Методы для работы с задачами
     def get_tasks_config(self):
-        if not self.is_connected():
+        if not self.is_connected:
             return self.in_memory_storage['tasks_config']
 
         try:
@@ -330,11 +347,11 @@ class Database:
                 }
             return {"button1": [], "button2": [], "button3": []}
         except Exception as e:
-            print(f"❌ Ошибка получения конфигурации задач: {e}")
-            return self.in_memory_storage['tasks_config']
+            logger.error(f"❌ Ошибка получения конфигурации задач: {e}")
+            return {"button1": [], "button2": [], "button3": []}
 
     def update_tasks_config(self, tasks):
-        if not self.is_connected():
+        if not self.is_connected:
             self.in_memory_storage['tasks_config'] = tasks
             return True
 
@@ -348,11 +365,12 @@ class Database:
             cur.close()
             return True
         except Exception as e:
-            print(f"❌ Ошибка обновления конфигурации задач: {e}")
+            logger.error(f"❌ Ошибка обновления конфигурации задач: {e}")
+            self.conn.rollback()
             return False
 
     def get_daily_tasks(self, date):
-        if not self.is_connected():
+        if not self.is_connected:
             return self.in_memory_storage['daily_tasks'].get(date)
 
         try:
@@ -362,11 +380,11 @@ class Database:
             cur.close()
             return result['tasks'] if result else None
         except Exception as e:
-            print(f"❌ Ошибка получения ежедневных задач: {e}")
-            return self.in_memory_storage['daily_tasks'].get(date)
+            logger.error(f"❌ Ошибка получения ежедневных задач: {e}")
+            return None
 
     def save_daily_tasks(self, date, tasks):
-        if not self.is_connected():
+        if not self.is_connected:
             self.in_memory_storage['daily_tasks'][date] = tasks
             return True
 
@@ -380,11 +398,12 @@ class Database:
             cur.close()
             return True
         except Exception as e:
-            print(f"❌ Ошибка сохранения ежедневных задач: {e}")
+            logger.error(f"❌ Ошибка сохранения ежедневных задач: {e}")
+            self.conn.rollback()
             return False
 
     def get_board_tasks(self):
-        if not self.is_connected():
+        if not self.is_connected:
             return self.in_memory_storage['board_tasks']
 
         try:
@@ -394,11 +413,11 @@ class Database:
             cur.close()
             return [dict(task) for task in tasks]
         except Exception as e:
-            print(f"❌ Ошибка получения задач доски: {e}")
-            return self.in_memory_storage['board_tasks']
+            logger.error(f"❌ Ошибка получения задач доски: {e}")
+            return []
 
     def save_board_tasks(self, tasks):
-        if not self.is_connected():
+        if not self.is_connected:
             self.in_memory_storage['board_tasks'] = tasks
             return True
 
@@ -417,14 +436,15 @@ class Database:
             cur.close()
             return True
         except Exception as e:
-            print(f"❌ Ошибка сохранения задач доски: {e}")
+            logger.error(f"❌ Ошибка сохранения задач доски: {e}")
+            self.conn.rollback()
             return False
 
     def update_board_task(self, task_id, updates):
-        if not self.is_connected():
-            # Обновляем in-memory задачу
+        if not self.is_connected:
+            # Обновляем задачу в памяти
             for task in self.in_memory_storage['board_tasks']:
-                if task.get('id') == task_id:
+                if task['id'] == task_id:
                     task.update(updates)
                     break
             return True
@@ -439,14 +459,16 @@ class Database:
             cur.close()
             return True
         except Exception as e:
-            print(f"❌ Ошибка обновления задачи доски {task_id}: {e}")
+            logger.error(f"❌ Ошибка обновления задачи доски {task_id}: {e}")
+            self.conn.rollback()
             return False
 
     # Методы для прогресса пользователей
     def get_user_progress(self, username, date):
-        if not self.is_connected():
+        if not self.is_connected:
+            user_progress = self.in_memory_storage['user_progress']
             key = f"{username}_{date}"
-            return self.in_memory_storage['user_progress'].get(key, [])
+            return user_progress.get(key, [])
 
         try:
             cur = self.conn.cursor()
@@ -455,12 +477,11 @@ class Database:
             cur.close()
             return result['tasks_done'] if result else []
         except Exception as e:
-            print(f"❌ Ошибка получения прогресса пользователя {username}: {e}")
-            key = f"{username}_{date}"
-            return self.in_memory_storage['user_progress'].get(key, [])
+            logger.error(f"❌ Ошибка получения прогресса пользователя {username}: {e}")
+            return []
 
     def save_user_progress(self, username, date, tasks_done):
-        if not self.is_connected():
+        if not self.is_connected:
             key = f"{username}_{date}"
             self.in_memory_storage['user_progress'][key] = tasks_done
             return True
@@ -475,15 +496,15 @@ class Database:
             cur.close()
             return True
         except Exception as e:
-            print(f"❌ Ошибка сохранения прогресса пользователя {username}: {e}")
+            logger.error(f"❌ Ошибка сохранения прогресса пользователя {username}: {e}")
+            self.conn.rollback()
             return False
 
     def get_user_all_progress(self, username):
-        if not self.is_connected():
-            # Собираем все задачи пользователя из in-memory
+        if not self.is_connected:
             all_tasks = []
             for key, tasks in self.in_memory_storage['user_progress'].items():
-                if key.startswith(username + '_'):
+                if key.startswith(f"{username}_"):
                     all_tasks.extend(tasks)
             return all_tasks
 
@@ -497,12 +518,12 @@ class Database:
                 all_tasks.extend(result['tasks_done'])
             return all_tasks
         except Exception as e:
-            print(f"❌ Ошибка получения всего прогресса пользователя {username}: {e}")
+            logger.error(f"❌ Ошибка получения всего прогресса пользователя {username}: {e}")
             return []
 
     # Методы для карты
     def get_map_config(self):
-        if not self.is_connected():
+        if not self.is_connected:
             return self.in_memory_storage['map_config']
 
         try:
@@ -521,14 +542,14 @@ class Database:
                 }
             return None
         except Exception as e:
-            print(f"❌ Ошибка получения конфигурации карты: {e}")
-            return self.in_memory_storage['map_config']
+            logger.error(f"❌ Ошибка получения конфигурации карты: {e}")
+            return None
 
     def save_map_config(self, config, updated_by):
-        if not self.is_connected():
+        if not self.is_connected:
             self.in_memory_storage['map_config'] = config
-            self.in_memory_storage['map_config']['updated_by'] = updated_by
             self.in_memory_storage['map_config']['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            self.in_memory_storage['map_config']['updated_by'] = updated_by
             return True
 
         try:
@@ -545,11 +566,12 @@ class Database:
             cur.close()
             return True
         except Exception as e:
-            print(f"❌ Ошибка сохранения конфигурации карты: {e}")
+            logger.error(f"❌ Ошибка сохранения конфигурации карты: {e}")
+            self.conn.rollback()
             return False
 
     def get_user_position(self, username):
-        if not self.is_connected():
+        if not self.is_connected:
             return self.in_memory_storage['user_positions'].get(username, {'x': 15, 'y': 75})
 
         try:
@@ -559,11 +581,11 @@ class Database:
             cur.close()
             return {'x': 15, 'y': 75} if not result else dict(result)
         except Exception as e:
-            print(f"❌ Ошибка получения позиции пользователя {username}: {e}")
+            logger.error(f"❌ Ошибка получения позиции пользователя {username}: {e}")
             return {'x': 15, 'y': 75}
 
     def save_user_position(self, username, x, y):
-        if not self.is_connected():
+        if not self.is_connected:
             self.in_memory_storage['user_positions'][username] = {'x': x, 'y': y}
             return True
 
@@ -577,7 +599,8 @@ class Database:
             cur.close()
             return True
         except Exception as e:
-            print(f"❌ Ошибка сохранения позиции пользователя {username}: {e}")
+            logger.error(f"❌ Ошибка сохранения позиции пользователя {username}: {e}")
+            self.conn.rollback()
             return False
 
 
