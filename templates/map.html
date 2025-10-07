@@ -164,6 +164,33 @@
                             </div>
                             {% endfor %}
 
+                        <!-- Фишки всех пользователей -->
+{% for username, user_data in all_users.items() %}
+{% if username != session.username %}
+<div class="map-pin other-user-pin miniature"
+     style="left: {{ user_data.position.x }}%; top: {{ user_data.position.y }}%;"
+     data-username="{{ username }}">
+    <div class="pin-icon other-user">
+        {% if user_data.progress.total_completed >= 30 %}🚀
+        {% elif user_data.progress.total_completed >= 20 %}⭐
+        {% elif user_data.progress.total_completed >= 10 %}🔵
+        {% else %}📍{% endif %}
+    </div>
+    <div class="pin-label">
+        {{ username }}
+    </div>
+    <div class="user-tooltip">
+        <strong>{{ username }}</strong>
+        <div class="user-stats">
+            <span>Уровень: {{ user_data.progress.current_level }}</span>
+            <span>Задач: {{ user_data.progress.total_completed }}</span>
+            <span>Монет: {{ user_data.coins }}</span>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
                             <!-- Финиш -->
                             <div class="map-point end-point" style="left: {{ map_config.end_point.x }}%; top: {{ map_config.end_point.y }}%;">
                                 <div class="point-marker">🏆</div>
