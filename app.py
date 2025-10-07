@@ -303,6 +303,29 @@ def api_save_map():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/map/users')
+def api_map_users():
+    """API для получения всех пользователей с их позициями на карте"""
+    if 'username' not in session:
+        return jsonify({'error': 'Не авторизован'}), 401
+
+    try:
+        users_data = db.get_all_users_with_positions()
+
+        # Добавляем информацию о прогрессе для каждого пользователя
+        for username, user_data in users_data.items():
+            user_position = calculate_user_position(username)
+            user_data.update({
+                'total_completed': user_position['total_completed'],
+                'current_level': user_position['current_level'],
+                'progress_percentage': user_position['progress_percentage']
+            })
+
+        return jsonify(users_data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
