@@ -278,27 +278,79 @@ class Database:
             return self.in_memory_storage['users'].get(username)
 
         try:
+            if self.conn and self.conn.closed == 0:
+                try:
+                    cur = self.conn.cursor()
+                    cur.execute("SELECT 1")
+                    cur.close()
+                except Exception as e:
+                    print(f"⚠️ Восстановление соединения для get_user: {e}")
+                    self.conn.rollback()
+
             cur = self.conn.cursor()
             cur.execute("SELECT * FROM users WHERE username = %s", (username,))
             user = cur.fetchone()
             cur.close()
             return user
         except Exception as e:
-            logger.error(f"❌ Ошибка получения пользователя {username}: {e}")
+            print(f"❌ Ошибка получения пользователя {username}: {e}")
+            if self.is_connected:
+                try:
+                    self.conn.rollback()
+                except:
+                    pass
             return None
+
+    def ensure_connection(self):
+        """Восстанавливает соединение если оно в ошибочном состоянии"""
+        if not self.is_connected:
+            return False
+
+        try:
+            # Проверяем состояние соединения
+            cur = self.conn.cursor()
+            cur.execute("SELECT 1")
+            cur.close()
+            return True
+        except Exception as e:
+            print(f"⚠️ Соединение с БД требует восстановления: {e}")
+            try:
+                self.conn.rollback()
+                # Пробуем переподключиться
+                self.connect()
+                return True
+            except Exception as reconnect_error:
+                print(f"❌ Не удалось восстановить соединение: {reconnect_error}")
+                return False
 
     def get_all_users(self):
         if not self.is_connected:
             return self.in_memory_storage['users']
 
         try:
+            # Проверяем, есть ли активная ошибочная транзакция
+            if self.conn and self.conn.closed == 0:
+                try:
+                    # Пытаемся выполнить простой запрос для проверки соединения
+                    cur = self.conn.cursor()
+                    cur.execute("SELECT 1")
+                    cur.close()
+                except Exception as e:
+                    print(f"⚠️ Восстановление соединения с БД: {e}")
+                    self.conn.rollback()  # Откатываем ошибочную транзакцию
+
             cur = self.conn.cursor()
             cur.execute("SELECT * FROM users ORDER BY username")
             users = cur.fetchall()
             cur.close()
             return {user['username']: dict(user) for user in users}
         except Exception as e:
-            logger.error(f"❌ Ошибка получения всех пользователей: {e}")
+            print(f"❌ Ошибка получения всех пользователей: {e}")
+            if self.is_connected:
+                try:
+                    self.conn.rollback()  # Откатываем транзакцию при ошибке
+                except:
+                    pass
             return {}
 
     def update_user_coins(self, username, coins):
@@ -419,13 +471,27 @@ class Database:
             return self.in_memory_storage['board_tasks']
 
         try:
+            if self.conn and self.conn.closed == 0:
+                try:
+                    cur = self.conn.cursor()
+                    cur.execute("SELECT 1")
+                    cur.close()
+                except Exception as e:
+                    print(f"⚠️ Восстановление соединения для board_tasks: {e}")
+                    self.conn.rollback()
+
             cur = self.conn.cursor()
             cur.execute("SELECT * FROM board_tasks ORDER BY id")
             tasks = cur.fetchall()
             cur.close()
             return [dict(task) for task in tasks]
         except Exception as e:
-            logger.error(f"❌ Ошибка получения задач доски: {e}")
+            print(f"❌ Ошибка получения задач доски: {e}")
+            if self.is_connected:
+                try:
+                    self.conn.rollback()
+                except:
+                    pass
             return []
 
     def save_board_tasks(self, tasks):

@@ -139,19 +139,17 @@
                             </div>
                         </div>
 
-                        {% if session.role == 'admin' and username != session.username %}
-                        <div class="user-admin-actions">
-                            <form action="/admin/update_game" method="POST" class="game-form">
-                                <input type="hidden" name="username" value="{{ username }}">
-                                <div class="game-input-group">
-                                    <input type="text" name="game" class="game-input"
-                                           value="{{ user_data.role if user_data.role != 'user' and user_data.role != 'admin' else '' }}"
-                                           placeholder="Введите название игры">
-                                    <button type="submit" class="btn btn-secondary btn-small">💾 Сохранить</button>
-                                </div>
-                            </form>
-                        </div>
-                        {% endif %}
+{% if session.role == 'admin' and username != session.username %}
+<div class="user-admin-actions">
+    <form action="/admin/update_game" method="POST" class="game-form">
+        <input type="hidden" name="username" value="{{ username }}">
+        <input type="text" name="game" class="game-input"
+               value="{{ user_data.role if user_data.role != 'user' and user_data.role != 'admin' else '' }}"
+               placeholder="Введите игру">
+        <button type="submit" class="btn btn-secondary btn-small">💾 Сохранить</button>
+    </form>
+</div>
+{% endif %}
                     </div>
                     {% endfor %}
                 </div>

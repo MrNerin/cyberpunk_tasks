@@ -76,49 +76,50 @@
             <p class="subtitle">Управление задачами, монетками и настройками системы</p>
 
             <!-- Управление играми пользователей -->
-            <section class="panel">
-                <h2 class="section-title">🎮 Управление играми пользователей</h2>
-                <div class="form-group">
-                    <label class="form-label">Назначение игры пользователю:</label>
-<form action="/admin/update_game" method="POST">
-    <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
-        <div>
-            <label class="form-label">Пользователь:</label>
-            <select name="username" class="form-input" required>
-                <option value="">Выберите пользователя</option>
-                {% for username, user_data in users.items() %}
-                <option value="{{ username }}">{{ username }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div>
-            <label class="form-label">Название игры:</label>
-            <input type="text" name="game" class="form-input" placeholder="Введите название игры">
-        </div>
-        <div>
-            <button type="submit" class="btn">💾 Назначить игру</button>
-        </div>
+<section class="panel">
+    <h2 class="section-title">🎮 Управление играми пользователей</h2>
+    <div class="form-group">
+        <label class="form-label">Назначение игры пользователю:</label>
+        <form action="/admin/update_game" method="POST">
+            <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
+                <div>
+                    <label class="form-label">Пользователь:</label>
+                    <select name="username" class="form-input" required>
+                        <option value="">Выберите пользователя</option>
+                        {% for username, user_data in users.items() %}
+                        <option value="{{ username }}">{{ username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Название игры:</label>
+                    <input type="text" name="game" class="form-input" placeholder="Введите название игры">
+                    <small class="form-hint">Оставьте пустым чтобы убрать игру</small>
+                </div>
+                <div>
+                    <button type="submit" class="btn">💾 Назначить игру</button>
+                </div>
+            </div>
+        </form>
     </div>
-</form>
-                </div>
 
-                <div style="margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: 8px;">
-                    <h4>Текущие игры пользователей:</h4>
-                    {% for username, user_data in users.items() %}
-                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color); align-items: center;">
-                        <div>
-                            <span>{{ username }}</span>
-                            {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
-                            <span style="margin-left: 10px; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; background: rgba(129, 199, 132, 0.2); color: var(--text-success);">
-                                {{ user_data.role }}
-                            </span>
-                            {% endif %}
-                        </div>
-                        <strong>💰 {{ user_data.coins }} монет</strong>
-                    </div>
-                    {% endfor %}
-                </div>
-            </section>
+    <div style="margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: 8px;">
+        <h4>Текущие игры пользователей:</h4>
+        {% for username, user_data in users.items() %}
+        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color); align-items: center;">
+            <div>
+                <span>{{ username }}</span>
+                {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
+                <span style="margin-left: 10px; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; background: rgba(129, 199, 132, 0.2); color: var(--text-success);">
+                    {{ user_data.role }}
+                </span>
+                {% endif %}
+            </div>
+            <strong>💰 {{ user_data.coins }} монет</strong>
+        </div>
+        {% endfor %}
+    </div>
+</section>
 
             <!-- Управление монетками -->
             <section class="panel">
