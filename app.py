@@ -312,6 +312,231 @@ def api_save_map():
         return jsonify({'error': str(e)}), 500
 
 
+# Добавляем в app.py новые маршруты:
+
+@app.route('/users')
+def users_list():
+    """Страница со списком всех пользователей"""
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    if session.get('role') != 'admin':
+        return "Доступ запрещен", 403
+
+    users = db.get_all_users()
+    # Получаем дополнительную информацию о каждом пользователе
+    users_with_stats = {}
+    for username, user_data in users.items():
+        user_progress = calculate_user_position(username)
+        users_with_stats[username] = {
+            **user_data,
+            'total_completed': user_progress['total_completed'],
+            'current_level': user_progress['current_level'],
+            'progress_percentage': user_progress['progress_percentage'],
+            'registered_date': user_data.get('created_at', 'Неизвестно')
+        }
+
+    return render_template('users.html', users=users_with_stats)
+
+
+@app.route('/inventory')
+def inventory():
+    """Страница инвентаря пользователя"""
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    username = session['username']
+    user_coins = get_user_coins(username)
+
+    # Получаем инвентарь пользователя из базы данных
+    user_inventory = get_user_inventory(username)
+
+    return render_template('inventory.html',
+                           user_inventory=user_inventory,
+                           user_coins=user_coins)
+
+
+@app.route('/inventory/add', methods=['POST'])
+def add_inventory_item():
+    """Добавление предмета в инвентарь"""
+    if 'username' not in session:
+        return jsonify({'error': 'Не авторизован'}), 401
+
+    try:
+        data = request.get_json()
+        item_name = data.get('name')
+        item_description = data.get('description', '')
+        item_quantity = data.get('quantity', 1)
+
+        if not item_name:
+            return jsonify({'error': 'Название предмета обязательно'}), 400
+
+        success = add_item_to_inventory(session['username'], item_name, item_description, item_quantity)
+
+        if success:
+            return jsonify({'success': True, 'message': 'Предмет добавлен в инвентарь'})
+        else:
+            return jsonify({'error': 'Ошибка при добавлении предмета'}), 500
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/inventory/update/<int:item_id>', methods=['POST'])
+def update_inventory_item(item_id):
+    """Обновление предмета в инвентаре"""
+    if 'username' not in session:
+        return jsonify({'error': 'Не авторизован'}), 401
+
+    try:
+        data = request.get_json()
+        updates = {}
+
+        if 'name' in data:
+            updates['name'] = data['name']
+        if 'description' in data:
+            updates['description'] = data['description']
+        if 'quantity' in data:
+            updates['quantity'] = data['quantity']
+
+        success = update_inventory_item_db(session['username'], item_id, updates)
+
+        if success:
+            return jsonify({'success': True, 'message': 'Предмет обновлен'})
+        else:
+            return jsonify({'error': 'Ошибка при обновлении предмета'}), 500
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/inventory/delete/<int:item_id>', methods=['POST'])
+def delete_inventory_item(item_id):
+    """Удаление предмета из инвентаря"""
+    if 'username' not in session:
+        return jsonify({'error': 'Не авторизован'}), 401
+
+    try:
+        success = delete_inventory_item_db(session['username'], item_id)
+
+        if success:
+            return jsonify({'success': True, 'message': 'Предмет удален'})
+        else:
+            return jsonify({'error': 'Ошибка при удалении предмета'}), 500
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# Функции для работы с инвентарем в базе данных
+def get_user_inventory(username):
+    """Получаем инвентарь пользователя"""
+    if not db.is_connected:
+        return db.in_memory_storage.get('user_inventory', {}).get(username, [])
+
+    try:
+        cur = db.conn.cursor()
+        cur.execute("""
+            SELECT id, name, description, quantity, created_at, updated_at 
+            FROM user_inventory 
+            WHERE username = %s 
+            ORDER BY created_at DESC
+        """, (username,))
+        inventory = cur.fetchall()
+        cur.close()
+        return [dict(item) for item in inventory]
+    except Exception as e:
+        print(f"Ошибка получения инвентаря: {e}")
+        return []
+
+
+def add_item_to_inventory(username, name, description, quantity=1):
+    """Добавляем предмет в инвентарь"""
+    if not db.is_connected:
+        if 'user_inventory' not in db.in_memory_storage:
+            db.in_memory_storage['user_inventory'] = {}
+        if username not in db.in_memory_storage['user_inventory']:
+            db.in_memory_storage['user_inventory'][username] = []
+
+        new_id = max([item.get('id', 0) for item in db.in_memory_storage['user_inventory'][username]], default=0) + 1
+        db.in_memory_storage['user_inventory'][username].append({
+            'id': new_id,
+            'name': name,
+            'description': description,
+            'quantity': quantity,
+            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+        return True
+
+    try:
+        cur = db.conn.cursor()
+        cur.execute("""
+            INSERT INTO user_inventory (username, name, description, quantity) 
+            VALUES (%s, %s, %s, %s)
+        """, (username, name, description, quantity))
+        db.conn.commit()
+        cur.close()
+        return True
+    except Exception as e:
+        print(f"Ошибка добавления предмета: {e}")
+        db.conn.rollback()
+        return False
+
+
+def update_inventory_item_db(username, item_id, updates):
+    """Обновляем предмет в инвентаре"""
+    if not db.is_connected:
+        if 'user_inventory' in db.in_memory_storage and username in db.in_memory_storage['user_inventory']:
+            for item in db.in_memory_storage['user_inventory'][username]:
+                if item['id'] == item_id:
+                    item.update(updates)
+                    item['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    return True
+        return False
+
+    try:
+        cur = db.conn.cursor()
+        set_clause = ", ".join([f"{key} = %s" for key in updates.keys()])
+        values = list(updates.values())
+        values.extend([username, item_id])
+
+        cur.execute(f"""
+            UPDATE user_inventory 
+            SET {set_clause}, updated_at = CURRENT_TIMESTAMP 
+            WHERE username = %s AND id = %s
+        """, values)
+        db.conn.commit()
+        cur.close()
+        return True
+    except Exception as e:
+        print(f"Ошибка обновления предмета: {e}")
+        db.conn.rollback()
+        return False
+
+
+def delete_inventory_item_db(username, item_id):
+    """Удаляем предмет из инвентаря"""
+    if not db.is_connected:
+        if 'user_inventory' in db.in_memory_storage and username in db.in_memory_storage['user_inventory']:
+            db.in_memory_storage['user_inventory'][username] = [
+                item for item in db.in_memory_storage['user_inventory'][username]
+                if item['id'] != item_id
+            ]
+            return True
+        return False
+
+    try:
+        cur = db.conn.cursor()
+        cur.execute("DELETE FROM user_inventory WHERE username = %s AND id = %s", (username, item_id))
+        db.conn.commit()
+        cur.close()
+        return True
+    except Exception as e:
+        print(f"Ошибка удаления предмета: {e}")
+        db.conn.rollback()
+        return False
+
+
 # Добавляем новый маршрут для API
 @app.route('/api/map/users')
 def api_map_users():

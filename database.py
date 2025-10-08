@@ -70,6 +70,7 @@ class Database:
     def create_in_memory_storage(self):
         """Создает временное хранилище в памяти при недоступности PostgreSQL"""
         logger.warning("🔄 Создаем временное хранилище в памяти (данные будут сброшены после перезапуска)")
+        self.in_memory_storage['user_inventory'] = {}
         self.in_memory_storage = {
             'users': {
                 "admin": {"password": "password", "role": "admin", "coins": 100},
@@ -116,6 +117,17 @@ class Database:
                 role VARCHAR(20) NOT NULL DEFAULT 'user',
                 coins INTEGER NOT NULL DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS user_inventory (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(50) NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                description TEXT,
+                quantity INTEGER NOT NULL DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """,
             """

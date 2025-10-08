@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой инвентарь - RGG QUEST</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-menu-toggle" onclick="toggleSidebar()">
+        <span>☰</span>
+        <span>Меню</span>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">RGG QUEST</div>
+                <div class="sidebar-subtitle">Управление задачами</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Основное</div>
+                    <a href="/" class="sidebar-link">
+                        <span class="sidebar-link-icon">📋</span>
+                        <span class="sidebar-link-text">Главная</span>
+                    </a>
+                    <a href="/map" class="sidebar-link">
+                        <span class="sidebar-link-icon">🗺️</span>
+                        <span class="sidebar-link-text">Карта прогресса</span>
+                    </a>
+                    <a href="/inventory" class="sidebar-link active">
+                        <span class="sidebar-link-icon">🎒</span>
+                        <span class="sidebar-link-text">Мой инвентарь</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Сообщество</div>
+                    <a href="/users" class="sidebar-link">
+                        <span class="sidebar-link-icon">👥</span>
+                        <span class="sidebar-link-text">Все игроки</span>
+                    </a>
+                </div>
+
+                {% if session.role == 'admin' %}
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Администрирование</div>
+                    <a href="/admin" class="sidebar-link">
+                        <span class="sidebar-link-icon">⚙️</span>
+                        <span class="sidebar-link-text">Панель управления</span>
+                    </a>
+                    <a href="/map_editor" class="sidebar-link">
+                        <span class="sidebar-link-icon">🎨</span>
+                        <span class="sidebar-link-text">Редактор карты</span>
+                    </a>
+                </div>
+                {% endif %}
+            </nav>
+
+            <div class="sidebar-user">
+                {% if 'username' in session %}
+                <div class="user-profile">
+                    <div class="user-avatar-large">
+                        {{ session.username[0]|upper }}
+                    </div>
+                    <div class="user-info-compact">
+                        <div class="user-name">{{ session.username }}</div>
+                        <div class="user-role">{{ session.role }}</div>
+                        <div class="user-coins">💰 {{ user_coins }} монет</div>
+                    </div>
+                    <a href="/logout" class="btn btn-outline logout-btn">Выйти</a>
+                </div>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="title">🎒 Мой инвентарь</h1>
+            <p class="subtitle">Управляйте своими предметами и ресурсами</p>
+
+            <!-- Статистика инвентаря -->
+            <div class="stats-panel">
+                <div class="stat-card coins-stat">
+                    <div class="stat-value">💰 {{ user_coins }}</div>
+                    <div class="stat-label">Монеток</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ user_inventory|length }}</div>
+                    <div class="stat-label">Всего предметов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ user_inventory|selectattr('quantity', 'gt', 1)|list|length }}</div>
+                    <div class="stat-label">Типов предметов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ user_inventory|sum(attribute='quantity') }}</div>
+                    <div class="stat-label">Всего единиц</div>
+                </div>
+            </div>
+
+            <!-- Форма добавления предмета -->
+            <section class="panel">
+                <h2 class="section-title">➕ Добавить предмет</h2>
+                <form id="addItemForm" class="inventory-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="text" id="itemName" class="form-input"
+                                   placeholder="Название предмета" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="itemDescription" class="form-input"
+                                   placeholder="Описание (необязательно)">
+                        </div>
+                        <div class="form-group">
+                            <input type="number" id="itemQuantity" class="form-input"
+                                   value="1" min="1" max="999" placeholder="Количество">
+                        </div>
+                        <button type="submit" class="btn">
+                            <span class="btn-icon">➕</span>
+                            Добавить
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Список предметов -->
+            <section class="panel">
+                <h2 class="section-title">📦 Предметы в инвентаре</h2>
+
+                <div class="inventory-grid">
+                    {% for item in user_inventory %}
+                    <div class="inventory-item" data-item-id="{{ item.id }}">
+                        <div class="item-header">
+                            <h3 class="item-name">{{ item.name }}</h3>
+                            <div class="item-actions">
+                                <button class="btn-icon edit-item" title="Редактировать">✏️</button>
+                                <button class="btn-icon delete-item" title="Удалить">🗑️</button>
+                            </div>
+                        </div>
+
+                        {% if item.description %}
+                        <p class="item-description">{{ item.description }}</p>
+                        {% endif %}
+
+                        <div class="item-footer">
+                            <span class="item-quantity">Количество: {{ item.quantity }}</span>
+                            <span class="item-date">
+                                Добавлен: {{ item.created_at.split(' ')[0] if item.created_at else 'Неизвестно' }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if not user_inventory %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎒</div>
+                    <h3>Инвентарь пуст</h3>
+                    <p>Добавьте свой первый предмет!</p>
+                </div>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+
+    <!-- Модальное окно редактирования -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Редактировать предмет</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="editItemForm" class="inventory-form">
+                <input type="hidden" id="editItemId">
+                <div class="form-group">
+                    <label for="editItemName" class="form-label">Название</label>
+                    <input type="text" id="editItemName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="editItemDescription" class="form-label">Описание</label>
+                    <textarea id="editItemDescription" class="form-input" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editItemQuantity" class="form-label">Количество</label>
+                    <input type="number" id="editItemQuantity" class="form-input" min="1" max="999" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline close-modal">Отмена</button>
+                    <button type="submit" class="btn">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .inventory-form .form-row {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .inventory-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .inventory-item:hover {
+            border-color: var(--text-accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .item-name {
+            color: var(--text-primary);
+            font-size: 1.1em;
+            font-weight: 600;
+            margin: 0;
+            flex: 1;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .item-description {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .item-quantity {
+            font-weight: 600;
+            color: var(--text-accent);
+        }
+
+        .item-date {
+            font-size: 0.8em;
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--bg-panel);
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            color: var(--text-primary);
+        }
+
+        .inventory-form {
+            padding: 24px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .inventory-form .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .item-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .item-actions {
+                align-self: flex-end;
+            }
+
+            .item-footer {
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+            }
+        }
+    </style>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обновление активной ссылки
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Добавление предмета
+            document.getElementById('addItemForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const name = document.getElementById('itemName').value.trim();
+                const description = document.getElementById('itemDescription').value.trim();
+                const quantity = parseInt(document.getElementById('itemQuantity').value) || 1;
+
+                if (!name) {
+                    alert('Введите название предмета');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/inventory/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name, description, quantity })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Ошибка сети: ' + error.message);
+                }
+            });
+
+            // Редактирование предмета
+            document.querySelectorAll('.edit-item').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const itemElement = this.closest('.inventory-item');
+                    const itemId = itemElement.dataset.itemId;
+                    const itemName = itemElement.querySelector('.item-name').textContent;
+                    const itemDescription = itemElement.querySelector('.item-description')?.textContent || '';
+                    const itemQuantity = parseInt(itemElement.querySelector('.item-quantity').textContent.split(': ')[1]);
+
+                    document.getElementById('editItemId').value = itemId;
+                    document.getElementById('editItemName').value = itemName;
+                    document.getElementById('editItemDescription').value = itemDescription;
+                    document.getElementById('editItemQuantity').value = itemQuantity;
+
+                    document.getElementById('editModal').style.display = 'block';
+                });
+            });
+
+            // Удаление предмета
+            document.querySelectorAll('.delete-item').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const itemElement = this.closest('.inventory-item');
+                    const itemId = itemElement.dataset.itemId;
+                    const itemName = itemElement.querySelector('.item-name').textContent;
+
+                    if (confirm(`Удалить предмет "${itemName}"?`)) {
+                        try {
+                            const response = await fetch(`/inventory/delete/${itemId}`, {
+                                method: 'POST'
+                            });
+
+                            const result = await response.json();
+
+                            if (result.success) {
+                                location.reload();
+                            } else {
+                                alert('Ошибка: ' + result.error);
+                            }
+                        } catch (error) {
+                            alert('Ошибка сети: ' + error.message);
+                        }
+                    }
+                });
+            });
+
+            // Сохранение изменений
+            document.getElementById('editItemForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const itemId = document.getElementById('editItemId').value;
+                const name = document.getElementById('editItemName').value.trim();
+                const description = document.getElementById('editItemDescription').value.trim();
+                const quantity = parseInt(document.getElementById('editItemQuantity').value) || 1;
+
+                if (!name) {
+                    alert('Введите название предмета');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/inventory/update/${itemId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name, description, quantity })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Ошибка сети: ' + error.message);
+                }
+            });
+
+            // Закрытие модального окна
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.getElementById('editModal').style.display = 'none';
+                });
+            });
+
+            // Закрытие модального окна при клике вне его
+            window.addEventListener('click', function(e) {
+                const modal = document.getElementById('editModal');
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
