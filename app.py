@@ -14,32 +14,6 @@ app.secret_key = os.environ.get('SECRET_KEY', 'taskflow_secret_key_2024')
 # Импортируем базу данных ПОСЛЕ создания app
 from database import db
 
-
-# Ждем пока база данных подключится
-def wait_for_db():
-    max_retries = 10
-    retry_delay = 3
-
-    for attempt in range(max_retries):
-        try:
-            # Проверяем подключение к БД
-            db.connect()
-            if db.conn and not db.conn.closed:
-                print("✅ База данных готова")
-                return True
-        except Exception as e:
-            print(f"❌ Попытка {attempt + 1}/{max_retries}: База данных не готова: {e}")
-            if attempt < max_retries - 1:
-                print(f"⏳ Ожидание {retry_delay} секунд...")
-                time.sleep(retry_delay)
-
-    print("❌ Не удалось подключиться к базе данных")
-    return False
-
-
-# Ждем подключения к БД при запуске
-wait_for_db()
-
 # Кэширование
 _data_cache = {}
 _cache_timeout = {}
@@ -208,15 +182,6 @@ def init_inventory_table():
     if not db.is_connected:
         return
 
-    def init_user_positions():
-        """Инициализирует позиции для всех пользователей, у которых их нет"""
-        users = db.get_all_users()
-        for username in users.keys():
-            position = db.get_user_position(username)
-            # Если позиция дефолтная, сохраняем ее в базе
-            if position.get('x') == 15 and position.get('y') == 75:
-                db.save_user_position(username, 15, 75)
-
     try:
         cur = db.conn.cursor()
         cur.execute("""
@@ -378,6 +343,18 @@ def get_all_inventories():
             }
 
     return all_inventories
+
+
+def init_user_positions():
+    """Инициализирует позиции для всех пользователей, у которых их нет"""
+    print("🔄 Инициализация позиций пользователей...")
+    users = db.get_all_users()
+    for username in users.keys():
+        position = db.get_user_position(username)
+        # Если позиция дефолтная, сохраняем ее в базе
+        if position.get('x') == 15 and position.get('y') == 75:
+            db.save_user_position(username, 15, 75)
+    print("✅ Позиции пользователей инициализированы")
 
 
 # Маршруты
@@ -654,9 +631,6 @@ def admin_update_role():
 
     return redirect(url_for('admin'))
 
-@app.before_first_request
-def initialize():
-    init_user_positions()
 
 @app.route('/board/take/<int:task_id>', methods=['POST'])
 def take_task(task_id):
@@ -857,6 +831,39 @@ def api_map_config():
     config = load_map_config()
     return jsonify(config)
 
+
+# Инициализация приложения
+def initialize_app():
+    """Инициализация приложения при старте"""
+    print("🚀 Инициализация RGG QUEST...")
+
+    # Подключение к базе данных
+    max_retries = 10
+    retry_delay = 3
+
+    for attempt in range(max_retries):
+        try:
+            db.connect()
+            if db.conn and not db.conn.closed:
+                print("✅ База данных готова")
+                break
+        except Exception as e:
+            print(f"❌ Попытка {attempt + 1}/{max_retries}: База данных не готова: {e}")
+            if attempt < max_retries - 1:
+                print(f"⏳ Ожидание {retry_delay} секунд...")
+                time.sleep(retry_delay)
+            else:
+                print("❌ Не удалось подключиться к базе данных")
+                return
+
+    # Инициализация позиций пользователей
+    init_user_positions()
+
+    print("✅ RGG QUEST успешно инициализирован")
+
+
+# Запуск инициализации при импорте
+initialize_app()
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
