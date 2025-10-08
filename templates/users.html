@@ -100,11 +100,25 @@
                     <div class="stat-label">Администраторов</div>
                 </div>
                 <div class="stat-card coins-stat">
-                    <div class="stat-value">{{ (users.values()|map(attribute='coins')|sum)|default(0) }}</div>
+                    <div class="stat-value">
+                        {% set total_coins = [] %}
+                        {% for user_data in users.values() %}
+                            {% set _ = total_coins.append(user_data.coins) %}
+                        {% endfor %}
+                        {{ total_coins|sum }}
+                    </div>
                     <div class="stat-label">Всего монет</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">{{ (users.values()|map(attribute='coins')|max)|default(0) }}</div>
+                    <div class="stat-value">
+                        {% set max_coins = 0 %}
+                        {% for user_data in users.values() %}
+                            {% if user_data.coins > max_coins %}
+                                {% set max_coins = user_data.coins %}
+                            {% endif %}
+                        {% endfor %}
+                        {{ max_coins }}
+                    </div>
                     <div class="stat-label">Макс. монет</div>
                 </div>
             </div>
@@ -128,9 +142,8 @@
                                     {% endif %}
                                 </h3>
                                 {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
-                                <div class="user-game-info">
-                                    <span class="game-label">Игра:</span>
-                                    <div class="game-name-full">{{ user_data.role }}</div>
+                                <div class="user-game-badge" title="{{ user_data.role }}">
+                                    {{ user_data.role }}
                                 </div>
                                 {% endif %}
                             </div>
@@ -139,17 +152,19 @@
                             </div>
                         </div>
 
-{% if session.role == 'admin' and username != session.username %}
-<div class="user-admin-actions">
-    <form action="/admin/update_game" method="POST" class="game-form">
-        <input type="hidden" name="username" value="{{ username }}">
-        <input type="text" name="game" class="game-input"
-               value="{{ user_data.role if user_data.role != 'user' and user_data.role != 'admin' else '' }}"
-               placeholder="Введите игру">
-        <button type="submit" class="btn btn-secondary btn-small">💾 Сохранить</button>
-    </form>
-</div>
-{% endif %}
+                        {% if session.role == 'admin' and username != session.username %}
+                        <div class="user-admin-actions">
+                            <form action="/admin/update_game" method="POST" class="game-form">
+                                <input type="hidden" name="username" value="{{ username }}">
+                                <div class="game-input-container">
+                                    <input type="text" name="game" class="game-input"
+                                           value="{{ user_data.role if user_data.role != 'user' and user_data.role != 'admin' else '' }}"
+                                           placeholder="Введите название игры" maxlength="100">
+                                    <button type="submit" class="btn btn-secondary btn-small">💾</button>
+                                </div>
+                            </form>
+                        </div>
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
@@ -169,7 +184,7 @@
     <style>
         .users-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 20px;
         }
 
@@ -214,7 +229,7 @@
 
         .user-main-info {
             flex: 1;
-            min-width: 0; /* Для правильного обрезания длинного текста */
+            min-width: 0; /* Важно для правильного обрезания текста */
         }
 
         .username {
@@ -224,7 +239,7 @@
             margin: 0 0 8px 0;
             color: var(--text-primary);
             font-size: 1.2em;
-            flex-wrap: wrap;
+            word-break: break-word;
         }
 
         .you-badge {
@@ -234,39 +249,31 @@
             border-radius: 12px;
             font-size: 0.7em;
             font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .user-game-info {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-
-        .game-label {
-            color: var(--text-secondary);
-            font-size: 0.9em;
-            white-space: nowrap;
             flex-shrink: 0;
-            margin-top: 2px;
         }
 
-        .game-name-full {
-            color: var(--text-success);
+        .user-game-badge {
+            background: linear-gradient(135deg, var(--text-success), #66bb6a);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
             font-weight: 500;
-            font-size: 0.9em;
-            background: rgba(129, 199, 132, 0.1);
-            padding: 6px 10px;
-            border-radius: 8px;
-            border: 1px solid rgba(129, 199, 132, 0.3);
-            word-break: break-word;
-            overflow-wrap: break-word;
+            display: inline-block;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: help;
+            transition: all 0.3s ease;
+        }
+
+        .user-game-badge:hover {
             white-space: normal;
-            line-height: 1.4;
-            flex: 1;
-            min-width: 0;
+            overflow: visible;
+            position: relative;
+            z-index: 10;
+            background: linear-gradient(135deg, var(--text-success), #4caf50);
         }
 
         .user-coins-display {
@@ -277,7 +284,6 @@
             color: gold;
             font-weight: 600;
             font-size: 0.9em;
-            white-space: nowrap;
             flex-shrink: 0;
         }
 
@@ -291,11 +297,10 @@
             width: 100%;
         }
 
-        .game-input-group {
+        .game-input-container {
             display: flex;
             gap: 8px;
-            align-items: stretch;
-            width: 100%;
+            align-items: center;
         }
 
         .game-input {
@@ -314,7 +319,7 @@
         }
 
         .btn-small {
-            padding: 8px 16px;
+            padding: 8px 12px;
             font-size: 0.8em;
             white-space: nowrap;
         }
@@ -332,25 +337,14 @@
 
             .user-main-info {
                 text-align: center;
-            }
-
-            .user-game-info {
-                justify-content: center;
-                text-align: center;
-                flex-direction: column;
-                gap: 4px;
-            }
-
-            .game-label {
-                margin-top: 0;
-            }
-
-            .game-name-full {
-                text-align: center;
                 width: 100%;
             }
 
-            .game-input-group {
+            .username {
+                justify-content: center;
+            }
+
+            .game-input-container {
                 flex-direction: column;
                 gap: 8px;
             }
@@ -359,8 +353,9 @@
                 width: 100%;
             }
 
-            .username {
-                justify-content: center;
+            .user-game-badge {
+                max-width: 200px;
+                margin: 0 auto;
             }
         }
 
@@ -369,23 +364,9 @@
                 padding: 16px;
             }
 
-            .user-card-header {
-                gap: 10px;
-            }
-
-            .user-avatar-medium {
-                width: 40px;
-                height: 40px;
-                font-size: 1em;
-            }
-
-            .username {
-                font-size: 1.1em;
-            }
-
-            .game-name-full {
-                font-size: 0.85em;
-                padding: 4px 8px;
+            .user-game-badge {
+                max-width: 150px;
+                font-size: 0.8em;
             }
         }
     </style>
@@ -405,6 +386,21 @@
                 if (link.getAttribute('href') === currentPath) {
                     link.classList.add('active');
                 }
+            });
+
+            // Автоматическое расширение бейджей с играми при наведении
+            document.querySelectorAll('.user-game-badge').forEach(badge => {
+                badge.addEventListener('mouseenter', function() {
+                    this.style.whiteSpace = 'normal';
+                    this.style.overflow = 'visible';
+                    this.style.zIndex = '10';
+                });
+
+                badge.addEventListener('mouseleave', function() {
+                    this.style.whiteSpace = 'nowrap';
+                    this.style.overflow = 'hidden';
+                    this.style.zIndex = '1';
+                });
             });
         });
     </script>

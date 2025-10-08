@@ -76,50 +76,57 @@
             <p class="subtitle">Управление задачами, монетками и настройками системы</p>
 
             <!-- Управление играми пользователей -->
-<section class="panel">
-    <h2 class="section-title">🎮 Управление играми пользователей</h2>
-    <div class="form-group">
-        <label class="form-label">Назначение игры пользователю:</label>
-        <form action="/admin/update_game" method="POST">
-            <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
-                <div>
-                    <label class="form-label">Пользователь:</label>
-                    <select name="username" class="form-input" required>
-                        <option value="">Выберите пользователя</option>
-                        {% for username, user_data in users.items() %}
-                        <option value="{{ username }}">{{ username }}</option>
-                        {% endfor %}
-                    </select>
+            <section class="panel">
+                <h2 class="section-title">🎮 Управление играми пользователей</h2>
+                <div class="form-group">
+                    <label class="form-label">Назначение игры пользователю:</label>
+                    <form action="/admin/update_game" method="POST">
+                        <div class="admin-form-grid">
+                            <div class="form-field">
+                                <label class="form-label">Пользователь:</label>
+                                <select name="username" class="form-input" required>
+                                    <option value="">Выберите пользователя</option>
+                                    {% for username, user_data in users.items() %}
+                                    <option value="{{ username }}">{{ username }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label class="form-label">Название игры:</label>
+                                <input type="text" name="game" class="form-input full-width-input"
+                                       placeholder="Введите полное название игры" maxlength="100">
+                                <small class="form-hint">Можно вводить длинные названия игр</small>
+                            </div>
+                            <div class="form-field">
+                                <button type="submit" class="btn full-width-btn">💾 Назначить игру</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                <div>
-                    <label class="form-label">Название игры:</label>
-                    <input type="text" name="game" class="form-input" placeholder="Введите название игры">
-                    <small class="form-hint">Оставьте пустым чтобы убрать игру</small>
-                </div>
-                <div>
-                    <button type="submit" class="btn">💾 Назначить игру</button>
-                </div>
-            </div>
-        </form>
-    </div>
 
-    <div style="margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: 8px;">
-        <h4>Текущие игры пользователей:</h4>
-        {% for username, user_data in users.items() %}
-        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color); align-items: center;">
-            <div>
-                <span>{{ username }}</span>
-                {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
-                <span style="margin-left: 10px; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; background: rgba(129, 199, 132, 0.2); color: var(--text-success);">
-                    {{ user_data.role }}
-                </span>
-                {% endif %}
-            </div>
-            <strong>💰 {{ user_data.coins }} монет</strong>
-        </div>
-        {% endfor %}
-    </div>
-</section>
+                <div class="users-games-list">
+                    <h4>Текущие игры пользователей:</h4>
+                    <div class="games-table">
+                        {% for username, user_data in users.items() %}
+                        <div class="game-row {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}has-game{% endif %}">
+                            <div class="game-user-info">
+                                <span class="game-username">{{ username }}</span>
+                                {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
+                                <span class="game-name-full" title="{{ user_data.role }}">
+                                    {{ user_data.role }}
+                                </span>
+                                {% else %}
+                                <span class="no-game">Нет игры</span>
+                                {% endif %}
+                            </div>
+                            <div class="game-coins">
+                                💰 {{ user_data.coins }} монет
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
 
             <!-- Управление монетками -->
             <section class="panel">
@@ -127,8 +134,8 @@
                 <div class="form-group">
                     <label class="form-label">Балансы пользователей:</label>
                     <form action="/admin/update_coins" method="POST">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
-                            <div>
+                        <div class="admin-form-grid">
+                            <div class="form-field">
                                 <label class="form-label">Пользователь:</label>
                                 <select name="username" class="form-input" required>
                                     <option value="">Выберите пользователя</option>
@@ -137,12 +144,13 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div>
+                            <div class="form-field">
                                 <label class="form-label">Новое количество монет:</label>
-                                <input type="number" name="coins" class="form-input" min="0" required placeholder="Количество монет">
+                                <input type="number" name="coins" class="form-input full-width-input"
+                                       min="0" required placeholder="Количество монет">
                             </div>
-                            <div>
-                                <button type="submit" class="btn">💾 Обновить баланс</button>
+                            <div class="form-field">
+                                <button type="submit" class="btn full-width-btn">💾 Обновить баланс</button>
                             </div>
                         </div>
                     </form>
@@ -154,11 +162,11 @@
                 <h2 class="section-title">📅 Ежедневные задачи</h2>
                 <div class="form-group">
                     <label class="form-label">Текущие ежедневные задачи:</label>
-                    <ul>
+                    <div class="daily-tasks-list">
                         {% for task in daily_tasks %}
-                        <li>{{ task }}</li>
+                        <div class="daily-task-item">{{ task }}</div>
                         {% endfor %}
-                    </ul>
+                    </div>
                 </div>
                 <form action="/admin/update_daily" method="POST">
                     <button type="submit" class="btn btn-secondary">🔄 Сгенерировать новые ежедневные задачи</button>
@@ -169,7 +177,7 @@
             <section class="panel">
                 <h2 class="section-title">🎯 Задачи по категориям</h2>
                 <form action="/admin/save_tasks" method="POST">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+                    <div class="tasks-categories-grid">
                         <!-- Кнопка 1 -->
                         <div class="form-group">
                             <label class="form-label">Кнопка 1 задачи:</label>
@@ -177,7 +185,7 @@
                             <input type="text"
                                    name="button1[]"
                                    value="{{ tasks.button1[i] if tasks.button1[i] else '' }}"
-                                   class="form-input"
+                                   class="form-input full-width-input"
                                    placeholder="Задача {{ i+1 }}">
                             {% endfor %}
                         </div>
@@ -189,7 +197,7 @@
                             <input type="text"
                                    name="button2[]"
                                    value="{{ tasks.button2[i] if tasks.button2[i] else '' }}"
-                                   class="form-input"
+                                   class="form-input full-width-input"
                                    placeholder="Задача {{ i+1 }}">
                             {% endfor %}
                         </div>
@@ -201,7 +209,7 @@
                             <input type="text"
                                    name="button3[]"
                                    value="{{ tasks.button3[i] if tasks.button3[i] else '' }}"
-                                   class="form-input"
+                                   class="form-input full-width-input"
                                    placeholder="Задача {{ i+1 }}">
                             {% endfor %}
                         </div>
@@ -217,13 +225,13 @@
                     <div class="form-group">
                         <label class="form-label">Задачи на доске:</label>
                         {% for i in range(5) %}
-                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 10px;">
+                        <div class="board-task-input-group">
                             <input type="text"
                                    name="board_tasks[]"
                                    value="{{ board[i].text if board[i] else '' }}"
-                                   class="form-input"
+                                   class="form-input board-task-input"
                                    placeholder="Текст задачи">
-                            <select name="board_difficulties[]" class="form-input">
+                            <select name="board_difficulties[]" class="form-input board-difficulty-select">
                                 <option value="лёгкая" {% if board[i] and board[i].difficulty == 'лёгкая' %}selected{% endif %}>лёгкая</option>
                                 <option value="средняя" {% if board[i] and board[i].difficulty == 'средняя' %}selected{% endif %}>средняя</option>
                                 <option value="сложная" {% if board[i] and board[i].difficulty == 'сложная' %}selected{% endif %}>сложная</option>
@@ -237,5 +245,180 @@
 
         </main>
     </div>
+
+    <style>
+        .admin-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .full-width-input {
+            width: 100%;
+        }
+
+        .full-width-btn {
+            width: 100%;
+        }
+
+        .users-games-list {
+            margin-top: 25px;
+            padding: 20px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .users-games-list h4 {
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            font-size: 1.1em;
+        }
+
+        .games-table {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .game-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .game-row.has-game {
+            background: linear-gradient(135deg, rgba(129, 199, 132, 0.1), transparent);
+            border-color: rgba(129, 199, 132, 0.3);
+        }
+
+        .game-row:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .game-user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+        }
+
+        .game-username {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .game-name-full {
+            color: var(--text-success);
+            font-size: 0.9em;
+            word-break: break-word;
+            white-space: normal;
+            line-height: 1.3;
+        }
+
+        .no-game {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        .game-coins {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 6px 10px;
+            color: gold;
+            font-weight: 600;
+            font-size: 0.85em;
+            flex-shrink: 0;
+        }
+
+        .tasks-categories-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 25px;
+        }
+
+        .daily-tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .daily-task-item {
+            padding: 10px 15px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+        }
+
+        .board-task-input-group {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .board-task-input {
+            width: 100%;
+        }
+
+        .board-difficulty-select {
+            width: 100%;
+        }
+
+        @media (max-width: 1024px) {
+            .admin-form-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .tasks-categories-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .board-task-input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .game-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .game-coins {
+                align-self: flex-end;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .users-games-list {
+                padding: 15px;
+            }
+
+            .game-row {
+                padding: 10px;
+            }
+        }
+    </style>
 </body>
 </html>
