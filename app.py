@@ -638,42 +638,32 @@ def admin_update_coins():
     return redirect(url_for('admin'))
 
 
-@app.route('/admin/update_role', methods=['POST'])
-def admin_update_role():
+@app.route('/admin/update_game', methods=['POST'])
+def admin_update_game():
     if 'username' not in session or session.get('role') != 'admin':
         return "Доступ запрещен", 403
 
     username = request.form.get('username')
-    new_role = request.form.get('role', '').strip()
+    game = request.form.get('game', '').strip()
 
     if username:
         try:
-            # Ограничиваем длину роли до 20 символов
-            if len(new_role) > 20:
-                new_role = new_role[:20]
-
-            # Если поле пустое, устанавливаем роль 'user'
-            if not new_role:
-                new_role = 'user'
-
-            # Обновляем роль пользователя
+            # Обновляем игру пользователя
             if db.is_connected:
                 cur = db.conn.cursor()
-                cur.execute("UPDATE users SET role = %s WHERE username = %s", (new_role, username))
+                cur.execute("UPDATE users SET role = %s WHERE username = %s", (game, username))
                 db.conn.commit()
                 cur.close()
             else:
                 if username in db.in_memory_storage['users']:
-                    db.in_memory_storage['users'][username]['role'] = new_role
+                    db.in_memory_storage['users'][username]['role'] = game
 
             # Обновляем сессию если это текущий пользователь
             if session.get('username') == username:
-                session['role'] = new_role
-
-            print(f"✅ Роль пользователя {username} обновлена на: {new_role}")
+                session['role'] = game
 
         except Exception as e:
-            print(f"❌ Ошибка обновления роли: {e}")
+            print(f"Ошибка обновления игры: {e}")
 
     return redirect(url_for('admin'))
 
