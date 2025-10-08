@@ -96,15 +96,37 @@
                     <div class="stat-label">Игроков с инвентарем</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">{{ all_inventories.values()|sum(attribute='inventory'|length) }}</div>
+                    <div class="stat-value">
+                        {% set total_items = [] %}
+                        {% for user_data in all_inventories.values() %}
+                            {% set _ = total_items.append(user_data.inventory|length) %}
+                        {% endfor %}
+                        {{ total_items|sum }}
+                    </div>
                     <div class="stat-label">Всего предметов</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">{{ all_inventories.values()|sum(attribute='inventory'|sum(attribute='quantity')) }}</div>
+                    <div class="stat-value">
+                        {% set total_units = [] %}
+                        {% for user_data in all_inventories.values() %}
+                            {% for item in user_data.inventory %}
+                                {% set _ = total_units.append(item.quantity) %}
+                            {% endfor %}
+                        {% endfor %}
+                        {{ total_units|sum }}
+                    </div>
                     <div class="stat-label">Всего единиц</div>
                 </div>
                 <div class="stat-card coins-stat">
-                    <div class="stat-value">{{ (all_inventories.values()|map(attribute='user_info')|map(attribute='coins')|max)|default(0) }}</div>
+                    <div class="stat-value">
+                        {% set max_coins = 0 %}
+                        {% for user_data in all_inventories.values() %}
+                            {% if user_data.user_info.coins > max_coins %}
+                                {% set max_coins = user_data.user_info.coins %}
+                            {% endif %}
+                        {% endfor %}
+                        {{ max_coins }}
+                    </div>
                     <div class="stat-label">Макс. монет</div>
                 </div>
             </div>
@@ -135,7 +157,13 @@
                             </div>
                             <div class="inventory-summary">
                                 <span class="item-count">{{ user_data.inventory|length }} предметов</span>
-                                <span class="total-items">{{ user_data.inventory|sum(attribute='quantity') }} единиц</span>
+                                <span class="total-items">
+                                    {% set user_total = [] %}
+                                    {% for item in user_data.inventory %}
+                                        {% set _ = user_total.append(item.quantity) %}
+                                    {% endfor %}
+                                    {{ user_total|sum }} единиц
+                                </span>
                             </div>
                         </div>
 

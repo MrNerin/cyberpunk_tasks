@@ -168,54 +168,46 @@
                                 </div>
                             </div>
 
-                            <!-- Миниатюрная фишка пользователя -->
-                            <div class="map-pin user-pin miniature" id="userPin"
-                                 style="left: {{ user_position[0] }}%; top: {{ user_position[1] }}%;"
-                                 data-x="{{ user_position[0] }}" data-y="{{ user_position[1] }}">
-                                <div class="pin-custom">
-                                    <img src="{{ url_for('static', filename='images/pins/' + session.username + '.png') }}"
-                                         alt="{{ session.username }}"
-                                         class="custom-pin-image"
-                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                                    <div class="pin-fallback" style="display: none;">
-                                        {{ session.username[0]|upper }}
-                                    </div>
-                                </div>
-                                <div class="pin-label">{{ session.username }}</div>
-                            </div>
+<!-- Миниатюрная фишка пользователя -->
+<div class="map-pin user-pin miniature" id="userPin"
+     style="left: {{ user_position[0] }}%; top: {{ user_position[1] }}%;"
+     data-x="{{ user_position[0] }}" data-y="{{ user_position[1] }}">
+    <div class="pin-custom">
+        <div class="pin-fallback">
+            {{ session.username[0]|upper }}
+        </div>
+    </div>
+    <div class="pin-label">{{ session.username }}</div>
+</div>
 
-                            <!-- Фишки других пользователей -->
-                            {% if all_users %}
-                                {% for username, user_data in all_users.items() %}
-                                {% if username != session.username %}
-                                <div class="map-pin other-user-pin miniature"
-                                     style="left: {{ user_data.position.x if user_data.position else 15 }}%; top: {{ user_data.position.y if user_data.position else 75 }}%;"
-                                     data-username="{{ username }}">
-                                    <div class="pin-custom">
-                                        <img src="{{ url_for('static', filename='images/pins/' + username + '.png') }}"
-                                             alt="{{ username }}"
-                                             class="custom-pin-image"
-                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                                        <div class="pin-fallback" style="display: none;">
-                                            {{ username[0]|upper }}
-                                        </div>
-                                    </div>
-                                    <div class="pin-label">
-                                        {{ username }}
-                                    </div>
-                                    <div class="user-tooltip">
-                                        <strong>{{ username }}</strong>
-                                        <div class="user-stats">
-                                            <span>Роль: {{ user_data.role }}</span>
-                                            <span>Монет: {{ user_data.coins }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endif %}
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                    </div>
+<!-- Фишки других пользователей -->
+{% if all_users %}
+    {% for username, user_data in all_users.items() %}
+    {% if username != session.username %}
+    <div class="map-pin other-user-pin miniature"
+         style="left: {{ user_data.position.x if user_data.position else 15 }}%; top: {{ user_data.position.y if user_data.position else 75 }}%;"
+         data-username="{{ username }}">
+        <div class="pin-custom">
+            <div class="pin-fallback">
+                {{ username[0]|upper }}
+            </div>
+        </div>
+        <div class="pin-label">
+            {{ username }}
+        </div>
+        <div class="user-tooltip">
+            <strong>{{ username }}</strong>
+            <div class="user-stats">
+                {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
+                <span>Игра: {{ user_data.role }}</span>
+                {% endif %}
+                <span>Монет: {{ user_data.coins }}</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+{% endif %}
 
                     <div class="map-legend">
                         <div class="legend-item">
