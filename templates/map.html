@@ -133,40 +133,82 @@
                     <div class="map-wrapper" id="mapWrapper">
                         <img src="{{ url_for('static', filename='images/map.png') }}" alt="Карта прогресса RGG" class="map-image" id="mapImage">
 
-                        <!-- Точки карты -->
-                        <div class="points-container">
-                            <!-- Старт -->
-                            <div class="map-point start-point" style="left: {{ map_config.start_point.x }}%; top: {{ map_config.start_point.y }}%;">
-                                <div class="point-marker">🏁</div>
-                                <div class="point-info">
-                                    <strong>Старт</strong><br>
-                                    Начало путешествия
-                                </div>
-                            </div>
+<!-- Точки карты -->
+<div class="points-container">
+    <!-- Старт -->
+    <div class="map-point start-point" style="left: {{ map_config.start_point.x }}%; top: {{ map_config.start_point.y }}%;">
+        <div class="point-marker">🏁</div>
+        <div class="point-info">
+            <strong>Старт</strong><br>
+            Начало путешествия
+        </div>
+    </div>
 
-                            <!-- Контрольные точки -->
-                            {% for checkpoint in map_config.checkpoints %}
-                            <div class="map-point checkpoint-point {% if total_completed >= checkpoint.required %}unlocked{% else %}locked{% endif %}"
-                                 style="left: {{ checkpoint.x }}%; top: {{ checkpoint.y }}%;">
-                                <div class="point-marker">
-                                    {% if total_completed >= checkpoint.required %}{{ checkpoint.icon }}{% else %}🔒{% endif %}
-                                </div>
-                                <div class="point-info">
-                                    <strong>{{ checkpoint.name }}</strong><br>
-                                    Требуется: {{ checkpoint.required }}+ задач<br>
-                                    Ваш прогресс: {{ total_completed }}
-                                </div>
-                            </div>
-                            {% endfor %}
+    <!-- Контрольные точки -->
+    {% for checkpoint in map_config.checkpoints %}
+    <div class="map-point checkpoint-point {% if total_completed >= checkpoint.required %}unlocked{% else %}locked{% endif %}"
+         style="left: {{ checkpoint.x }}%; top: {{ checkpoint.y }}%;">
+        <div class="point-marker">
+            {% if total_completed >= checkpoint.required %}{{ checkpoint.icon }}{% else %}🔒{% endif %}
+        </div>
+        <div class="point-info">
+            <strong>{{ checkpoint.name }}</strong><br>
+            Требуется: {{ checkpoint.required }}+ задач<br>
+            Ваш прогресс: {{ total_completed }}
+        </div>
+    </div>
+    {% endfor %}
 
-                            <!-- Финиш -->
-                            <div class="map-point end-point" style="left: {{ map_config.end_point.x }}%; top: {{ map_config.end_point.y }}%;">
-                                <div class="point-marker">🏆</div>
-                                <div class="point-info">
-                                    <strong>Финиш</strong><br>
-                                    Конец путешествия
-                                </div>
-                            </div>
+    <!-- Финиш -->
+    <div class="map-point end-point" style="left: {{ map_config.end_point.x }}%; top: {{ map_config.end_point.y }}%;">
+        <div class="point-marker">🏆</div>
+        <div class="point-info">
+            <strong>Финиш</strong><br>
+            Конец путешествия
+        </div>
+    </div>
+
+    <!-- Миниатюрная фишка пользователя -->
+    <div class="map-pin user-pin miniature" id="userPin"
+         style="left: {{ user_position[0] }}%; top: {{ user_position[1] }}%;"
+         data-x="{{ user_position[0] }}" data-y="{{ user_position[1] }}">
+        <div class="pin-custom user-pin-custom">
+            <div class="pin-fallback">
+                {{ session.username[0]|upper }}
+            </div>
+        </div>
+        <div class="pin-label">{{ session.username }}</div>
+    </div>
+
+    <!-- Фишки других пользователей -->
+    {% if all_users %}
+        {% for username, user_data in all_users.items() %}
+        {% if username != session.username and user_data.position %}
+        <div class="map-pin other-user-pin miniature"
+             style="left: {{ user_data.position.x }}%; top: {{ user_data.position.y }}%;"
+             data-username="{{ username }}">
+            <div class="pin-custom other-pin-custom">
+                <div class="pin-fallback">
+                    {{ username[0]|upper }}
+                </div>
+            </div>
+            <div class="pin-label">
+                {{ username }}
+            </div>
+            <div class="user-tooltip">
+                <strong>{{ username }}</strong>
+                <div class="user-stats">
+                    {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
+                    <span>Игра: {{ user_data.role }}</span>
+                    {% endif %}
+                    <span>Монет: {{ user_data.coins }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    {% endif %}
+</div>
 
 <!-- Миниатюрная фишка пользователя -->
 <div class="map-pin user-pin miniature" id="userPin"

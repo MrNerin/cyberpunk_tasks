@@ -208,6 +208,15 @@ def init_inventory_table():
     if not db.is_connected:
         return
 
+    def init_user_positions():
+        """Инициализирует позиции для всех пользователей, у которых их нет"""
+        users = db.get_all_users()
+        for username in users.keys():
+            position = db.get_user_position(username)
+            # Если позиция дефолтная, сохраняем ее в базе
+            if position.get('x') == 15 and position.get('y') == 75:
+                db.save_user_position(username, 15, 75)
+
     try:
         cur = db.conn.cursor()
         cur.execute("""
@@ -342,8 +351,11 @@ def get_all_users_with_stats():
     users = db.get_all_users()
     users_with_stats = {}
     for username, user_data in users.items():
+        # Получаем позицию пользователя
+        user_position = get_user_position(username)
         users_with_stats[username] = {
             **user_data,
+            'position': user_position,
             'registered_date': user_data.get('created_at', 'Неизвестно')
         }
     return users_with_stats
@@ -642,6 +654,9 @@ def admin_update_role():
 
     return redirect(url_for('admin'))
 
+@app.before_first_request
+def initialize():
+    init_user_positions()
 
 @app.route('/board/take/<int:task_id>', methods=['POST'])
 def take_task(task_id):
