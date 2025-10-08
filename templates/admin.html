@@ -80,26 +80,26 @@
                 <h2 class="section-title">🎮 Управление играми пользователей</h2>
                 <div class="form-group">
                     <label class="form-label">Назначение игры пользователю:</label>
-                    <form action="/admin/update_role" method="POST">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
-                            <div>
-                                <label class="form-label">Пользователь:</label>
-                                <select name="username" class="form-input" required>
-                                    <option value="">Выберите пользователя</option>
-                                    {% for username, user_data in users.items() %}
-                                    <option value="{{ username }}">{{ username }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div>
-                                <label class="form-label">Название игры:</label>
-                                <input type="text" name="role" class="form-input" placeholder="Введите название игры">
-                            </div>
-                            <div>
-                                <button type="submit" class="btn">💾 Назначить игру</button>
-                            </div>
-                        </div>
-                    </form>
+<form action="/admin/update_game" method="POST">
+    <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
+        <div>
+            <label class="form-label">Пользователь:</label>
+            <select name="username" class="form-input" required>
+                <option value="">Выберите пользователя</option>
+                {% for username, user_data in users.items() %}
+                <option value="{{ username }}">{{ username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Название игры:</label>
+            <input type="text" name="game" class="form-input" placeholder="Введите название игры" maxlength="20">
+        </div>
+        <div>
+            <button type="submit" class="btn">💾 Назначить игру</button>
+        </div>
+    </div>
+</form>
                 </div>
 
                 <div style="margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: 8px;">

@@ -82,7 +82,6 @@
                     </div>
                     <div class="user-info-compact">
                         <div class="user-name">{{ session.username }}</div>
-                        <div class="user-role">{{ session.role }}</div>
                         <div class="user-coins">💰 {{ user_coins }} монет</div>
                     </div>
                     <a href="/logout" class="btn btn-outline logout-btn">Выйти</a>
@@ -110,24 +109,14 @@
                     <div class="stat-label">Выполнено задач</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">{{ (user_daily_done|length / daily|length * 100)|round|int if daily|length > 0 else 0 }}%</div>
-                    <div class="stat-label">Прогресс сегодня</div>
+                    <div class="stat-value">{{ current_level }}</div>
+                    <div class="stat-label">Текущий уровень</div>
                 </div>
             </div>
 
             <!-- Карта -->
-<section class="panel">
-    <div class="map-container">
-        {% if not map_config %}
-        <div class="empty-state">
-            <div class="empty-state-icon">🗺️</div>
-            <h3>Карта не настроена</h3>
-            <p>Администратор должен настроить карту</p>
-            {% if session.role == 'admin' %}
-            <a href="/map_editor" class="btn">Настроить карту</a>
-            {% endif %}
-        </div>
-        {% else %}
+            <section class="panel">
+                <div class="map-container">
                     <div class="map-controls">
                         <button class="btn btn-secondary" onclick="enableMovement()">
                             🎯 Режим перемещения
@@ -142,135 +131,92 @@
 
                     <div class="map-wrapper" id="mapWrapper">
                         <img src="{{ url_for('static', filename='images/map.png') }}" alt="Карта прогресса RGG" class="map-image" id="mapImage">
-                               {% endif %}
+
+                        <!-- Точки карты -->
+                        <div class="points-container">
+                            <!-- Старт -->
+                            {% if map_config and map_config.start_point %}
+                            <div class="map-point start-point" style="left: {{ map_config.start_point.x }}%; top: {{ map_config.start_point.y }}%;">
+                                <div class="point-marker">🏁</div>
+                                <div class="point-info">
+                                    <strong>Старт</strong><br>
+                                    Начало путешествия
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Контрольные точки -->
+                            {% if map_config and map_config.checkpoints %}
+                            {% for checkpoint in map_config.checkpoints %}
+                            <div class="map-point checkpoint-point {% if total_completed >= checkpoint.required %}unlocked{% else %}locked{% endif %}"
+                                 style="left: {{ checkpoint.x }}%; top: {{ checkpoint.y }}%;">
+                                <div class="point-marker">
+                                    {% if total_completed >= checkpoint.required %}{{ checkpoint.icon }}{% else %}🔒{% endif %}
+                                </div>
+                                <div class="point-info">
+                                    <strong>{{ checkpoint.name }}</strong><br>
+                                    Требуется: {{ checkpoint.required }}+ задач<br>
+                                    Ваш прогресс: {{ total_completed }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% endif %}
+
+                            <!-- Финиш -->
+                            {% if map_config and map_config.end_point %}
+                            <div class="map-point end-point" style="left: {{ map_config.end_point.x }}%; top: {{ map_config.end_point.y }}%;">
+                                <div class="point-marker">🏆</div>
+                                <div class="point-info">
+                                    <strong>Финиш</strong><br>
+                                    Конец путешествия
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Фишка текущего пользователя -->
+                            <div class="map-pin user-pin" id="userPin"
+                                 style="left: {{ user_position[0] }}%; top: {{ user_position[1] }}%;"
+                                 data-x="{{ user_position[0] }}" data-y="{{ user_position[1] }}">
+                                <div class="pin-avatar user-pin-avatar">
+                                    {{ session.username[0]|upper }}
+                                </div>
+                                <div class="pin-label">{{ session.username }}</div>
+                            </div>
+
+                            <!-- Фишки других пользователей -->
+                            {% if all_users %}
+                                {% for username, user_data in all_users.items() %}
+                                {% if username != session.username and user_data.position %}
+                                <div class="map-pin other-user-pin"
+                                     style="left: {{ user_data.position.x }}%; top: {{ user_data.position.y }}%;"
+                                     data-username="{{ username }}">
+                                    <div class="pin-avatar other-pin-avatar">
+                                        {{ username[0]|upper }}
+                                    </div>
+                                    <div class="pin-label">{{ username }}</div>
+                                    <div class="user-tooltip">
+                                        <strong>{{ username }}</strong>
+                                        <div class="user-stats">
+                                            {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
+                                            <span>Игра: {{ user_data.role }}</span>
+                                            {% endif %}
+                                            <span>Монет: {{ user_data.coins }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
                     </div>
-            </section>
-
-<!-- Точки карты -->
-<div class="points-container">
-    <!-- Старт -->
-    <div class="map-point start-point" style="left: {{ map_config.start_point.x }}%; top: {{ map_config.start_point.y }}%;">
-        <div class="point-marker">🏁</div>
-        <div class="point-info">
-            <strong>Старт</strong><br>
-            Начало путешествия
-        </div>
-    </div>
-
-    <!-- Контрольные точки -->
-    {% for checkpoint in map_config.checkpoints %}
-    <div class="map-point checkpoint-point {% if total_completed >= checkpoint.required %}unlocked{% else %}locked{% endif %}"
-         style="left: {{ checkpoint.x }}%; top: {{ checkpoint.y }}%;">
-        <div class="point-marker">
-            {% if total_completed >= checkpoint.required %}{{ checkpoint.icon }}{% else %}🔒{% endif %}
-        </div>
-        <div class="point-info">
-            <strong>{{ checkpoint.name }}</strong><br>
-            Требуется: {{ checkpoint.required }}+ задач<br>
-            Ваш прогресс: {{ total_completed }}
-        </div>
-    </div>
-    {% endfor %}
-
-    <!-- Финиш -->
-    <div class="map-point end-point" style="left: {{ map_config.end_point.x }}%; top: {{ map_config.end_point.y }}%;">
-        <div class="point-marker">🏆</div>
-        <div class="point-info">
-            <strong>Финиш</strong><br>
-            Конец путешествия
-        </div>
-    </div>
-
-    <!-- Миниатюрная фишка пользователя -->
-    <div class="map-pin user-pin miniature" id="userPin"
-         style="left: {{ user_position[0] }}%; top: {{ user_position[1] }}%;"
-         data-x="{{ user_position[0] }}" data-y="{{ user_position[1] }}">
-        <div class="pin-custom user-pin-custom">
-            <div class="pin-fallback">
-                {{ session.username[0]|upper }}
-            </div>
-        </div>
-        <div class="pin-label">{{ session.username }}</div>
-    </div>
-
-    <!-- Фишки других пользователей -->
-    {% if all_users %}
-        {% for username, user_data in all_users.items() %}
-        {% if username != session.username and user_data.position %}
-        <div class="map-pin other-user-pin miniature"
-             style="left: {{ user_data.position.x }}%; top: {{ user_data.position.y }}%;"
-             data-username="{{ username }}">
-            <div class="pin-custom other-pin-custom">
-                <div class="pin-fallback">
-                    {{ username[0]|upper }}
-                </div>
-            </div>
-            <div class="pin-label">
-                {{ username }}
-            </div>
-            <div class="user-tooltip">
-                <strong>{{ username }}</strong>
-                <div class="user-stats">
-                    {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
-                    <span>Игра: {{ user_data.role }}</span>
-                    {% endif %}
-                    <span>Монет: {{ user_data.coins }}</span>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        {% endfor %}
-    {% endif %}
-</div>
-
-<!-- Миниатюрная фишка пользователя -->
-<div class="map-pin user-pin miniature" id="userPin"
-     style="left: {{ user_position[0] }}%; top: {{ user_position[1] }}%;"
-     data-x="{{ user_position[0] }}" data-y="{{ user_position[1] }}">
-    <div class="pin-custom">
-        <div class="pin-fallback">
-            {{ session.username[0]|upper }}
-        </div>
-    </div>
-    <div class="pin-label">{{ session.username }}</div>
-</div>
-
-<!-- Фишки других пользователей -->
-{% if all_users %}
-    {% for username, user_data in all_users.items() %}
-    {% if username != session.username %}
-    <div class="map-pin other-user-pin miniature"
-         style="left: {{ user_data.position.x if user_data.position else 15 }}%; top: {{ user_data.position.y if user_data.position else 75 }}%;"
-         data-username="{{ username }}">
-        <div class="pin-custom">
-            <div class="pin-fallback">
-                {{ username[0]|upper }}
-            </div>
-        </div>
-        <div class="pin-label">
-            {{ username }}
-        </div>
-        <div class="user-tooltip">
-            <strong>{{ username }}</strong>
-            <div class="user-stats">
-                {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
-                <span>Игра: {{ user_data.role }}</span>
-                {% endif %}
-                <span>Монет: {{ user_data.coins }}</span>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-    {% endfor %}
-{% endif %}
 
                     <div class="map-legend">
                         <div class="legend-item">
-                            <span class="legend-marker">📍</span>
+                            <span class="legend-marker user-marker">🔵</span>
                             <span>Ваше текущее положение</span>
                         </div>
                         <div class="legend-item">
-                            <span class="legend-marker other-user">👤</span>
+                            <span class="legend-marker other-marker">🟢</span>
                             <span>Другие игроки</span>
                         </div>
                         <div class="legend-item">
@@ -346,94 +292,54 @@
         </main>
     </div>
 
-   <script>
-    let isMovementEnabled = false;
-    let userPin = null;
+    <script>
+        let isMovementEnabled = false;
+        let userPin = null;
 
-    // Mobile sidebar toggle
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('mobileOverlay');
-        sidebar.classList.toggle('mobile-open');
-        overlay.classList.toggle('active');
-    }
-
-    // Close sidebar when clicking on a link (mobile)
-    document.querySelectorAll('.sidebar-link, .btn, .logout-btn, .login-btn, .register-btn').forEach(link => {
-        link.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) {
-                toggleSidebar();
-            }
-        });
-    });
-
-    function enableMovement() {
-        isMovementEnabled = true;
-        userPin = document.getElementById('userPin');
-        document.getElementById('saveBtn').disabled = false;
-
-        if (userPin) {
-            userPin.style.cursor = 'move';
-            userPin.style.zIndex = '100';
-
-            // Анимация включения режима
-            userPin.style.animation = 'glow 1s ease-in-out';
-            setTimeout(() => {
-                userPin.style.animation = '';
-            }, 1000);
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
         }
 
-        alert('🎯 Режим перемещения включен! Перетащите свою фишку в нужное место и нажмите "Закрепить позицию"');
-    }
-
-    function savePosition() {
-        if (!isMovementEnabled || !userPin) {
-            alert('Сначала включите режим перемещения!');
-            return;
-        }
-
-        const x = parseFloat(userPin.style.left);
-        const y = parseFloat(userPin.style.top);
-
-        console.log('Saving position:', { x, y });
-
-        fetch('/map/save_position', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                x: x,
-                y: y
-            })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                alert('✅ Позиция успешно сохранена!');
-                isMovementEnabled = false;
-                userPin.style.cursor = 'default';
-                document.getElementById('saveBtn').disabled = true;
-            } else {
-                alert('❌ Ошибка при сохранении позиции: ' + (data.error || 'Неизвестная ошибка'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('❌ Ошибка сети: ' + error.message);
+        // Close sidebar when clicking on a link (mobile)
+        document.querySelectorAll('.sidebar-link, .btn, .logout-btn, .login-btn, .register-btn').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
         });
-    }
 
-    function resetPosition() {
-        if (confirm('Вернуться на стартовую позицию?')) {
+        function enableMovement() {
+            isMovementEnabled = true;
             userPin = document.getElementById('userPin');
-            userPin.style.left = '15%';
-            userPin.style.top = '75%';
+            document.getElementById('saveBtn').disabled = false;
+
+            if (userPin) {
+                userPin.style.cursor = 'move';
+                userPin.style.zIndex = '100';
+
+                // Анимация включения режима
+                userPin.style.animation = 'glow 1s ease-in-out';
+                setTimeout(() => {
+                    userPin.style.animation = '';
+                }, 1000);
+            }
+
+            alert('🎯 Режим перемещения включен! Перетащите свою фишку в нужное место и нажмите "Закрепить позицию"');
+        }
+
+        function savePosition() {
+            if (!isMovementEnabled || !userPin) {
+                alert('Сначала включите режим перемещения!');
+                return;
+            }
+
+            const x = parseFloat(userPin.style.left);
+            const y = parseFloat(userPin.style.top);
 
             fetch('/map/save_position', {
                 method: 'POST',
@@ -441,16 +347,19 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    x: 15,
-                    y: 75
+                    x: x,
+                    y: y
                 })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('✅ Позиция сброшена!');
+                    alert('✅ Позиция успешно сохранена!');
+                    isMovementEnabled = false;
+                    userPin.style.cursor = 'default';
+                    document.getElementById('saveBtn').disabled = true;
                 } else {
-                    alert('❌ Ошибка при сбросе позиции');
+                    alert('❌ Ошибка при сохранении позиции');
                 }
             })
             .catch(error => {
@@ -458,179 +367,182 @@
                 alert('❌ Ошибка сети');
             });
         }
-    }
 
-    // Drag & Drop для фишки пользователя
-    function initMap() {
-        userPin = document.getElementById('userPin');
-        let isDragging = false;
-        let offsetX, offsetY;
+        function resetPosition() {
+            if (confirm('Вернуться на стартовую позицию?')) {
+                userPin = document.getElementById('userPin');
+                userPin.style.left = '15%';
+                userPin.style.top = '75%';
 
-        if (userPin) {
-            userPin.addEventListener('mousedown', startDrag);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', stopDrag);
-
-            // Touch events для мобильных устройств
-            userPin.addEventListener('touchstart', startDragTouch);
-            document.addEventListener('touchmove', dragTouch);
-            document.addEventListener('touchend', stopDrag);
+                fetch('/map/save_position', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        x: 15,
+                        y: 75
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ Позиция сброшена!');
+                    }
+                });
+            }
         }
 
-        function startDrag(e) {
-            if (!isMovementEnabled) return;
-            isDragging = true;
-            const rect = userPin.getBoundingClientRect();
-            offsetX = e.clientX - rect.left;
-            offsetY = e.clientY - rect.top;
-            userPin.style.transition = 'none';
-            e.preventDefault();
-        }
+        // Drag & Drop для фишки пользователя
+        function initMap() {
+            userPin = document.getElementById('userPin');
+            let isDragging = false;
+            let offsetX, offsetY;
 
-        function startDragTouch(e) {
-            if (!isMovementEnabled) return;
-            isDragging = true;
-            const touch = e.touches[0];
-            const rect = userPin.getBoundingClientRect();
-            offsetX = touch.clientX - rect.left;
-            offsetY = touch.clientY - rect.top;
-            userPin.style.transition = 'none';
-            e.preventDefault();
-        }
-
-        function drag(e) {
-            if (!isDragging || !isMovementEnabled) return;
-
-            const mapWrapper = document.getElementById('mapWrapper');
-            const mapRect = mapWrapper.getBoundingClientRect();
-
-            let x = e.clientX - mapRect.left - offsetX;
-            let y = e.clientY - mapRect.top - offsetY;
-
-            // Ограничиваем перемещение в пределах карты
-            x = Math.max(0, Math.min(x, mapRect.width - userPin.offsetWidth));
-            y = Math.max(0, Math.min(y, mapRect.height - userPin.offsetHeight));
-
-            // Конвертируем в проценты
-            const percentX = (x / mapRect.width) * 100;
-            const percentY = (y / mapRect.height) * 100;
-
-            userPin.style.left = percentX + '%';
-            userPin.style.top = percentY + '%';
-        }
-
-        function dragTouch(e) {
-            if (!isDragging || !isMovementEnabled) return;
-
-            const touch = e.touches[0];
-            const mapWrapper = document.getElementById('mapWrapper');
-            const mapRect = mapWrapper.getBoundingClientRect();
-
-            let x = touch.clientX - mapRect.left - offsetX;
-            let y = touch.clientY - mapRect.top - offsetY;
-
-            // Ограничиваем перемещение в пределах карты
-            x = Math.max(0, Math.min(x, mapRect.width - userPin.offsetWidth));
-            y = Math.max(0, Math.min(y, mapRect.height - userPin.offsetHeight));
-
-            // Конвертируем в проценты
-            const percentX = (x / mapRect.width) * 100;
-            const percentY = (y / mapRect.height) * 100;
-
-            userPin.style.left = percentX + '%';
-            userPin.style.top = percentY + '%';
-
-            e.preventDefault();
-        }
-
-        function stopDrag() {
-            if (!isDragging) return;
-            isDragging = false;
-            userPin.style.transition = 'all 0.3s ease';
-        }
-
-        // Анимация фишки при загрузке
-        setTimeout(() => {
             if (userPin) {
-                userPin.classList.add('pin-move');
-                setTimeout(() => {
-                    userPin.classList.remove('pin-move');
-                }, 1500);
-            }
-        }, 800);
-    }
+                userPin.addEventListener('mousedown', startDrag);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', stopDrag);
 
-    document.addEventListener('DOMContentLoaded', function() {
-        initMap();
-
-        // Update active link based on current page
-        const currentPath = window.location.pathname;
-        document.querySelectorAll('.sidebar-link').forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === currentPath) {
-                link.classList.add('active');
+                // Touch events для мобильных устройств
+                userPin.addEventListener('touchstart', startDragTouch);
+                document.addEventListener('touchmove', dragTouch);
+                document.addEventListener('touchend', stopDrag);
             }
+
+            function startDrag(e) {
+                if (!isMovementEnabled) return;
+                isDragging = true;
+                const rect = userPin.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                userPin.style.transition = 'none';
+                e.preventDefault();
+            }
+
+            function startDragTouch(e) {
+                if (!isMovementEnabled) return;
+                isDragging = true;
+                const touch = e.touches[0];
+                const rect = userPin.getBoundingClientRect();
+                offsetX = touch.clientX - rect.left;
+                offsetY = touch.clientY - rect.top;
+                userPin.style.transition = 'none';
+                e.preventDefault();
+            }
+
+            function drag(e) {
+                if (!isDragging || !isMovementEnabled) return;
+
+                const mapWrapper = document.getElementById('mapWrapper');
+                const mapRect = mapWrapper.getBoundingClientRect();
+
+                let x = e.clientX - mapRect.left - offsetX;
+                let y = e.clientY - mapRect.top - offsetY;
+
+                // Ограничиваем перемещение в пределах карты
+                x = Math.max(0, Math.min(x, mapRect.width - userPin.offsetWidth));
+                y = Math.max(0, Math.min(y, mapRect.height - userPin.offsetHeight));
+
+                // Конвертируем в проценты
+                const percentX = (x / mapRect.width) * 100;
+                const percentY = (y / mapRect.height) * 100;
+
+                userPin.style.left = percentX + '%';
+                userPin.style.top = percentY + '%';
+            }
+
+            function dragTouch(e) {
+                if (!isDragging || !isMovementEnabled) return;
+
+                const touch = e.touches[0];
+                const mapWrapper = document.getElementById('mapWrapper');
+                const mapRect = mapWrapper.getBoundingClientRect();
+
+                let x = touch.clientX - mapRect.left - offsetX;
+                let y = touch.clientY - mapRect.top - offsetY;
+
+                // Ограничиваем перемещение в пределах карта
+                x = Math.max(0, Math.min(x, mapRect.width - userPin.offsetWidth));
+                y = Math.max(0, Math.min(y, mapRect.height - userPin.offsetHeight));
+
+                // Конвертируем в проценты
+                const percentX = (x / mapRect.width) * 100;
+                const percentY = (y / mapRect.height) * 100;
+
+                userPin.style.left = percentX + '%';
+                userPin.style.top = percentY + '%';
+
+                e.preventDefault();
+            }
+
+            function stopDrag() {
+                if (!isDragging) return;
+                isDragging = false;
+                userPin.style.transition = 'all 0.3s ease';
+            }
+
+            // Анимация фишки при загрузке
+            setTimeout(() => {
+                if (userPin) {
+                    userPin.classList.add('pin-move');
+                    setTimeout(() => {
+                        userPin.classList.remove('pin-move');
+                    }, 1500);
+                }
+            }, 800);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+
+            // Update active link based on current page
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
         });
-    });
-</script>
+    </script>
 
     <style>
-        /* Стили для кастомных фишек */
-        .pin-custom {
+        /* Стили для фишек на карте */
+        .map-pin {
+            position: absolute;
+            transform: translate(-50%, -100%);
+            text-align: center;
+            z-index: 20;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pin-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, var(--text-accent), var(--text-accent2));
-            border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .custom-pin-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-
-        .pin-fallback {
             color: white;
             font-weight: bold;
             font-size: 16px;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
-        .map-pin.miniature .pin-custom {
-            width: 30px;
-            height: 30px;
+        .user-pin-avatar {
+            background: linear-gradient(135deg, #64b5f6, #42a5f5);
+            animation: float 3s ease-in-out infinite;
         }
 
-        .map-pin.miniature .pin-fallback {
-            font-size: 12px;
-        }
-
-        /* Стили для фишек других пользователей */
-        .other-user-pin {
-            position: absolute;
-            transform: translate(-50%, -100%) scale(0.8);
-            z-index: 15;
-            cursor: help;
-            transition: all 0.3s ease;
-        }
-
-        .other-user-pin:hover {
-            z-index: 25;
-            transform: translate(-50%, -100%) scale(0.9);
-        }
-
-        .other-user-pin .pin-custom {
+        .other-pin-avatar {
+            background: linear-gradient(135deg, #81c784, #66bb6a);
             animation: floatMini 3s ease-in-out infinite;
         }
 
-        .other-user-pin .pin-label {
+        .pin-label {
             position: absolute;
             top: -25px;
             left: 50%;
@@ -642,6 +554,28 @@
             font-size: 0.7em;
             white-space: nowrap;
             border: 1px solid var(--border-color);
+            font-weight: 500;
+        }
+
+        .user-pin .pin-label {
+            background: linear-gradient(135deg, #64b5f6, #42a5f5);
+            color: white;
+            border: 1px solid white;
+        }
+
+        .user-pin {
+            z-index: 30;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+        }
+
+        .other-user-pin {
+            z-index: 15;
+            cursor: help;
+        }
+
+        .other-user-pin:hover {
+            z-index: 25;
+            transform: translate(-50%, -100%) scale(1.1);
         }
 
         .user-tooltip {
@@ -681,28 +615,35 @@
             color: var(--text-secondary);
         }
 
-        @keyframes floatMini {
-            0%, 100% { transform: translate(-50%, -100%) scale(0.8) translateY(0px); }
-            50% { transform: translate(-50%, -100%) scale(0.8) translateY(-3px); }
+        @keyframes float {
+            0%, 100% { transform: translate(-50%, -100%) translateY(0px); }
+            50% { transform: translate(-50%, -100%) translateY(-8px); }
         }
 
-        .legend-marker.other-user {
-            color: #667eea;
+        @keyframes floatMini {
+            0%, 100% { transform: translate(-50%, -100%) translateY(0px); }
+            50% { transform: translate(-50%, -100%) translateY(-4px); }
+        }
+
+        /* Легенда */
+        .user-marker {
+            color: #64b5f6;
+        }
+
+        .other-marker {
+            color: #81c784;
         }
 
         @media (max-width: 768px) {
-            .pin-custom {
-                width: 35px;
-                height: 35px;
+            .pin-avatar {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
             }
 
-            .map-pin.miniature .pin-custom {
-                width: 25px;
-                height: 25px;
-            }
-
-            .map-pin.miniature .pin-fallback {
-                font-size: 10px;
+            .pin-label {
+                font-size: 0.6em;
+                padding: 3px 6px;
             }
         }
     </style>

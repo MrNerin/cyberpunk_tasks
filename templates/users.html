@@ -161,14 +161,13 @@
                         </div>
 
                         {% if session.role == 'admin' and username != session.username %}
-                        <div class="user-admin-actions">
-                            <form action="/admin/update_role" method="POST" class="role-form">
-                                <input type="hidden" name="username" value="{{ username }}">
-                                <input type="text" name="role" class="role-input"
-                                       value="{{ user_data.role if user_data.role != 'user' and user_data.role != 'admin' else '' }}"
-                                       placeholder="Введите игру">
-                                <button type="submit" class="btn btn-secondary btn-small">💾 Сохранить</button>
-                            </form>
+                    <form action="/admin/update_game" method="POST" class="game-form">
+    <input type="hidden" name="username" value="{{ username }}">
+    <input type="text" name="game" class="game-input"
+           value="{{ user_data.role if user_data.role != 'user' and user_data.role != 'admin' else '' }}"
+           placeholder="Введите игру" maxlength="20">
+    <button type="submit" class="btn btn-secondary btn-small">💾 Сохранить</button>
+</form>
                         </div>
                         {% endif %}
                     </div>
