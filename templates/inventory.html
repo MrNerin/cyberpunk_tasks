@@ -153,7 +153,16 @@
                         <div class="item-footer">
                             <span class="item-quantity">Количество: {{ item.quantity }}</span>
                             <span class="item-date">
-                                Добавлен: {{ item.created_at.split(' ')[0] if item.created_at else 'Неизвестно' }}
+                                Добавлен:
+                                {% if item.created_at %}
+                                    {% if item.created_at is string %}
+                                        {{ item.created_at.split(' ')[0] }}
+                                    {% else %}
+                                        {{ item.created_at.strftime('%Y-%m-%d') }}
+                                    {% endif %}
+                                {% else %}
+                                    Неизвестно
+                                {% endif %}
                             </span>
                         </div>
                     </div>
