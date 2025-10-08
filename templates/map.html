@@ -190,14 +190,41 @@
                             </div>
 
                             <!-- Миниатюрная фишка пользователя -->
-                            <div class="map-pin user-pin miniature" id="userPin"
-                                 style="left: {{ user_position[0] }}%; top: {{ user_position[1] }}%;"
-                                 data-x="{{ user_position[0] }}" data-y="{{ user_position[1] }}">
-                                <div class="pin-icon">
-                                    {% if total_completed >= 30 %}🚀{% elif total_completed >= 20 %}⭐{% elif total_completed >= 10 %}🔵{% else %}📍{% endif %}
-                                </div>
-                                <div class="pin-label">{{ session.username }}</div>
-                            </div>
+<div class="map-pin user-pin miniature" id="userPin"
+     style="left: {{ user_position[0] }}%; top: {{ user_position[1] }}%;"
+     data-x="{{ user_position[0] }}" data-y="{{ user_position[1] }}">
+    <div class="pin-custom" id="userPinCustom">
+        <!-- Динамически загружаемая фишка -->
+    </div>
+    <div class="pin-label">{{ session.username }}</div>
+</div>
+
+<!-- Добавляем панель выбора фишки -->
+<div class="pin-selector-panel">
+    <h4>Выберите фишку:</h4>
+    <div class="pin-options">
+        <div class="pin-option" data-type="crystal" data-color="blue">
+            <div class="pin-crystal crystal-1"></div>
+            <span>Синий кристалл</span>
+        </div>
+        <div class="pin-option" data-type="crystal" data-color="green">
+            <div class="pin-crystal crystal-2"></div>
+            <span>Зеленый кристалл</span>
+        </div>
+        <div class="pin-option" data-type="crystal" data-color="purple">
+            <div class="pin-crystal crystal-3"></div>
+            <span>Фиолетовый кристалл</span>
+        </div>
+        <div class="pin-option" data-type="emoji" data-emoji="🚀">
+            <span class="pin-emoji">🚀</span>
+            <span>Ракета</span>
+        </div>
+        <div class="pin-option" data-type="emoji" data-emoji="⭐">
+            <span class="pin-emoji">⭐</span>
+            <span>Звезда</span>
+        </div>
+    </div>
+</div>
 
                             <!-- Фишки других пользователей -->
                             {% if all_users %}

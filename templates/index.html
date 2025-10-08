@@ -71,27 +71,6 @@
                     </a>
                 </div>
                 {% endif %}
-
-                <!-- Быстрые действия -->
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Быстрые действия</div>
-                    <div class="quick-actions">
-                        <a href="/map" class="action-button">
-                            <span class="action-button-icon">🗺️</span>
-                            <span class="action-button-text">На карту</span>
-                        </a>
-                        <a href="/users" class="action-button">
-                            <span class="action-button-icon">👥</span>
-                            <span class="action-button-text">Все игроки</span>
-                        </a>
-                        {% if session.role == 'admin' %}
-                        <a href="/admin" class="action-button">
-                            <span class="action-button-icon">⚙️</span>
-                            <span class="action-button-text">Управление системой</span>
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
             </nav>
 
             <!-- User Info -->

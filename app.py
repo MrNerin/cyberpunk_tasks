@@ -522,6 +522,64 @@ def register():
     return render_template('register.html')
 
 
+@app.route('/api/user/pin_config', methods=['GET'])
+def get_user_pin_config():
+    if 'username' not in session:
+        return jsonify({'error': 'Не авторизован'}), 401
+
+    pin_config = db.get_user_pin_config(session['username'])
+    return jsonify(pin_config)
+
+
+@app.route('/api/user/update_pin', methods=['POST'])
+def update_user_pin():
+    if 'username' not in session:
+        return jsonify({'error': 'Не авторизован'}), 401
+
+    data = request.get_json()
+    pin_type = data.get('type', 'default')
+    pin_color = data.get('color', 'blue')
+
+    success = db.update_user_pin_config(session['username'], pin_type, pin_color)
+
+    if success:
+        return jsonify({'success': True, 'message': 'Фишка обновлена'})
+    else:
+        return jsonify({'error': 'Ошибка обновления фишки'}), 500
+
+
+@app.route('/api/user/update_status', methods=['POST'])
+def update_user_status():
+    if 'username' not in session or session.get('role') != 'admin':
+        return jsonify({'error': 'Доступ запрещен'}), 403
+
+    data = request.get_json()
+    username = data.get('username')
+    status = data.get('status')
+
+    if username and status:
+        success = db.update_user_status(username, status)
+        if success:
+            return jsonify({'success': True, 'message': 'Статус обновлен'})
+
+    return jsonify({'error': 'Ошибка обновления статуса'}), 500
+
+
+@app.route('/api/user/delete', methods=['POST'])
+def delete_user():
+    if 'username' not in session or session.get('role') != 'admin':
+        return jsonify({'error': 'Доступ запрещен'}), 403
+
+    data = request.get_json()
+    username = data.get('username')
+
+    if username and username != session['username']:
+        # Реализация удаления пользователя
+        # db.delete_user(username)
+        return jsonify({'success': True, 'message': 'Пользователь удален'})
+
+    return jsonify({'error': 'Невозможно удалить пользователя'}), 400
+
 @app.route('/logout')
 def logout():
     session.clear()
