@@ -240,7 +240,7 @@
         }
 
         // Close sidebar when clicking on a link (mobile)
-        document.querySelectorAll('.sidebar-link, .action-button, .btn, .logout-btn, .login-btn, .register-btn').forEach(link => {
+        document.querySelectorAll('.sidebar-link, .btn, .logout-btn, .login-btn, .register-btn').forEach(link => {
             link.addEventListener('click', (e) => {
                 // Проверяем, что это не кнопка действия в задаче
                 if (!e.target.closest('.btn-action') && !e.target.closest('.task-form')) {

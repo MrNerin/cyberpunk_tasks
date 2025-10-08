@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Панель управления - RGG QUEST</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
 </head>
 <body>
@@ -20,23 +18,7 @@
 
             <nav class="sidebar-nav">
                 <div class="sidebar-section">
-    <div class="sidebar-section-title">Сообщество</div>
-    <a href="/users" class="sidebar-link">
-        <span class="sidebar-link-icon">👥</span>
-        <span class="sidebar-link-text">Все игроки</span>
-    </a>
-</div>
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Управление</div>
-                    <a href="/admin" class="sidebar-link active">
-                        <span class="sidebar-link-icon">⚙️</span>
-                        <span class="sidebar-link-text">Панель управления</span>
-                    </a>
-
-                    <a href="/map_editor" class="sidebar-link">
-                        <span class="sidebar-link-icon">🎨</span>
-                        <span class="sidebar-link-text">Редактор карты</span>
-                    </a>
+                    <div class="sidebar-section-title">Основное</div>
                     <a href="/" class="sidebar-link">
                         <span class="sidebar-link-icon">📋</span>
                         <span class="sidebar-link-text">Главная</span>
@@ -45,11 +27,30 @@
                         <span class="sidebar-link-icon">🗺️</span>
                         <span class="sidebar-link-text">Карта прогресса</span>
                     </a>
-                        <div class="sidebar-section-title">Сообщество</div>
-    <a href="/users" class="sidebar-link">
-        <span class="sidebar-link-icon">👥</span>
-        <span class="sidebar-link-text">Все игроки</span>
-    </a>
+                    <a href="/inventory" class="sidebar-link">
+                        <span class="sidebar-link-icon">🎒</span>
+                        <span class="sidebar-link-text">Мой инвентарь</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Сообщество</div>
+                    <a href="/users" class="sidebar-link">
+                        <span class="sidebar-link-icon">👥</span>
+                        <span class="sidebar-link-text">Все игроки</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Управление</div>
+                    <a href="/admin" class="sidebar-link active">
+                        <span class="sidebar-link-icon">⚙️</span>
+                        <span class="sidebar-link-text">Панель управления</span>
+                    </a>
+                    <a href="/map_editor" class="sidebar-link">
+                        <span class="sidebar-link-icon">🎨</span>
+                        <span class="sidebar-link-text">Редактор карты</span>
+                    </a>
                 </div>
             </nav>
 
@@ -74,6 +75,60 @@
         <main class="main-content">
             <h1 class="title">Панель управления</h1>
             <p class="subtitle">Управление задачами, монетками и настройками системы</p>
+
+            <!-- Управление ролями пользователей -->
+            <section class="panel">
+                <h2 class="section-title">👥 Управление ролями пользователей</h2>
+                <div class="form-group">
+                    <label class="form-label">Изменение ролей:</label>
+                    <form action="/admin/update_role" method="POST">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
+                            <div>
+                                <label class="form-label">Пользователь:</label>
+                                <select name="username" class="form-input" required>
+                                    <option value="">Выберите пользователя</option>
+                                    {% for username, user_data in users.items() %}
+                                    <option value="{{ username }}">{{ username }} ({{ user_data.role }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Новая роль:</label>
+                                <select name="role" class="form-input" required>
+                                    <option value="user">Игрок</option>
+                                    <option value="admin">Админ</option>
+                                    <option value="minecraft">Minecraft</option>
+                                    <option value="cs2">CS2</option>
+                                    <option value="dota2">Dota 2</option>
+                                    <option value="valorant">Valorant</option>
+                                    <option value="overwatch">Overwatch</option>
+                                </select>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn">💾 Обновить роль</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div style="margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: 8px;">
+                    <h4>Текущие роли пользователей:</h4>
+                    {% for username, user_data in users.items() %}
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color); align-items: center;">
+                        <div>
+                            <span>{{ username }}</span>
+                            <span style="margin-left: 10px; padding: 2px 8px; border-radius: 12px; font-size: 0.8em;
+                                {% if user_data.role == 'admin' %}background: #ff6b6b; color: white;
+                                {% elif user_data.role == 'user' %}background: rgba(100, 181, 246, 0.2); color: var(--text-accent);
+                                {% else %}background: rgba(129, 199, 132, 0.2); color: var(--text-success);{% endif %}">
+                                {{ user_data.role }}
+                            </span>
+                        </div>
+                        <strong>💰 {{ user_data.coins }} монет</strong>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
 
             <!-- Управление монетками -->
             <section class="panel">
@@ -100,16 +155,6 @@
                             </div>
                         </div>
                     </form>
-                </div>
-
-                <div style="margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: 8px;">
-                    <h4>Текущие балансы:</h4>
-                    {% for username, user_data in users.items() %}
-                    <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border-color);">
-                        <span>{{ username }} ({{ user_data.role }})</span>
-                        <strong>💰 {{ user_data.coins }} монет</strong>
-                    </div>
-                    {% endfor %}
                 </div>
             </section>
 

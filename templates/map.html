@@ -71,27 +71,6 @@
                     </a>
                 </div>
                 {% endif %}
-
-                <!-- Быстрые действия -->
-                <div class="sidebar-section">
-                    <div class="sidebar-section-title">Быстрые действия</div>
-                    <div class="quick-actions">
-                        <a href="/" class="action-button">
-                            <span class="action-button-icon">📋</span>
-                            <span class="action-button-text">К заданиям</span>
-                        </a>
-                        <a href="/users" class="action-button">
-                            <span class="action-button-icon">👥</span>
-                            <span class="action-button-text">Все игроки</span>
-                        </a>
-                        {% if session.role == 'admin' %}
-                        <a href="/admin" class="action-button">
-                            <span class="action-button-icon">⚙️</span>
-                            <span class="action-button-text">Управление системой</span>
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
             </nav>
 
             <!-- User Info -->
@@ -190,41 +169,20 @@
                             </div>
 
                             <!-- Миниатюрная фишка пользователя -->
-<div class="map-pin user-pin miniature" id="userPin"
-     style="left: {{ user_position[0] }}%; top: {{ user_position[1] }}%;"
-     data-x="{{ user_position[0] }}" data-y="{{ user_position[1] }}">
-    <div class="pin-custom" id="userPinCustom">
-        <!-- Динамически загружаемая фишка -->
-    </div>
-    <div class="pin-label">{{ session.username }}</div>
-</div>
-
-<!-- Добавляем панель выбора фишки -->
-<div class="pin-selector-panel">
-    <h4>Выберите фишку:</h4>
-    <div class="pin-options">
-        <div class="pin-option" data-type="crystal" data-color="blue">
-            <div class="pin-crystal crystal-1"></div>
-            <span>Синий кристалл</span>
-        </div>
-        <div class="pin-option" data-type="crystal" data-color="green">
-            <div class="pin-crystal crystal-2"></div>
-            <span>Зеленый кристалл</span>
-        </div>
-        <div class="pin-option" data-type="crystal" data-color="purple">
-            <div class="pin-crystal crystal-3"></div>
-            <span>Фиолетовый кристалл</span>
-        </div>
-        <div class="pin-option" data-type="emoji" data-emoji="🚀">
-            <span class="pin-emoji">🚀</span>
-            <span>Ракета</span>
-        </div>
-        <div class="pin-option" data-type="emoji" data-emoji="⭐">
-            <span class="pin-emoji">⭐</span>
-            <span>Звезда</span>
-        </div>
-    </div>
-</div>
+                            <div class="map-pin user-pin miniature" id="userPin"
+                                 style="left: {{ user_position[0] }}%; top: {{ user_position[1] }}%;"
+                                 data-x="{{ user_position[0] }}" data-y="{{ user_position[1] }}">
+                                <div class="pin-custom">
+                                    <img src="{{ url_for('static', filename='images/pins/' + session.username + '.png') }}"
+                                         alt="{{ session.username }}"
+                                         class="custom-pin-image"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                                    <div class="pin-fallback" style="display: none;">
+                                        {{ session.username[0]|upper }}
+                                    </div>
+                                </div>
+                                <div class="pin-label">{{ session.username }}</div>
+                            </div>
 
                             <!-- Фишки других пользователей -->
                             {% if all_users %}
@@ -233,11 +191,14 @@
                                 <div class="map-pin other-user-pin miniature"
                                      style="left: {{ user_data.position.x if user_data.position else 15 }}%; top: {{ user_data.position.y if user_data.position else 75 }}%;"
                                      data-username="{{ username }}">
-                                    <div class="pin-icon other-user">
-                                        {% if user_data.total_completed >= 30 %}🚀
-                                        {% elif user_data.total_completed >= 20 %}⭐
-                                        {% elif user_data.total_completed >= 10 %}🔵
-                                        {% else %}📍{% endif %}
+                                    <div class="pin-custom">
+                                        <img src="{{ url_for('static', filename='images/pins/' + username + '.png') }}"
+                                             alt="{{ username }}"
+                                             class="custom-pin-image"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                                        <div class="pin-fallback" style="display: none;">
+                                            {{ username[0]|upper }}
+                                        </div>
                                     </div>
                                     <div class="pin-label">
                                         {{ username }}
@@ -245,8 +206,7 @@
                                     <div class="user-tooltip">
                                         <strong>{{ username }}</strong>
                                         <div class="user-stats">
-                                            <span>Уровень: {{ user_data.current_level }}</span>
-                                            <span>Задач: {{ user_data.total_completed }}</span>
+                                            <span>Роль: {{ user_data.role }}</span>
                                             <span>Монет: {{ user_data.coins }}</span>
                                         </div>
                                     </div>
@@ -263,7 +223,7 @@
                             <span>Ваше текущее положение</span>
                         </div>
                         <div class="legend-item">
-                            <span class="legend-marker other-user">🔵</span>
+                            <span class="legend-marker other-user">👤</span>
                             <span>Другие игроки</span>
                         </div>
                         <div class="legend-item">
@@ -352,7 +312,7 @@
         }
 
         // Close sidebar when clicking on a link (mobile)
-        document.querySelectorAll('.sidebar-link, .action-button, .btn, .logout-btn, .login-btn, .register-btn').forEach(link => {
+        document.querySelectorAll('.sidebar-link, .btn, .logout-btn, .login-btn, .register-btn').forEach(link => {
             link.addEventListener('click', (e) => {
                 if (window.innerWidth <= 768) {
                     toggleSidebar();
@@ -555,10 +515,47 @@
     </script>
 
     <style>
+        /* Стили для кастомных фишек */
+        .pin-custom {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--text-accent), var(--text-accent2));
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .custom-pin-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .pin-fallback {
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .map-pin.miniature .pin-custom {
+            width: 30px;
+            height: 30px;
+        }
+
+        .map-pin.miniature .pin-fallback {
+            font-size: 12px;
+        }
+
         /* Стили для фишек других пользователей */
         .other-user-pin {
             position: absolute;
-            transform: translate(-50%, -100%) scale(0.6);
+            transform: translate(-50%, -100%) scale(0.8);
             z-index: 15;
             cursor: help;
             transition: all 0.3s ease;
@@ -566,11 +563,10 @@
 
         .other-user-pin:hover {
             z-index: 25;
-            transform: translate(-50%, -100%) scale(0.7);
+            transform: translate(-50%, -100%) scale(0.9);
         }
 
-        .other-user-pin .pin-icon {
-            font-size: 1.5em;
+        .other-user-pin .pin-custom {
             animation: floatMini 3s ease-in-out infinite;
         }
 
@@ -626,12 +622,28 @@
         }
 
         @keyframes floatMini {
-            0%, 100% { transform: translate(-50%, -100%) scale(0.6) translateY(0px); }
-            50% { transform: translate(-50%, -100%) scale(0.6) translateY(-3px); }
+            0%, 100% { transform: translate(-50%, -100%) scale(0.8) translateY(0px); }
+            50% { transform: translate(-50%, -100%) scale(0.8) translateY(-3px); }
         }
 
         .legend-marker.other-user {
             color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .pin-custom {
+                width: 35px;
+                height: 35px;
+            }
+
+            .map-pin.miniature .pin-custom {
+                width: 25px;
+                height: 25px;
+            }
+
+            .map-pin.miniature .pin-fallback {
+                font-size: 10px;
+            }
         }
     </style>
 </body>

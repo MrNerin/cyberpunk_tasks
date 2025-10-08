@@ -17,150 +17,221 @@
     <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
 
     <div class="app-container">
-        <!-- Sidebar (аналогичная структура) -->
+        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
-            <!-- ... существующий сайдбар ... -->
+            <div class="sidebar-header">
+                <div class="sidebar-title">RGG QUEST</div>
+                <div class="sidebar-subtitle">Управление задачами</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Основное</div>
+                    <a href="/" class="sidebar-link">
+                        <span class="sidebar-link-icon">📋</span>
+                        <span class="sidebar-link-text">Главная</span>
+                    </a>
+                    <a href="/map" class="sidebar-link">
+                        <span class="sidebar-link-icon">🗺️</span>
+                        <span class="sidebar-link-text">Карта прогресса</span>
+                    </a>
+                    <a href="/inventory" class="sidebar-link">
+                        <span class="sidebar-link-icon">🎒</span>
+                        <span class="sidebar-link-text">Мой инвентарь</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Сообщество</div>
+                    <a href="/users" class="sidebar-link active">
+                        <span class="sidebar-link-icon">👥</span>
+                        <span class="sidebar-link-text">Все игроки</span>
+                    </a>
+                    <a href="/all_inventories" class="sidebar-link">
+                        <span class="sidebar-link-icon">📦</span>
+                        <span class="sidebar-link-text">Инвентари игроков</span>
+                    </a>
+                </div>
+
+                {% if session.role == 'admin' %}
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Администрирование</div>
+                    <a href="/admin" class="sidebar-link">
+                        <span class="sidebar-link-icon">⚙️</span>
+                        <span class="sidebar-link-text">Панель управления</span>
+                    </a>
+                    <a href="/map_editor" class="sidebar-link">
+                        <span class="sidebar-link-icon">🎨</span>
+                        <span class="sidebar-link-text">Редактор карты</span>
+                    </a>
+                </div>
+                {% endif %}
+            </nav>
+
+            <div class="sidebar-user">
+                {% if 'username' in session %}
+                <div class="user-profile">
+                    <div class="user-avatar-large">
+                        {{ session.username[0]|upper }}
+                    </div>
+                    <div class="user-info-compact">
+                        <div class="user-name">{{ session.username }}</div>
+                        <div class="user-role">{{ session.role }}</div>
+                        <div class="user-coins">💰 {{ user_coins }} монет</div>
+                    </div>
+                    <a href="/logout" class="btn btn-outline logout-btn">Выйти</a>
+                </div>
+                {% endif %}
+            </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
             <h1 class="title">👥 Все игроки</h1>
-            <p class="subtitle">Управление пользователями системы</p>
+            <p class="subtitle">Сообщество активных участников</p>
 
-            <!-- Статистика -->
+            <!-- Статистика сообщества -->
             <div class="stats-panel">
                 <div class="stat-card">
                     <div class="stat-value">{{ users|length }}</div>
                     <div class="stat-label">Всего игроков</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">{{ users|selectattr('role', 'equalto', 'admin')|list|length }}</div>
+                    <div class="stat-value">{{ users.values()|selectattr('role', 'equalto', 'admin')|list|length }}</div>
                     <div class="stat-label">Администраторов</div>
                 </div>
                 <div class="stat-card coins-stat">
-                    <div class="stat-value">{{ (users.values()|max(attribute='coins')).coins }}</div>
+                    <div class="stat-value">{{ (users.values()|map(attribute='coins')|sum)|default(0) }}</div>
+                    <div class="stat-label">Всего монет</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ (users.values()|map(attribute='coins')|max)|default(0) }}</div>
                     <div class="stat-label">Макс. монет</div>
                 </div>
             </div>
 
-            <!-- Таблица пользователей -->
+            <!-- Список пользователей -->
             <section class="panel">
-                <h2 class="section-title">📊 Список игроков</h2>
+                <h2 class="section-title">🎮 Список игроков</h2>
 
-                <div class="users-table">
-                    <div class="table-header">
-                        <div class="table-cell">Игрок</div>
-                        <div class="table-cell">Статус (игры)</div>
-                        <div class="table-cell">Монеты</div>
-                        <div class="table-cell">Роль</div>
-                        {% if session.role == 'admin' %}
-                        <div class="table-cell">Действия</div>
-                        {% endif %}
-                    </div>
-
+                <div class="users-grid">
                     {% for username, user_data in users.items() %}
-                    <div class="table-row {% if username == session.username %}current-user{% endif %}">
-                        <div class="table-cell user-cell">
-                            <div class="user-avatar-small">
+                    <div class="user-card {% if username == session.username %}current-user{% endif %}">
+                        <div class="user-card-header">
+                            <div class="user-avatar-medium">
                                 {{ username[0]|upper }}
                             </div>
-                            <div class="user-info">
-                                <span class="username">{{ username }}</span>
-                                {% if username == session.username %}
-                                <span class="you-badge">Вы</span>
-                                {% endif %}
+                            <div class="user-main-info">
+                                <h3 class="username">
+                                    {{ username }}
+                                    {% if username == session.username %}
+                                    <span class="you-badge">Вы</span>
+                                    {% endif %}
+                                </h3>
+                                <div class="user-role-badge role-{{ user_data.role }}">
+                                    {{ user_data.role }}
+                                </div>
+                            </div>
+                            <div class="user-coins-display">
+                                💰 {{ user_data.coins }}
                             </div>
                         </div>
 
-                        <div class="table-cell status-cell">
-                            {% if session.role == 'admin' %}
-                            <select class="status-select" data-username="{{ username }}">
-                                <option value="Active" {% if user_data.status == 'Active' %}selected{% endif %}>Active</option>
-                                <option value="AFK" {% if user_data.status == 'AFK' %}selected{% endif %}>AFK</option>
-                                <option value="In Game" {% if user_data.status == 'In Game' %}selected{% endif %}>In Game</option>
-                                <option value="Offline" {% if user_data.status == 'Offline' %}selected{% endif %}>Offline</option>
-                            </select>
-                            {% else %}
-                            <span class="user-status status-{{ user_data.status|lower|replace(' ', '') }}">
-                                {{ user_data.status }}
-                            </span>
-                            {% endif %}
+                        <div class="user-card-details">
+                            <div class="user-info-row">
+                                <span class="info-label">Зарегистрирован:</span>
+                                <span class="info-value">
+                                    {% if user_data.registered_date %}
+                                        {% if user_data.registered_date is string %}
+                                            {{ user_data.registered_date }}
+                                        {% else %}
+                                            {{ user_data.registered_date.strftime('%d.%m.%Y') }}
+                                        {% endif %}
+                                    {% else %}
+                                        Неизвестно
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <div class="user-info-row">
+                                <span class="info-label">Позиция на карте:</span>
+                                <span class="info-value">
+                                    X: {{ user_data.position.x|default(15)|round(1) }},
+                                    Y: {{ user_data.position.y|default(75)|round(1) }}
+                                </span>
+                            </div>
                         </div>
 
-                        <div class="table-cell">
-                            <span class="coins-display">💰 {{ user_data.coins }}</span>
-                        </div>
-
-                        <div class="table-cell">
-                            <span class="role-badge role-{{ user_data.role }}">{{ user_data.role }}</span>
-                        </div>
-
-                        {% if session.role == 'admin' %}
-                        <div class="table-cell actions-cell">
-                            <button class="btn-icon edit-user" data-username="{{ username }}" title="Редактировать">
-                                ✏️
-                            </button>
-                            {% if user_data.role != 'admin' %}
-                            <button class="btn-icon delete-user" data-username="{{ username }}" title="Удалить">
-                                🗑️
-                            </button>
-                            {% endif %}
+                        {% if session.role == 'admin' and username != session.username %}
+                        <div class="user-admin-actions">
+                            <form action="/admin/update_role" method="POST" class="role-form">
+                                <input type="hidden" name="username" value="{{ username }}">
+                                <select name="role" class="role-select">
+                                    <option value="user" {% if user_data.role == 'user' %}selected{% endif %}>Игрок</option>
+                                    <option value="admin" {% if user_data.role == 'admin' %}selected{% endif %}>Админ</option>
+                                    <option value="minecraft" {% if user_data.role == 'minecraft' %}selected{% endif %}>Minecraft</option>
+                                    <option value="cs2" {% if user_data.role == 'cs2' %}selected{% endif %}>CS2</option>
+                                    <option value="dota2" {% if user_data.role == 'dota2' %}selected{% endif %}>Dota 2</option>
+                                    <option value="valorant" {% if user_data.role == 'valorant' %}selected{% endif %}>Valorant</option>
+                                    <option value="overwatch" {% if user_data.role == 'overwatch' %}selected{% endif %}>Overwatch</option>
+                                </select>
+                                <button type="submit" class="btn btn-secondary btn-small">💾 Сохранить</button>
+                            </form>
                         </div>
                         {% endif %}
                     </div>
                     {% endfor %}
                 </div>
+
+                {% if not users %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">👥</div>
+                    <h3>Пока нет игроков</h3>
+                    <p>Зарегистрируйтесь первым!</p>
+                    <a href="/register" class="btn">Зарегистрироваться</a>
+                </div>
+                {% endif %}
             </section>
         </main>
     </div>
 
     <style>
-        .users-table {
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .user-card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            overflow: hidden;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
         }
 
-        .table-header {
-            display: grid;
-            grid-template-columns: 2fr 2fr 1fr 1fr {% if session.role == 'admin' %}1fr{% endif %};
-            background: var(--bg-panel);
-            padding: 16px;
-            font-weight: 600;
-            color: var(--text-primary);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .table-row {
-            display: grid;
-            grid-template-columns: 2fr 2fr 1fr 1fr {% if session.role == 'admin' %}1fr{% endif %};
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
-            align-items: center;
-        }
-
-        .table-row:last-child {
-            border-bottom: none;
-        }
-
-        .table-row.current-user {
+        .user-card.current-user {
+            border-color: var(--text-accent);
             background: linear-gradient(135deg, rgba(100, 181, 246, 0.05), transparent);
         }
 
-        .table-cell {
-            padding: 0 8px;
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-soft);
         }
 
-        .user-cell {
+        .user-card-header {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .user-avatar-small {
-            width: 32px;
-            height: 32px;
+        .user-avatar-medium {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--text-accent), var(--text-accent2));
             display: flex;
@@ -168,99 +239,166 @@
             justify-content: center;
             color: white;
             font-weight: 600;
-            font-size: 0.9em;
+            font-size: 1.2em;
+            flex-shrink: 0;
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .user-main-info {
+            flex: 1;
         }
 
         .username {
-            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 0 8px 0;
             color: var(--text-primary);
+            font-size: 1.2em;
         }
 
         .you-badge {
             background: var(--text-accent);
             color: white;
-            padding: 2px 6px;
-            border-radius: 10px;
+            padding: 2px 8px;
+            border-radius: 12px;
             font-size: 0.7em;
             font-weight: 500;
         }
 
-        .status-select {
-            width: 100%;
-            padding: 6px 8px;
-            background: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            color: var(--text-primary);
-            font-size: 0.9em;
-        }
-
-        .user-status {
-            padding: 4px 8px;
-            border-radius: 12px;
+        .user-role-badge {
+            padding: 4px 12px;
+            border-radius: 15px;
             font-size: 0.8em;
             font-weight: 500;
-        }
-
-        .status-active { background: rgba(129, 199, 132, 0.2); color: var(--text-success); }
-        .status-afk { background: rgba(255, 183, 77, 0.2); color: var(--text-warning); }
-        .status-ingame { background: rgba(100, 181, 246, 0.2); color: var(--text-accent); }
-        .status-offline { background: rgba(158, 158, 158, 0.2); color: var(--text-secondary); }
-
-        .role-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: 500;
+            display: inline-block;
         }
 
         .role-admin {
             background: linear-gradient(135deg, #ff6b6b, #ee5a52);
             color: white;
         }
+
         .role-user {
             background: rgba(100, 181, 246, 0.1);
             color: var(--text-accent);
             border: 1px solid var(--text-accent);
         }
 
-        .actions-cell {
+        .role-minecraft {
+            background: linear-gradient(135deg, #6bc46c, #4caf50);
+            color: white;
+        }
+
+        .role-cs2 {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+        }
+
+        .role-dota2 {
+            background: linear-gradient(135deg, #e53935, #d32f2f);
+            color: white;
+        }
+
+        .role-valorant {
+            background: linear-gradient(135deg, #ff5252, #d32f2f);
+            color: white;
+        }
+
+        .role-overwatch {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+        }
+
+        .user-coins-display {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 15px;
+            padding: 6px 12px;
+            color: gold;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .user-card-details {
             display: flex;
-            gap: 6px;
-            justify-content: center;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .user-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .user-admin-actions {
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+        }
+
+        .role-form {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .role-select {
+            flex: 1;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 10px;
+            color: var(--text-primary);
+            font-size: 0.9em;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8em;
         }
 
         @media (max-width: 768px) {
-            .table-header,
-            .table-row {
+            .users-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .user-card-header {
+                flex-direction: column;
+                text-align: center;
                 gap: 12px;
             }
 
-            .table-header {
-                display: none;
+            .user-main-info {
+                text-align: center;
             }
 
-            .table-cell::before {
-                content: attr(data-label);
-                font-weight: 600;
-                color: var(--text-secondary);
-                display: block;
-                margin-bottom: 4px;
-                font-size: 0.8em;
+            .user-info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
             }
 
-            .user-cell::before { content: "Игрок"; }
-            .status-cell::before { content: "Статус"; }
-            .table-cell:nth-child(3)::before { content: "Монеты"; }
-            .table-cell:nth-child(4)::before { content: "Роль"; }
-            .actions-cell::before { content: "Действия"; }
+            .role-form {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .role-select {
+                width: 100%;
+            }
         }
     </style>
 
@@ -273,78 +411,14 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Обновление статуса пользователя
-            document.querySelectorAll('.status-select').forEach(select => {
-                select.addEventListener('change', function() {
-                    const username = this.dataset.username;
-                    const status = this.value;
-
-                    fetch('/api/user/update_status', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            username: username,
-                            status: status
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Статус обновлен');
-                        } else {
-                            alert('Ошибка: ' + data.error);
-                        }
-                    })
-                    .catch(error => {
-                        alert('Ошибка сети: ' + error.message);
-                    });
-                });
-            });
-
-            // Редактирование пользователя
-            document.querySelectorAll('.edit-user').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const username = this.dataset.username;
-                    // Открываем модальное окно редактирования
-                    openEditUserModal(username);
-                });
-            });
-
-            // Удаление пользователя
-            document.querySelectorAll('.delete-user').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const username = this.dataset.username;
-
-                    if (confirm(`Удалить пользователя ${username}?`)) {
-                        fetch('/api/user/delete', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ username: username })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                location.reload();
-                            } else {
-                                alert('Ошибка: ' + data.error);
-                            }
-                        })
-                        .catch(error => {
-                            alert('Ошибка сети: ' + error.message);
-                        });
-                    }
-                });
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
             });
         });
-
-        function openEditUserModal(username) {
-            // Реализация модального окна редактирования
-            alert('Редактирование пользователя: ' + username);
-        }
     </script>
 </body>
 </html>
