@@ -584,36 +584,31 @@ class Database:
 
     def get_user_position(self, username):
         if not self.is_connected:
-            return self.in_memory_storage['user_positions'].get(username, {'x': 15, 'y': 75})
+            # Возвращаем позицию из памяти или дефолтную
+            if hasattr(self, 'in_memory_storage') and 'user_positions' in self.in_memory_storage:
+                position = self.in_memory_storage['user_positions'].get(username)
+                if position:
+                    return position
+            return {'x': 15, 'y': 75}  # Дефолтная позиция
 
         try:
             cur = self.conn.cursor()
             cur.execute("SELECT x, y FROM user_positions WHERE username = %s", (username,))
             result = cur.fetchone()
             cur.close()
-            return {'x': 15, 'y': 75} if not result else dict(result)
+
+            if result:
+                # Убедимся, что координаты в пределах карты
+                x = max(0, min(float(result['x']), 100))
+                y = max(0, min(float(result['y']), 100))
+                return {'x': x, 'y': y}
+            else:
+                # Возвращаем дефолтную позицию если нет в базе
+                return {'x': 15, 'y': 75}
+
         except Exception as e:
             logger.error(f"❌ Ошибка получения позиции пользователя {username}: {e}")
-            return {'x': 15, 'y': 75}
-
-    def save_user_position(self, username, x, y):
-        if not self.is_connected:
-            self.in_memory_storage['user_positions'][username] = {'x': x, 'y': y}
-            return True
-
-        try:
-            cur = self.conn.cursor()
-            cur.execute(
-                "INSERT INTO user_positions (username, x, y) VALUES (%s, %s, %s) ON CONFLICT (username) DO UPDATE SET x = %s, y = %s",
-                (username, x, y, x, y)
-            )
-            self.conn.commit()
-            cur.close()
-            return True
-        except Exception as e:
-            logger.error(f"❌ Ошибка сохранения позиции пользователя {username}: {e}")
-            self.conn.rollback()
-            return False
+            return {'x': 15, 'y': 75}  # Дефолтная позиция при ошибке
 
 
 # Глобальный объект базы данных
