@@ -15,6 +15,7 @@ class Database:
     def __init__(self):
         self.conn = None
         self.is_connected = False
+        self.in_memory_storage = {}
 
     def connect(self):
         """Подключение к базе данных с повторными попытками"""
@@ -102,87 +103,6 @@ class Database:
             'user_positions': {},
             'user_inventory': {}
         }
-
-    'user_pins': {
-        'admin': {'type': 'crystal', 'color': 'blue'},
-        'user1': {'type': 'crystal', 'color': 'green'},
-        'user2': {'type': 'crystal', 'color': 'purple'}
-    }
-
-    # В create_in_memory_storage добавляем:
-    'user_statuses': {
-        'admin': 'Active',
-        'user1': 'In Game',
-        'user2': 'AFK'
-    }
-
-    # Добавляем методы:
-    def get_user_status(self, username):
-        if not self.is_connected:
-            return self.in_memory_storage['user_statuses'].get(username, 'Active')
-
-        try:
-            cur = self.conn.cursor()
-            cur.execute("SELECT status FROM user_statuses WHERE username = %s", (username,))
-            result = cur.fetchone()
-            cur.close()
-            return result['status'] if result else 'Active'
-        except:
-            return 'Active'
-
-    def update_user_status(self, username, status):
-        if not self.is_connected:
-            if 'user_statuses' not in self.in_memory_storage:
-                self.in_memory_storage['user_statuses'] = {}
-            self.in_memory_storage['user_statuses'][username] = status
-            return True
-
-        try:
-            cur = self.conn.cursor()
-            cur.execute("""
-                INSERT INTO user_statuses (username, status) 
-                VALUES (%s, %s)
-                ON CONFLICT (username) DO UPDATE SET status = %s
-            """, (username, status, status))
-            self.conn.commit()
-            cur.close()
-            return True
-        except:
-            return False
-
-    # Добавляем методы для работы с фишками
-    def get_user_pin_config(username):
-        if not self.is_connected:
-            return self.in_memory_storage['user_pins'].get(username, {'type': 'default', 'color': 'blue'})
-
-        try:
-            cur = self.conn.cursor()
-            cur.execute("SELECT pin_type, pin_color FROM user_pins WHERE username = %s", (username,))
-            result = cur.fetchone()
-            cur.close()
-            return dict(result) if result else {'type': 'default', 'color': 'blue'}
-        except:
-            return {'type': 'default', 'color': 'blue'}
-
-    def update_user_pin_config(username, pin_type, pin_color):
-        if not self.is_connected:
-            if 'user_pins' not in self.in_memory_storage:
-                self.in_memory_storage['user_pins'] = {}
-            self.in_memory_storage['user_pins'][username] = {'type': pin_type, 'color': pin_color}
-            return True
-
-        try:
-            cur = self.conn.cursor()
-            cur.execute("""
-                INSERT INTO user_pins (username, pin_type, pin_color) 
-                VALUES (%s, %s, %s)
-                ON CONFLICT (username) DO UPDATE SET pin_type = %s, pin_color = %s
-            """, (username, pin_type, pin_color, pin_type, pin_color))
-            self.conn.commit()
-            cur.close()
-            return True
-        except:
-            return False
 
     def init_tables(self):
         """Инициализация таблиц только если подключение к БД установлено"""
@@ -348,7 +268,6 @@ class Database:
             self.conn.commit()
             cur.close()
             logger.info("✅ Начальные данные добавлены")
-
         except Exception as e:
             logger.error(f"❌ Ошибка добавления начальных данных: {e}")
             self.conn.rollback()
