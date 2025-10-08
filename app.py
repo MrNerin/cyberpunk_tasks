@@ -202,233 +202,33 @@ def calculate_user_position(username):
     }
 
 
-# Маршруты
-@app.before_request
-def load_user_from_cookie():
-    if 'username' not in session:
-        username = request.cookies.get('remembered_user')
-        if username:
-            user = db.get_user(username)
-            if user:
-                session['username'] = username
-                session['role'] = user['role']
-                session['coins'] = user['coins']
-
-
-@app.route('/')
-def index():
-    daily = load_daily_tasks()
-    board_data = load_board()
-    today_date = date.today().strftime('%d.%m.%Y')
-    user_daily_done = []
-    total_completed = 0
-    user_coins = 0
-
-    if 'username' in session:
-        user_daily_done = get_user_daily_done(session['username'])
-        user_position = calculate_user_position(session['username'])
-        total_completed = user_position['total_completed']
-        user_coins = get_user_coins(session['username'])
-        session['coins'] = user_coins
-
-    return render_template('index.html',
-                           daily=daily,
-                           board=board_data,
-                           today_date=today_date,
-                           user_daily_done=user_daily_done,
-                           total_completed=total_completed,
-                           user_coins=user_coins)
-
-
-@app.route('/map')
-def map_page():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    user_position = calculate_user_position(session['username'])
-    user_coins = get_user_coins(session['username'])
-    session['coins'] = user_coins
-
-    # Получаем сохраненную позицию пользователя
-    saved_position = get_user_position(session['username'])
-
-    map_config = load_map_config()
-
-    # Получаем данные всех пользователей
-    all_users = db.get_all_users_with_positions()
-
-    # Добавляем прогресс для каждого пользователя
-    for username, user_data in all_users.items():
-        user_progress = calculate_user_position(username)
-        user_data['progress'] = user_progress
-
-    return render_template('map.html',
-                           total_completed=user_position['total_completed'],
-                           current_level=user_position['current_level'],
-                           user_position=(saved_position['x'], saved_position['y']),
-                           progress_percentage=user_position['progress_percentage'],
-                           user_coins=user_coins,
-                           map_config=map_config,
-                           all_users=all_users)
-
-
-@app.route('/map/save_position', methods=['POST'])
-def save_user_position_route():
-    if 'username' not in session:
-        return jsonify({'error': 'Не авторизован'}), 401
+# Функции для работы с инвентарем
+def init_inventory_table():
+    """Инициализация таблицы инвентаря если она не существует"""
+    if not db.is_connected:
+        return
 
     try:
-        data = request.get_json()
-        x = float(data.get('x', 15))
-        y = float(data.get('y', 75))
-
-        save_user_position(session['username'], x, y)
-        return jsonify({'success': True})
-
+        cur = db.conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS user_inventory (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(50) NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                description TEXT,
+                quantity INTEGER NOT NULL DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        db.conn.commit()
+        cur.close()
+        print("✅ Таблица инвентаря инициализирована")
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"❌ Ошибка инициализации таблицы инвентаря: {e}")
+        db.conn.rollback()
 
 
-@app.route('/map_editor')
-def map_editor():
-    if 'username' not in session or session.get('role') != 'admin':
-        return redirect(url_for('login'))
-
-    map_config = load_map_config()
-    return render_template('map_editor.html', map_config=map_config)
-
-
-@app.route('/api/map/save', methods=['POST'])
-def api_save_map():
-    if 'username' not in session or session.get('role') != 'admin':
-        return jsonify({'error': 'Доступ запрещен'}), 403
-
-    try:
-        data = request.get_json()
-        save_map_config(data)
-        return jsonify({'success': True, 'message': 'Карта сохранена'})
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-# Добавляем в app.py новые маршруты:
-
-@app.route('/users')
-def users_list():
-    """Страница со списком всех пользователей"""
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    if session.get('role') != 'admin':
-        return "Доступ запрещен", 403
-
-    users = db.get_all_users()
-    # Получаем дополнительную информацию о каждом пользователе
-    users_with_stats = {}
-    for username, user_data in users.items():
-        user_progress = calculate_user_position(username)
-        users_with_stats[username] = {
-            **user_data,
-            'total_completed': user_progress['total_completed'],
-            'current_level': user_progress['current_level'],
-            'progress_percentage': user_progress['progress_percentage'],
-            'registered_date': user_data.get('created_at', 'Неизвестно')
-        }
-
-    return render_template('users.html', users=users_with_stats)
-
-
-@app.route('/inventory')
-def inventory():
-    """Страница инвентаря пользователя"""
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    username = session['username']
-    user_coins = get_user_coins(username)
-
-    # Получаем инвентарь пользователя из базы данных
-    user_inventory = get_user_inventory(username)
-
-    return render_template('inventory.html',
-                           user_inventory=user_inventory,
-                           user_coins=user_coins)
-
-
-@app.route('/inventory/add', methods=['POST'])
-def add_inventory_item():
-    """Добавление предмета в инвентарь"""
-    if 'username' not in session:
-        return jsonify({'error': 'Не авторизован'}), 401
-
-    try:
-        data = request.get_json()
-        item_name = data.get('name')
-        item_description = data.get('description', '')
-        item_quantity = data.get('quantity', 1)
-
-        if not item_name:
-            return jsonify({'error': 'Название предмета обязательно'}), 400
-
-        success = add_item_to_inventory(session['username'], item_name, item_description, item_quantity)
-
-        if success:
-            return jsonify({'success': True, 'message': 'Предмет добавлен в инвентарь'})
-        else:
-            return jsonify({'error': 'Ошибка при добавлении предмета'}), 500
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/inventory/update/<int:item_id>', methods=['POST'])
-def update_inventory_item(item_id):
-    """Обновление предмета в инвентаре"""
-    if 'username' not in session:
-        return jsonify({'error': 'Не авторизован'}), 401
-
-    try:
-        data = request.get_json()
-        updates = {}
-
-        if 'name' in data:
-            updates['name'] = data['name']
-        if 'description' in data:
-            updates['description'] = data['description']
-        if 'quantity' in data:
-            updates['quantity'] = data['quantity']
-
-        success = update_inventory_item_db(session['username'], item_id, updates)
-
-        if success:
-            return jsonify({'success': True, 'message': 'Предмет обновлен'})
-        else:
-            return jsonify({'error': 'Ошибка при обновлении предмета'}), 500
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/inventory/delete/<int:item_id>', methods=['POST'])
-def delete_inventory_item(item_id):
-    """Удаление предмета из инвентаря"""
-    if 'username' not in session:
-        return jsonify({'error': 'Не авторизован'}), 401
-
-    try:
-        success = delete_inventory_item_db(session['username'], item_id)
-
-        if success:
-            return jsonify({'success': True, 'message': 'Предмет удален'})
-        else:
-            return jsonify({'error': 'Ошибка при удалении предмета'}), 500
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-# Функции для работы с инвентарем в базе данных
 def get_user_inventory(username):
     """Получаем инвентарь пользователя"""
     if not db.is_connected:
@@ -464,7 +264,7 @@ def add_item_to_inventory(username, name, description, quantity=1):
             'name': name,
             'description': description,
             'quantity': quantity,
-            'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            'created_at': datetime.now()
         })
         return True
 
@@ -537,26 +337,142 @@ def delete_inventory_item_db(username, item_id):
         return False
 
 
-# Добавляем новый маршрут для API
-@app.route('/api/map/users')
-def api_map_users():
-    """API для получения всех пользователей с их позициями на карте"""
+def get_all_users_with_stats():
+    """Получаем всех пользователей со статистикой"""
+    users = db.get_all_users()
+    users_with_stats = {}
+    for username, user_data in users.items():
+        user_progress = calculate_user_position(username)
+        users_with_stats[username] = {
+            **user_data,
+            'total_completed': user_progress['total_completed'],
+            'current_level': user_progress['current_level'],
+            'progress_percentage': user_progress['progress_percentage'],
+            'registered_date': user_data.get('created_at', 'Неизвестно')
+        }
+    return users_with_stats
+
+
+def get_all_inventories():
+    """Получаем инвентари всех пользователей"""
+    users = db.get_all_users()
+    all_inventories = {}
+
+    for username in users.keys():
+        inventory = get_user_inventory(username)
+        if inventory:
+            user_progress = calculate_user_position(username)
+            all_inventories[username] = {
+                'inventory': inventory,
+                'user_info': {
+                    'username': username,
+                    'role': users[username]['role'],
+                    'coins': users[username]['coins'],
+                    'total_completed': user_progress['total_completed'],
+                    'current_level': user_progress['current_level']
+                }
+            }
+
+    return all_inventories
+
+
+# Маршруты
+@app.before_request
+def load_user_from_cookie():
+    if 'username' not in session:
+        username = request.cookies.get('remembered_user')
+        if username:
+            user = db.get_user(username)
+            if user:
+                session['username'] = username
+                session['role'] = user['role']
+                session['coins'] = user['coins']
+
+
+@app.route('/')
+def index():
+    daily = load_daily_tasks()
+    board_data = load_board()
+    today_date = date.today().strftime('%d.%m.%Y')
+    user_daily_done = []
+    total_completed = 0
+    user_coins = 0
+
+    if 'username' in session:
+        user_daily_done = get_user_daily_done(session['username'])
+        user_position = calculate_user_position(session['username'])
+        total_completed = user_position['total_completed']
+        user_coins = get_user_coins(session['username'])
+        session['coins'] = user_coins
+
+    return render_template('index.html',
+                           daily=daily,
+                           board=board_data,
+                           today_date=today_date,
+                           user_daily_done=user_daily_done,
+                           total_completed=total_completed,
+                           user_coins=user_coins)
+
+
+@app.route('/map')
+def map_page():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    user_position = calculate_user_position(session['username'])
+    user_coins = get_user_coins(session['username'])
+    session['coins'] = user_coins
+
+    # Получаем сохраненную позицию пользователя
+    saved_position = get_user_position(session['username'])
+
+    map_config = load_map_config()
+
+    return render_template('map.html',
+                           total_completed=user_position['total_completed'],
+                           current_level=user_position['current_level'],
+                           user_position=(saved_position['x'], saved_position['y']),
+                           progress_percentage=user_position['progress_percentage'],
+                           user_coins=user_coins,
+                           map_config=map_config)
+
+
+@app.route('/map/save_position', methods=['POST'])
+def save_user_position_route():
     if 'username' not in session:
         return jsonify({'error': 'Не авторизован'}), 401
 
     try:
-        users_data = db.get_all_users_with_positions()
+        data = request.get_json()
+        x = float(data.get('x', 15))
+        y = float(data.get('y', 75))
 
-        # Добавляем информацию о прогрессе для каждого пользователя
-        for username, user_data in users_data.items():
-            user_position = calculate_user_position(username)
-            user_data.update({
-                'total_completed': user_position['total_completed'],
-                'current_level': user_position['current_level'],
-                'progress_percentage': user_position['progress_percentage']
-            })
+        save_user_position(session['username'], x, y)
+        return jsonify({'success': True})
 
-        return jsonify(users_data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/map_editor')
+def map_editor():
+    if 'username' not in session or session.get('role') != 'admin':
+        return redirect(url_for('login'))
+
+    map_config = load_map_config()
+    return render_template('map_editor.html', map_config=map_config)
+
+
+@app.route('/api/map/save', methods=['POST'])
+def api_save_map():
+    if 'username' not in session or session.get('role') != 'admin':
+        return jsonify({'error': 'Доступ запрещен'}), 403
+
+    try:
+        data = request.get_json()
+        save_map_config(data)
+        return jsonify({'success': True, 'message': 'Карта сохранена'})
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -741,6 +657,9 @@ def mark_done(task_id):
 
 @app.route('/archive')
 def archive():
+    if 'username' not in session or session.get('role') != 'admin':
+        return "Доступ запрещен", 403
+
     board_data = [t for t in load_board() if t['status'] == 'done']
     user_coins = get_user_coins(session.get('username', '')) if 'username' in session else 0
     return render_template('archive.html', board=board_data, user_coins=user_coins)
@@ -768,6 +687,127 @@ def unmark_daily_done_route():
         if not success:
             return "Ошибка при отмене выполнения", 400
     return redirect(url_for('index'))
+
+
+# Новые маршруты для пользователей и инвентаря
+@app.route('/users')
+def users_list():
+    """Страница со списком всех пользователей"""
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    users_with_stats = get_all_users_with_stats()
+    user_coins = get_user_coins(session['username'])
+
+    return render_template('users.html',
+                           users=users_with_stats,
+                           user_coins=user_coins)
+
+
+@app.route('/inventory')
+def inventory():
+    """Страница инвентаря пользователя"""
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    username = session['username']
+    user_coins = get_user_coins(username)
+
+    # Инициализируем таблицу если нужно
+    init_inventory_table()
+
+    # Получаем инвентарь пользователя из базы данных
+    user_inventory = get_user_inventory(username)
+
+    return render_template('inventory.html',
+                           user_inventory=user_inventory,
+                           user_coins=user_coins)
+
+
+@app.route('/all_inventories')
+def all_inventories():
+    """Страница со всеми инвентарями"""
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    user_coins = get_user_coins(session['username'])
+    all_inventories_data = get_all_inventories()
+
+    return render_template('all_inventories.html',
+                           all_inventories=all_inventories_data,
+                           user_coins=user_coins)
+
+
+@app.route('/inventory/add', methods=['POST'])
+def add_inventory_item():
+    """Добавление предмета в инвентарь"""
+    if 'username' not in session:
+        return jsonify({'error': 'Не авторизован'}), 401
+
+    try:
+        data = request.get_json()
+        item_name = data.get('name')
+        item_description = data.get('description', '')
+        item_quantity = data.get('quantity', 1)
+
+        if not item_name:
+            return jsonify({'error': 'Название предмета обязательно'}), 400
+
+        success = add_item_to_inventory(session['username'], item_name, item_description, item_quantity)
+
+        if success:
+            return jsonify({'success': True, 'message': 'Предмет добавлен в инвентарь'})
+        else:
+            return jsonify({'error': 'Ошибка при добавлении предмета'}), 500
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/inventory/update/<int:item_id>', methods=['POST'])
+def update_inventory_item(item_id):
+    """Обновление предмета в инвентаре"""
+    if 'username' not in session:
+        return jsonify({'error': 'Не авторизован'}), 401
+
+    try:
+        data = request.get_json()
+        updates = {}
+
+        if 'name' in data:
+            updates['name'] = data['name']
+        if 'description' in data:
+            updates['description'] = data['description']
+        if 'quantity' in data:
+            updates['quantity'] = data['quantity']
+
+        success = update_inventory_item_db(session['username'], item_id, updates)
+
+        if success:
+            return jsonify({'success': True, 'message': 'Предмет обновлен'})
+        else:
+            return jsonify({'error': 'Ошибка при обновлении предмета'}), 500
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/inventory/delete/<int:item_id>', methods=['POST'])
+def delete_inventory_item(item_id):
+    """Удаление предмета из инвентаря"""
+    if 'username' not in session:
+        return jsonify({'error': 'Не авторизован'}), 401
+
+    try:
+        success = delete_inventory_item_db(session['username'], item_id)
+
+        if success:
+            return jsonify({'success': True, 'message': 'Предмет удален'})
+        else:
+            return jsonify({'error': 'Ошибка при удалении предмета'}), 500
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 # API маршруты

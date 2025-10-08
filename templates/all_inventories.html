@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Инвентари игроков - RGG QUEST</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <div class="mobile-menu-toggle" onclick="toggleSidebar()">
+        <span>☰</span>
+        <span>Меню</span>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">RGG QUEST</div>
+                <div class="sidebar-subtitle">Управление задачами</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Основное</div>
+                    <a href="/" class="sidebar-link">
+                        <span class="sidebar-link-icon">📋</span>
+                        <span class="sidebar-link-text">Главная</span>
+                    </a>
+                    <a href="/map" class="sidebar-link">
+                        <span class="sidebar-link-icon">🗺️</span>
+                        <span class="sidebar-link-text">Карта прогресса</span>
+                    </a>
+                    <a href="/inventory" class="sidebar-link">
+                        <span class="sidebar-link-icon">🎒</span>
+                        <span class="sidebar-link-text">Мой инвентарь</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Сообщество</div>
+                    <a href="/users" class="sidebar-link">
+                        <span class="sidebar-link-icon">👥</span>
+                        <span class="sidebar-link-text">Все игроки</span>
+                    </a>
+                    <a href="/all_inventories" class="sidebar-link active">
+                        <span class="sidebar-link-icon">📦</span>
+                        <span class="sidebar-link-text">Инвентари игроков</span>
+                    </a>
+                </div>
+
+                {% if session.role == 'admin' %}
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Администрирование</div>
+                    <a href="/admin" class="sidebar-link">
+                        <span class="sidebar-link-icon">⚙️</span>
+                        <span class="sidebar-link-text">Панель управления</span>
+                    </a>
+                    <a href="/map_editor" class="sidebar-link">
+                        <span class="sidebar-link-icon">🎨</span>
+                        <span class="sidebar-link-text">Редактор карты</span>
+                    </a>
+                    <a href="/archive" class="sidebar-link">
+                        <span class="sidebar-link-icon">📚</span>
+                        <span class="sidebar-link-text">Архив задач</span>
+                    </a>
+                </div>
+                {% endif %}
+            </nav>
+
+            <div class="sidebar-user">
+                {% if 'username' in session %}
+                <div class="user-profile">
+                    <div class="user-avatar-large">
+                        {{ session.username[0]|upper }}
+                    </div>
+                    <div class="user-info-compact">
+                        <div class="user-name">{{ session.username }}</div>
+                        <div class="user-role">{{ session.role }}</div>
+                        <div class="user-coins">💰 {{ user_coins }} монет</div>
+                    </div>
+                    <a href="/logout" class="btn btn-outline logout-btn">Выйти</a>
+                </div>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 class="title">📦 Инвентари игроков</h1>
+            <p class="subtitle">Обзор предметов всех участников системы</p>
+
+            <!-- Статистика -->
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <div class="stat-value">{{ all_inventories|length }}</div>
+                    <div class="stat-label">Игроков с инвентарем</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">
+                        {% set total_items = [] %}
+                        {% for user_data in all_inventories.values() %}
+                            {% for item in user_data.inventory %}
+                                {% if total_items.append(1) %}{% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                        {{ total_items|length }}
+                    </div>
+                    <div class="stat-label">Всего предметов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">
+                        {% set total_quantity = [] %}
+                        {% for user_data in all_inventories.values() %}
+                            {% for item in user_data.inventory %}
+                                {% if total_quantity.append(item.quantity) %}{% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                        {{ total_quantity|sum }}
+                    </div>
+                    <div class="stat-label">Всего единиц</div>
+                </div>
+                <div class="stat-card coins-stat">
+                    <div class="stat-value">💰 {{ user_coins }}</div>
+                    <div class="stat-label">Ваши монеты</div>
+                </div>
+            </div>
+
+            <!-- Список инвентарей -->
+            <section class="panel">
+                <h2 class="section-title">🎒 Инвентари участников</h2>
+
+                <div class="inventories-container">
+                    {% for username, user_data in all_inventories.items() %}
+                    <div class="user-inventory-section">
+                        <div class="user-inventory-header">
+                            <div class="user-info">
+                                <div class="user-avatar-medium">
+                                    {{ username[0]|upper }}
+                                </div>
+                                <div class="user-details">
+                                    <h3 class="username">{{ username }}</h3>
+                                    <div class="user-stats">
+                                        <span class="user-role role-{{ user_data.user_info.role }}">
+                                            {{ user_data.user_info.role }}
+                                        </span>
+                                        <span class="user-level">Уровень: {{ user_data.user_info.current_level }}</span>
+                                        <span class="user-tasks">Задач: {{ user_data.user_info.total_completed }}</span>
+                                        <span class="user-coins">💰 {{ user_data.user_info.coins }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="inventory-grid">
+                            {% for item in user_data.inventory %}
+                            <div class="inventory-item">
+                                <div class="item-header">
+                                    <h4 class="item-name">{{ item.name }}</h4>
+                                </div>
+
+                                {% if item.description %}
+                                <p class="item-description">{{ item.description }}</p>
+                                {% endif %}
+
+                                <div class="item-footer">
+                                    <span class="item-quantity">Количество: {{ item.quantity }}</span>
+                                    <span class="item-date">
+                                        Добавлен:
+                                        {% if item.created_at %}
+                                            {% if item.created_at is string %}
+                                                {{ item.created_at.split(' ')[0] }}
+                                            {% else %}
+                                                {{ item.created_at.strftime('%Y-%m-%d') }}
+                                            {% endif %}
+                                        {% else %}
+                                            Неизвестно
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if not user_data.inventory %}
+                        <div class="empty-inventory">
+                            <span class="empty-icon">🎒</span>
+                            <span>Инвентарь пуст</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if not all_inventories %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📦</div>
+                    <h3>Пока нет инвентарей</h3>
+                    <p>Игроки еще не добавили предметы в свои инвентари</p>
+                </div>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+
+    <style>
+        .inventories-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .user-inventory-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .user-inventory-section:hover {
+            border-color: var(--text-accent);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .user-inventory-header {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar-medium {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--text-accent), var(--text-accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2em;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .username {
+            color: var(--text-primary);
+            margin: 0 0 8px 0;
+            font-size: 1.3em;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .user-stats span {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .user-role {
+            background: rgba(100, 181, 246, 0.1);
+            color: var(--text-accent);
+            border: 1px solid var(--text-accent);
+        }
+
+        .role-admin {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+        }
+
+        .user-level, .user-tasks, .user-coins {
+            background: var(--bg-panel);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .inventory-item {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .inventory-item:hover {
+            border-color: var(--text-accent);
+            transform: translateY(-2px);
+        }
+
+        .item-header {
+            margin-bottom: 8px;
+        }
+
+        .item-name {
+            color: var(--text-primary);
+            font-size: 1.1em;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .item-description {
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            line-height: 1.4;
+            font-size: 0.9em;
+        }
+
+        .item-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8em;
+            color: var(--text-secondary);
+        }
+
+        .item-quantity {
+            font-weight: 600;
+            color: var(--text-accent);
+        }
+
+        .item-date {
+            font-size: 0.75em;
+        }
+
+        .empty-inventory {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 20px;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .empty-icon {
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+            }
+
+            .user-stats {
+                justify-content: center;
+            }
+
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .item-footer {
+                flex-direction: column;
+                gap: 4px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

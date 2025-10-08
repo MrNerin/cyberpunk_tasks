@@ -70,7 +70,6 @@ class Database:
     def create_in_memory_storage(self):
         """Создает временное хранилище в памяти при недоступности PostgreSQL"""
         logger.warning("🔄 Создаем временное хранилище в памяти (данные будут сброшены после перезапуска)")
-        self.in_memory_storage['user_inventory'] = {}
         self.in_memory_storage = {
             'users': {
                 "admin": {"password": "password", "role": "admin", "coins": 100},
@@ -100,7 +99,8 @@ class Database:
                 'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 'updated_by': 'system'
             },
-            'user_positions': {}
+            'user_positions': {},
+            'user_inventory': {}
         }
 
     def init_tables(self):
@@ -117,17 +117,6 @@ class Database:
                 role VARCHAR(20) NOT NULL DEFAULT 'user',
                 coins INTEGER NOT NULL DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-            """,
-            """
-            CREATE TABLE IF NOT EXISTS user_inventory (
-                id SERIAL PRIMARY KEY,
-                username VARCHAR(50) NOT NULL,
-                name VARCHAR(100) NOT NULL,
-                description TEXT,
-                quantity INTEGER NOT NULL DEFAULT 1,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """,
             """
@@ -184,6 +173,17 @@ class Database:
                 username VARCHAR(50) PRIMARY KEY,
                 x FLOAT NOT NULL,
                 y FLOAT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS user_inventory (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(50) NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                description TEXT,
+                quantity INTEGER NOT NULL DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """
@@ -299,51 +299,6 @@ class Database:
             return {user['username']: dict(user) for user in users}
         except Exception as e:
             logger.error(f"❌ Ошибка получения всех пользователей: {e}")
-            return {}
-
-    def get_all_users_with_positions(self):
-        """Получаем всех пользователей с их позициями на карте"""
-        if not self.is_connected:
-            users_with_positions = {}
-            for username, user_data in self.in_memory_storage['users'].items():
-                position = self.in_memory_storage['user_positions'].get(username, {'x': 15, 'y': 75})
-                users_with_positions[username] = {
-                    'username': username,
-                    'role': user_data['role'],
-                    'coins': user_data['coins'],
-                    'position': position,
-                    'is_online': False  # В памяти не отслеживаем онлайн статус
-                }
-            return users_with_positions
-
-        try:
-            cur = self.conn.cursor()
-            cur.execute("""
-                SELECT u.username, u.role, u.coins, 
-                       COALESCE(up.x, 15) as x, 
-                       COALESCE(up.y, 75) as y
-                FROM users u
-                LEFT JOIN user_positions up ON u.username = up.username
-                ORDER BY u.username
-            """)
-            users = cur.fetchall()
-            cur.close()
-
-            # Простой способ отслеживания онлайн статуса (можно улучшить)
-            online_users = set()  # В реальном приложении здесь была бы логика отслеживания сессий
-
-            return {
-                user['username']: {
-                    'username': user['username'],
-                    'role': user['role'],
-                    'coins': user['coins'],
-                    'position': {'x': user['x'], 'y': user['y']},
-                    'is_online': user['username'] in online_users
-                }
-                for user in users
-            }
-        except Exception as e:
-            logger.error(f"❌ Ошибка получения пользователей с позициями: {e}")
             return {}
 
     def update_user_coins(self, username, coins):

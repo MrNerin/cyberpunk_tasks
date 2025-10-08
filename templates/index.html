@@ -6,9 +6,6 @@
     <title>RGG QUEST - Управление задачами</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
 </head>
 <body>
     <!-- Mobile Menu Toggle -->
@@ -30,13 +27,6 @@
 
             <nav class="sidebar-nav">
                 <div class="sidebar-section">
-                    <div class="sidebar-section">
-    <div class="sidebar-section-title">Сообщество</div>
-    <a href="/users" class="sidebar-link">
-        <span class="sidebar-link-icon">👥</span>
-        <span class="sidebar-link-text">Все игроки</span>
-    </a>
-</div>
                     <div class="sidebar-section-title">Основное</div>
                     <a href="/" class="sidebar-link active">
                         <span class="sidebar-link-icon">📋</span>
@@ -46,9 +36,21 @@
                         <span class="sidebar-link-icon">🗺️</span>
                         <span class="sidebar-link-text">Карта прогресса</span>
                     </a>
-                    <a href="/archive" class="sidebar-link">
-                        <span class="sidebar-link-icon">📚</span>
-                        <span class="sidebar-link-text">Архив задач</span>
+                    <a href="/inventory" class="sidebar-link">
+                        <span class="sidebar-link-icon">🎒</span>
+                        <span class="sidebar-link-text">Мой инвентарь</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Сообщество</div>
+                    <a href="/users" class="sidebar-link">
+                        <span class="sidebar-link-icon">👥</span>
+                        <span class="sidebar-link-text">Все игроки</span>
+                    </a>
+                    <a href="/all_inventories" class="sidebar-link">
+                        <span class="sidebar-link-icon">📦</span>
+                        <span class="sidebar-link-text">Инвентари игроков</span>
                     </a>
                 </div>
 
@@ -63,6 +65,10 @@
                         <span class="sidebar-link-icon">🎨</span>
                         <span class="sidebar-link-text">Редактор карты</span>
                     </a>
+                    <a href="/archive" class="sidebar-link">
+                        <span class="sidebar-link-icon">📚</span>
+                        <span class="sidebar-link-text">Архив задач</span>
+                    </a>
                 </div>
                 {% endif %}
 
@@ -74,13 +80,9 @@
                             <span class="action-button-icon">🗺️</span>
                             <span class="action-button-text">На карту</span>
                         </a>
-                        <a href="/inventory" class="sidebar-link">
-    <span class="sidebar-link-icon">🎒</span>
-    <span class="sidebar-link-text">Мой инвентарь</span>
-</a>
-                        <a href="/archive" class="action-button">
-                            <span class="action-button-icon">📚</span>
-                            <span class="action-button-text">История выполненных</span>
+                        <a href="/users" class="action-button">
+                            <span class="action-button-icon">👥</span>
+                            <span class="action-button-text">Все игроки</span>
                         </a>
                         {% if session.role == 'admin' %}
                         <a href="/admin" class="action-button">
