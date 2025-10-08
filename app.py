@@ -342,10 +342,8 @@ def get_all_users_with_stats():
     users = db.get_all_users()
     users_with_stats = {}
     for username, user_data in users.items():
-        user_position = get_user_position(username)
         users_with_stats[username] = {
             **user_data,
-            'position': user_position,
             'registered_date': user_data.get('created_at', 'Неизвестно')
         }
     return users_with_stats
@@ -363,7 +361,6 @@ def get_all_inventories():
                 'inventory': inventory,
                 'user_info': {
                     'username': username,
-                    'role': users[username]['role'],
                     'coins': users[username]['coins']
                 }
             }

@@ -62,7 +62,6 @@
                     </div>
                     <div class="user-info-compact">
                         <div class="user-name">{{ session.username }}</div>
-                        <div class="user-role">{{ session.role }}</div>
                         <div class="user-coins">💰 {{ session.coins }}</div>
                     </div>
                     <a href="/logout" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8em;">Выйти</a>
@@ -76,11 +75,11 @@
             <h1 class="title">Панель управления</h1>
             <p class="subtitle">Управление задачами, монетками и настройками системы</p>
 
-            <!-- Управление ролями пользователей -->
+            <!-- Управление играми пользователей -->
             <section class="panel">
-                <h2 class="section-title">👥 Управление ролями пользователей</h2>
+                <h2 class="section-title">🎮 Управление играми пользователей</h2>
                 <div class="form-group">
-                    <label class="form-label">Изменение ролей:</label>
+                    <label class="form-label">Назначение игры пользователю:</label>
                     <form action="/admin/update_role" method="POST">
                         <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
                             <div>
@@ -88,41 +87,32 @@
                                 <select name="username" class="form-input" required>
                                     <option value="">Выберите пользователя</option>
                                     {% for username, user_data in users.items() %}
-                                    <option value="{{ username }}">{{ username }} ({{ user_data.role }})</option>
+                                    <option value="{{ username }}">{{ username }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                             <div>
-                                <label class="form-label">Новая роль:</label>
-                                <select name="role" class="form-input" required>
-                                    <option value="user">Игрок</option>
-                                    <option value="admin">Админ</option>
-                                    <option value="minecraft">Minecraft</option>
-                                    <option value="cs2">CS2</option>
-                                    <option value="dota2">Dota 2</option>
-                                    <option value="valorant">Valorant</option>
-                                    <option value="overwatch">Overwatch</option>
-                                </select>
+                                <label class="form-label">Название игры:</label>
+                                <input type="text" name="role" class="form-input" placeholder="Введите название игры">
                             </div>
                             <div>
-                                <button type="submit" class="btn">💾 Обновить роль</button>
+                                <button type="submit" class="btn">💾 Назначить игру</button>
                             </div>
                         </div>
                     </form>
                 </div>
 
                 <div style="margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: 8px;">
-                    <h4>Текущие роли пользователей:</h4>
+                    <h4>Текущие игры пользователей:</h4>
                     {% for username, user_data in users.items() %}
                     <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color); align-items: center;">
                         <div>
                             <span>{{ username }}</span>
-                            <span style="margin-left: 10px; padding: 2px 8px; border-radius: 12px; font-size: 0.8em;
-                                {% if user_data.role == 'admin' %}background: #ff6b6b; color: white;
-                                {% elif user_data.role == 'user' %}background: rgba(100, 181, 246, 0.2); color: var(--text-accent);
-                                {% else %}background: rgba(129, 199, 132, 0.2); color: var(--text-success);{% endif %}">
+                            {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
+                            <span style="margin-left: 10px; padding: 2px 8px; border-radius: 12px; font-size: 0.8em; background: rgba(129, 199, 132, 0.2); color: var(--text-success);">
                                 {{ user_data.role }}
                             </span>
+                            {% endif %}
                         </div>
                         <strong>💰 {{ user_data.coins }} монет</strong>
                     </div>
@@ -142,7 +132,7 @@
                                 <select name="username" class="form-input" required>
                                     <option value="">Выберите пользователя</option>
                                     {% for username, user_data in users.items() %}
-                                    <option value="{{ username }}">{{ username }} ({{ user_data.role }}) - {{ user_data.coins }} монет</option>
+                                    <option value="{{ username }}">{{ username }} - {{ user_data.coins }} монет</option>
                                     {% endfor %}
                                 </select>
                             </div>

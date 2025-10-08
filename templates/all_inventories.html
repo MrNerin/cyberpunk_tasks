@@ -64,10 +64,6 @@
                         <span class="sidebar-link-icon">🎨</span>
                         <span class="sidebar-link-text">Редактор карты</span>
                     </a>
-                    <a href="/archive" class="sidebar-link">
-                        <span class="sidebar-link-icon">📚</span>
-                        <span class="sidebar-link-text">Архив задач</span>
-                    </a>
                 </div>
                 {% endif %}
             </nav>
@@ -80,7 +76,6 @@
                     </div>
                     <div class="user-info-compact">
                         <div class="user-name">{{ session.username }}</div>
-                        <div class="user-role">{{ session.role }}</div>
                         <div class="user-coins">💰 {{ user_coins }} монет</div>
                     </div>
                     <a href="/logout" class="btn btn-outline logout-btn">Выйти</a>
@@ -92,106 +87,71 @@
         <!-- Main Content -->
         <main class="main-content">
             <h1 class="title">📦 Инвентари игроков</h1>
-            <p class="subtitle">Обзор предметов всех участников системы</p>
+            <p class="subtitle">Посмотрите что собрали другие игроки</p>
 
-            <!-- Статистика -->
+            <!-- Статистика сообщества -->
             <div class="stats-panel">
                 <div class="stat-card">
                     <div class="stat-value">{{ all_inventories|length }}</div>
                     <div class="stat-label">Игроков с инвентарем</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">
-                        {% set total_items = [] %}
-                        {% for user_data in all_inventories.values() %}
-                            {% for item in user_data.inventory %}
-                                {% if total_items.append(1) %}{% endif %}
-                            {% endfor %}
-                        {% endfor %}
-                        {{ total_items|length }}
-                    </div>
+                    <div class="stat-value">{{ all_inventories.values()|sum(attribute='inventory'|length) }}</div>
                     <div class="stat-label">Всего предметов</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">
-                        {% set total_quantity = [] %}
-                        {% for user_data in all_inventories.values() %}
-                            {% for item in user_data.inventory %}
-                                {% if total_quantity.append(item.quantity) %}{% endif %}
-                            {% endfor %}
-                        {% endfor %}
-                        {{ total_quantity|sum }}
-                    </div>
+                    <div class="stat-value">{{ all_inventories.values()|sum(attribute='inventory'|sum(attribute='quantity')) }}</div>
                     <div class="stat-label">Всего единиц</div>
                 </div>
                 <div class="stat-card coins-stat">
-                    <div class="stat-value">💰 {{ user_coins }}</div>
-                    <div class="stat-label">Ваши монеты</div>
+                    <div class="stat-value">{{ (all_inventories.values()|map(attribute='user_info')|map(attribute='coins')|max)|default(0) }}</div>
+                    <div class="stat-label">Макс. монет</div>
                 </div>
             </div>
 
-            <!-- Список инвентарей -->
+            <!-- Список игроков с инвентарем -->
             <section class="panel">
-                <h2 class="section-title">🎒 Инвентари участников</h2>
+                <h2 class="section-title">🎮 Игроки и их коллекции</h2>
 
-                <div class="inventories-container">
+                <div class="community-inventory">
                     {% for username, user_data in all_inventories.items() %}
-                    <div class="user-inventory-section">
-                        <div class="user-inventory-header">
+                    <div class="user-inventory-section {% if username == session.username %}current-user{% endif %}">
+                        <div class="user-header">
                             <div class="user-info">
                                 <div class="user-avatar-medium">
                                     {{ username[0]|upper }}
                                 </div>
                                 <div class="user-details">
-                                    <h3 class="username">{{ username }}</h3>
-                                    <div class="user-stats">
-                                        <span class="user-role role-{{ user_data.user_info.role }}">
-                                            {{ user_data.user_info.role }}
-                                        </span>
-                                        <span class="user-level">Уровень: {{ user_data.user_info.current_level }}</span>
-                                        <span class="user-tasks">Задач: {{ user_data.user_info.total_completed }}</span>
-                                        <span class="user-coins">💰 {{ user_data.user_info.coins }}</span>
+                                    <h3 class="username">
+                                        {{ username }}
+                                        {% if username == session.username %}
+                                        <span class="you-badge">Вы</span>
+                                        {% endif %}
+                                    </h3>
+                                    <div class="user-coins-display">
+                                        💰 {{ user_data.user_info.coins }} монет
                                     </div>
                                 </div>
+                            </div>
+                            <div class="inventory-summary">
+                                <span class="item-count">{{ user_data.inventory|length }} предметов</span>
+                                <span class="total-items">{{ user_data.inventory|sum(attribute='quantity') }} единиц</span>
                             </div>
                         </div>
 
                         <div class="inventory-grid">
                             {% for item in user_data.inventory %}
-                            <div class="inventory-item">
+                            <div class="inventory-item community-item">
                                 <div class="item-header">
                                     <h4 class="item-name">{{ item.name }}</h4>
+                                    <span class="item-quantity-badge">{{ item.quantity }}</span>
                                 </div>
-
                                 {% if item.description %}
                                 <p class="item-description">{{ item.description }}</p>
                                 {% endif %}
-
-                                <div class="item-footer">
-                                    <span class="item-quantity">Количество: {{ item.quantity }}</span>
-                                    <span class="item-date">
-                                        Добавлен:
-                                        {% if item.created_at %}
-                                            {% if item.created_at is string %}
-                                                {{ item.created_at.split(' ')[0] }}
-                                            {% else %}
-                                                {{ item.created_at.strftime('%Y-%m-%d') }}
-                                            {% endif %}
-                                        {% else %}
-                                            Неизвестно
-                                        {% endif %}
-                                    </span>
-                                </div>
                             </div>
                             {% endfor %}
                         </div>
-
-                        {% if not user_data.inventory %}
-                        <div class="empty-inventory">
-                            <span class="empty-icon">🎒</span>
-                            <span>Инвентарь пуст</span>
-                        </div>
-                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
@@ -199,8 +159,9 @@
                 {% if not all_inventories %}
                 <div class="empty-state">
                     <div class="empty-state-icon">📦</div>
-                    <h3>Пока нет инвентарей</h3>
+                    <h3>Пока нет инвентаря</h3>
                     <p>Игроки еще не добавили предметы в свои инвентари</p>
+                    <a href="/inventory" class="btn">Добавить первый предмет</a>
                 </div>
                 {% endif %}
             </section>
@@ -208,7 +169,7 @@
     </div>
 
     <style>
-        .inventories-container {
+        .community-inventory {
             display: flex;
             flex-direction: column;
             gap: 24px;
@@ -222,26 +183,34 @@
             transition: all 0.3s ease;
         }
 
-        .user-inventory-section:hover {
+        .user-inventory-section.current-user {
             border-color: var(--text-accent);
+            background: linear-gradient(135deg, rgba(100, 181, 246, 0.05), transparent);
+        }
+
+        .user-inventory-section:hover {
+            transform: translateY(-2px);
             box-shadow: var(--shadow-soft);
         }
 
-        .user-inventory-header {
-            margin-bottom: 16px;
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
             padding-bottom: 16px;
             border-bottom: 1px solid var(--border-color);
         }
 
         .user-info {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 16px;
         }
 
         .user-avatar-medium {
-            width: 48px;
-            height: 48px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--text-accent), var(--text-accent2));
             display: flex;
@@ -250,56 +219,70 @@
             color: white;
             font-weight: 600;
             font-size: 1.2em;
+            flex-shrink: 0;
         }
 
         .user-details {
-            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .username {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
             color: var(--text-primary);
-            margin: 0 0 8px 0;
             font-size: 1.3em;
         }
 
-        .user-stats {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .user-stats span {
+        .you-badge {
+            background: var(--text-accent);
+            color: white;
             padding: 4px 8px;
             border-radius: 12px;
-            font-size: 0.8em;
+            font-size: 0.7em;
             font-weight: 500;
         }
 
-        .user-role {
-            background: rgba(100, 181, 246, 0.1);
+        .user-coins-display {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 15px;
+            padding: 6px 12px;
+            color: gold;
+            font-weight: 600;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+
+        .inventory-summary {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            text-align: right;
+        }
+
+        .item-count {
+            font-weight: 600;
             color: var(--text-accent);
-            border: 1px solid var(--text-accent);
+            font-size: 1.1em;
         }
 
-        .role-admin {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-            color: white;
-            border: none;
-        }
-
-        .user-level, .user-tasks, .user-coins {
-            background: var(--bg-panel);
+        .total-items {
+            font-size: 0.9em;
             color: var(--text-secondary);
-            border: 1px solid var(--border-color);
         }
 
         .inventory-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 12px;
         }
 
-        .inventory-item {
+        .inventory-item.community-item {
             background: var(--bg-panel);
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -307,80 +290,55 @@
             transition: all 0.3s ease;
         }
 
-        .inventory-item:hover {
+        .inventory-item.community-item:hover {
             border-color: var(--text-accent);
-            transform: translateY(-2px);
+            transform: translateY(-1px);
         }
 
-        .item-header {
-            margin-bottom: 8px;
-        }
-
-        .item-name {
-            color: var(--text-primary);
-            font-size: 1.1em;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .item-description {
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-            line-height: 1.4;
-            font-size: 0.9em;
-        }
-
-        .item-footer {
+        .community-item .item-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .community-item .item-name {
+            margin: 0;
+            font-size: 1em;
+            color: var(--text-primary);
+        }
+
+        .item-quantity-badge {
+            background: var(--text-accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
             font-size: 0.8em;
-            color: var(--text-secondary);
-        }
-
-        .item-quantity {
             font-weight: 600;
-            color: var(--text-accent);
         }
 
-        .item-date {
-            font-size: 0.75em;
-        }
-
-        .empty-inventory {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .community-item .item-description {
+            font-size: 0.9em;
             color: var(--text-secondary);
-            font-style: italic;
-            padding: 20px;
-            text-align: center;
-            justify-content: center;
-        }
-
-        .empty-icon {
-            font-size: 1.2em;
+            margin-bottom: 8px;
+            line-height: 1.4;
         }
 
         @media (max-width: 768px) {
-            .user-info {
+            .user-header {
                 flex-direction: column;
-                text-align: center;
-                gap: 12px;
+                gap: 16px;
             }
 
-            .user-stats {
-                justify-content: center;
+            .inventory-summary {
+                align-items: flex-start;
+                text-align: left;
             }
 
             .inventory-grid {
                 grid-template-columns: 1fr;
-            }
-
-            .item-footer {
-                flex-direction: column;
-                gap: 4px;
-                align-items: flex-start;
             }
         }
     </style>

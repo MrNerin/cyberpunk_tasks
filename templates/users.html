@@ -76,7 +76,6 @@
                     </div>
                     <div class="user-info-compact">
                         <div class="user-name">{{ session.username }}</div>
-                        <div class="user-role">{{ session.role }}</div>
                         <div class="user-coins">💰 {{ user_coins }} монет</div>
                     </div>
                     <a href="/logout" class="btn btn-outline logout-btn">Выйти</a>
@@ -128,37 +127,14 @@
                                     <span class="you-badge">Вы</span>
                                     {% endif %}
                                 </h3>
-                                <div class="user-role-badge role-{{ user_data.role }}">
+                                {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
+                                <div class="user-game-badge">
                                     {{ user_data.role }}
                                 </div>
+                                {% endif %}
                             </div>
                             <div class="user-coins-display">
                                 💰 {{ user_data.coins }}
-                            </div>
-                        </div>
-
-                        <div class="user-card-details">
-                            <div class="user-info-row">
-                                <span class="info-label">Зарегистрирован:</span>
-                                <span class="info-value">
-                                    {% if user_data.registered_date %}
-                                        {% if user_data.registered_date is string %}
-                                            {{ user_data.registered_date }}
-                                        {% else %}
-                                            {{ user_data.registered_date.strftime('%d.%m.%Y') }}
-                                        {% endif %}
-                                    {% else %}
-                                        Неизвестно
-                                    {% endif %}
-                                </span>
-                            </div>
-
-                            <div class="user-info-row">
-                                <span class="info-label">Позиция на карте:</span>
-                                <span class="info-value">
-                                    X: {{ user_data.position.x|default(15)|round(1) }},
-                                    Y: {{ user_data.position.y|default(75)|round(1) }}
-                                </span>
                             </div>
                         </div>
 
@@ -166,15 +142,9 @@
                         <div class="user-admin-actions">
                             <form action="/admin/update_role" method="POST" class="role-form">
                                 <input type="hidden" name="username" value="{{ username }}">
-                                <select name="role" class="role-select">
-                                    <option value="user" {% if user_data.role == 'user' %}selected{% endif %}>Игрок</option>
-                                    <option value="admin" {% if user_data.role == 'admin' %}selected{% endif %}>Админ</option>
-                                    <option value="minecraft" {% if user_data.role == 'minecraft' %}selected{% endif %}>Minecraft</option>
-                                    <option value="cs2" {% if user_data.role == 'cs2' %}selected{% endif %}>CS2</option>
-                                    <option value="dota2" {% if user_data.role == 'dota2' %}selected{% endif %}>Dota 2</option>
-                                    <option value="valorant" {% if user_data.role == 'valorant' %}selected{% endif %}>Valorant</option>
-                                    <option value="overwatch" {% if user_data.role == 'overwatch' %}selected{% endif %}>Overwatch</option>
-                                </select>
+                                <input type="text" name="role" class="role-input"
+                                       value="{{ user_data.role if user_data.role != 'user' and user_data.role != 'admin' else '' }}"
+                                       placeholder="Введите игру">
                                 <button type="submit" class="btn btn-secondary btn-small">💾 Сохранить</button>
                             </form>
                         </div>
@@ -198,7 +168,7 @@
     <style>
         .users-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
         }
 
@@ -224,9 +194,6 @@
             display: flex;
             align-items: center;
             gap: 16px;
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
         }
 
         .user-avatar-medium {
@@ -265,48 +232,14 @@
             font-weight: 500;
         }
 
-        .user-role-badge {
+        .user-game-badge {
+            background: linear-gradient(135deg, var(--text-success), #66bb6a);
+            color: white;
             padding: 4px 12px;
             border-radius: 15px;
             font-size: 0.8em;
             font-weight: 500;
             display: inline-block;
-        }
-
-        .role-admin {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-            color: white;
-        }
-
-        .role-user {
-            background: rgba(100, 181, 246, 0.1);
-            color: var(--text-accent);
-            border: 1px solid var(--text-accent);
-        }
-
-        .role-minecraft {
-            background: linear-gradient(135deg, #6bc46c, #4caf50);
-            color: white;
-        }
-
-        .role-cs2 {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
-            color: white;
-        }
-
-        .role-dota2 {
-            background: linear-gradient(135deg, #e53935, #d32f2f);
-            color: white;
-        }
-
-        .role-valorant {
-            background: linear-gradient(135deg, #ff5252, #d32f2f);
-            color: white;
-        }
-
-        .role-overwatch {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
-            color: white;
         }
 
         .user-coins-display {
@@ -319,34 +252,10 @@
             font-size: 0.9em;
         }
 
-        .user-card-details {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .user-info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4px 0;
-        }
-
-        .info-label {
-            color: var(--text-secondary);
-            font-size: 0.9em;
-        }
-
-        .info-value {
-            color: var(--text-primary);
-            font-size: 0.9em;
-            font-weight: 500;
-        }
-
         .user-admin-actions {
             border-top: 1px solid var(--border-color);
             padding-top: 16px;
+            margin-top: 16px;
         }
 
         .role-form {
@@ -355,7 +264,7 @@
             align-items: center;
         }
 
-        .role-select {
+        .role-input {
             flex: 1;
             background: var(--bg-panel);
             border: 1px solid var(--border-color);
@@ -363,6 +272,10 @@
             padding: 6px 10px;
             color: var(--text-primary);
             font-size: 0.9em;
+        }
+
+        .role-input::placeholder {
+            color: var(--text-secondary);
         }
 
         .btn-small {
@@ -385,18 +298,12 @@
                 text-align: center;
             }
 
-            .user-info-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
-            }
-
             .role-form {
                 flex-direction: column;
                 gap: 8px;
             }
 
-            .role-select {
+            .role-input {
                 width: 100%;
             }
         }
