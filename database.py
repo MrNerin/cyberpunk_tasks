@@ -15,7 +15,6 @@ class Database:
     def __init__(self):
         self.conn = None
         self.is_connected = False
-        self.in_memory_storage = {}
 
     def connect(self):
         """Подключение к базе данных с повторными попытками"""
@@ -172,8 +171,8 @@ class Database:
             """
             CREATE TABLE IF NOT EXISTS user_positions (
                 username VARCHAR(50) PRIMARY KEY,
-                x FLOAT NOT NULL,
-                y FLOAT NOT NULL,
+                x FLOAT NOT NULL DEFAULT 15,
+                y FLOAT NOT NULL DEFAULT 75,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """,
@@ -268,6 +267,7 @@ class Database:
             self.conn.commit()
             cur.close()
             logger.info("✅ Начальные данные добавлены")
+
         except Exception as e:
             logger.error(f"❌ Ошибка добавления начальных данных: {e}")
             self.conn.rollback()
@@ -584,12 +584,7 @@ class Database:
 
     def get_user_position(self, username):
         if not self.is_connected:
-            # Возвращаем позицию из памяти или дефолтную
-            if hasattr(self, 'in_memory_storage') and 'user_positions' in self.in_memory_storage:
-                position = self.in_memory_storage['user_positions'].get(username)
-                if position:
-                    return position
-            return {'x': 15, 'y': 75}  # Дефолтная позиция
+            return self.in_memory_storage['user_positions'].get(username, {'x': 15, 'y': 75})
 
         try:
             cur = self.conn.cursor()
@@ -603,12 +598,91 @@ class Database:
                 y = max(0, min(float(result['y']), 100))
                 return {'x': x, 'y': y}
             else:
-                # Возвращаем дефолтную позицию если нет в базе
+                # Создаем дефолтную позицию если нет в базе
+                self.save_user_position(username, 15, 75)
                 return {'x': 15, 'y': 75}
 
         except Exception as e:
             logger.error(f"❌ Ошибка получения позиции пользователя {username}: {e}")
             return {'x': 15, 'y': 75}  # Дефолтная позиция при ошибке
+
+    def save_user_position(self, username, x, y):
+        if not self.is_connected:
+            self.in_memory_storage['user_positions'][username] = {'x': x, 'y': y}
+            return True
+
+        try:
+            cur = self.conn.cursor()
+            # Убедимся, что координаты в пределах карты
+            x = max(0, min(float(x), 100))
+            y = max(0, min(float(y), 100))
+
+            cur.execute(
+                "INSERT INTO user_positions (username, x, y) VALUES (%s, %s, %s) ON CONFLICT (username) DO UPDATE SET x = %s, y = %s, updated_at = CURRENT_TIMESTAMP",
+                (username, x, y, x, y)
+            )
+            self.conn.commit()
+            cur.close()
+            logger.info(f"✅ Позиция пользователя {username} сохранена: x={x}, y={y}")
+            return True
+        except Exception as e:
+            logger.error(f"❌ Ошибка сохранения позиции пользователя {username}: {e}")
+            self.conn.rollback()
+            return False
+
+    # Функции для работы с инвентарем
+    def get_user_inventory(self, username):
+        """Получаем инвентарь пользователя"""
+        if not self.is_connected:
+            return self.in_memory_storage.get('user_inventory', {}).get(username, [])
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute("""
+                SELECT id, name, description, quantity, created_at, updated_at 
+                FROM user_inventory 
+                WHERE username = %s 
+                ORDER BY created_at DESC
+            """, (username,))
+            inventory = cur.fetchall()
+            cur.close()
+            return [dict(item) for item in inventory]
+        except Exception as e:
+            logger.error(f"Ошибка получения инвентаря: {e}")
+            return []
+
+    def add_item_to_inventory(self, username, name, description, quantity=1):
+        """Добавляем предмет в инвентарь"""
+        if not self.is_connected:
+            if 'user_inventory' not in self.in_memory_storage:
+                self.in_memory_storage['user_inventory'] = {}
+            if username not in self.in_memory_storage['user_inventory']:
+                self.in_memory_storage['user_inventory'][username] = []
+
+            new_id = max([item.get('id', 0) for item in self.in_memory_storage['user_inventory'][username]],
+                         default=0) + 1
+            self.in_memory_storage['user_inventory'][username].append({
+                'id': new_id,
+                'name': name,
+                'description': description,
+                'quantity': quantity,
+                'created_at': datetime.now()
+            })
+            return True
+
+        try:
+            cur = self.conn.cursor()
+            cur.execute("""
+                INSERT INTO user_inventory (username, name, description, quantity) 
+                VALUES (%s, %s, %s, %s)
+            """, (username, name, description, quantity))
+            self.conn.commit()
+            cur.close()
+            return True
+        except Exception as e:
+            logger.error(f"Ошибка добавления предмета: {e}")
+            self.conn.rollback()
+            return False
 
 
 # Глобальный объект базы данных
