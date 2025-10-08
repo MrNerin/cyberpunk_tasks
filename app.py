@@ -14,6 +14,32 @@ app.secret_key = os.environ.get('SECRET_KEY', 'taskflow_secret_key_2024')
 # Импортируем базу данных ПОСЛЕ создания app
 from database import db
 
+
+# Ждем пока база данных подключится
+def wait_for_db():
+    max_retries = 10
+    retry_delay = 3
+
+    for attempt in range(max_retries):
+        try:
+            # Проверяем подключение к БД
+            db.connect()
+            if db.conn and not db.conn.closed:
+                print("✅ База данных готова")
+                return True
+        except Exception as e:
+            print(f"❌ Попытка {attempt + 1}/{max_retries}: База данных не готова: {e}")
+            if attempt < max_retries - 1:
+                print(f"⏳ Ожидание {retry_delay} секунд...")
+                time.sleep(retry_delay)
+
+    print("❌ Не удалось подключиться к базе данных")
+    return False
+
+
+# Ждем подключения к БД при запуске
+wait_for_db()
+
 # Кэширование
 _data_cache = {}
 _cache_timeout = {}
@@ -135,9 +161,9 @@ def get_user_coins(username):
 @cached_data('map_config', 300)
 def load_map_config():
     config = db.get_map_config()
+    # Если конфиг пустой, создаем дефолтный
     if not config:
-        # Создаем дефолтную конфигурацию карты если её нет
-        default_config = {
+        config = {
             'start_point': {'x': 15, 'y': 75, 'type': 'start'},
             'active_points': [
                 {'x': 25, 'y': 70, 'type': 'active'},
@@ -152,8 +178,7 @@ def load_map_config():
             'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'updated_by': 'system'
         }
-        db.save_map_config(default_config, 'system')
-        return default_config
+        db.save_map_config(config, 'system')
     return config
 
 
@@ -335,32 +360,13 @@ def get_all_users_with_stats():
     """Получаем всех пользователей со статистикой и позициями"""
     users = db.get_all_users()
     users_with_stats = {}
-
     for username, user_data in users.items():
-        try:
-            # Получаем позицию пользователя
-            user_position = get_user_position(username)
-
-            users_with_stats[username] = {
-                'username': username,
-                'password': user_data.get('password', ''),
-                'role': user_data.get('role', 'user'),
-                'coins': user_data.get('coins', 0),
-                'created_at': user_data.get('created_at', 'Неизвестно'),
-                'position': user_position
-            }
-        except Exception as e:
-            print(f"❌ Ошибка получения данных пользователя {username}: {e}")
-            # Добавляем пользователя с дефолтными значениями
-            users_with_stats[username] = {
-                'username': username,
-                'password': user_data.get('password', ''),
-                'role': user_data.get('role', 'user'),
-                'coins': user_data.get('coins', 0),
-                'created_at': user_data.get('created_at', 'Неизвестно'),
-                'position': {'x': 15, 'y': 75}
-            }
-
+        user_position = get_user_position(username)
+        users_with_stats[username] = {
+            **user_data,
+            'position': user_position,
+            'registered_date': user_data.get('created_at', 'Неизвестно')
+        }
     return users_with_stats
 
 
@@ -381,18 +387,6 @@ def get_all_inventories():
             }
 
     return all_inventories
-
-
-def init_user_positions():
-    """Инициализирует позиции для всех пользователей, у которых их нет"""
-    print("🔄 Инициализация позиций пользователей...")
-    users = db.get_all_users()
-    for username in users.keys():
-        position = db.get_user_position(username)
-        # Если позиция дефолтная, сохраняем ее в базе
-        if position.get('x') == 15 and position.get('y') == 75:
-            db.save_user_position(username, 15, 75)
-    print("✅ Позиции пользователей инициализированы")
 
 
 # Маршруты
@@ -439,7 +433,7 @@ def map_page():
         return redirect(url_for('login'))
 
     try:
-        user_position_data = calculate_user_position(session['username'])
+        user_position = calculate_user_position(session['username'])
         user_coins = get_user_coins(session['username'])
         session['coins'] = user_coins
 
@@ -452,16 +446,15 @@ def map_page():
         all_users = get_all_users_with_stats()
 
         return render_template('map.html',
-                               total_completed=user_position_data['total_completed'],
-                               current_level=user_position_data['current_level'],
+                               total_completed=user_position['total_completed'],
+                               current_level=user_position['current_level'],
                                user_position=(saved_position['x'], saved_position['y']),
-                               progress_percentage=user_position_data['progress_percentage'],
+                               progress_percentage=user_position['progress_percentage'],
                                user_coins=user_coins,
                                map_config=map_config,
                                all_users=all_users)
-
     except Exception as e:
-        print(f"❌ Ошибка в маршруте /map: {e}")
+        print(f"❌ Ошибка при загрузке карты: {e}")
         return "Ошибка при загрузке карты", 500
 
 
@@ -651,10 +644,18 @@ def admin_update_role():
         return "Доступ запрещен", 403
 
     username = request.form.get('username')
-    new_role = request.form.get('role')
+    new_role = request.form.get('role', '').strip()
 
-    if username and new_role:
+    if username:
         try:
+            # Ограничиваем длину роли до 20 символов
+            if len(new_role) > 20:
+                new_role = new_role[:20]
+
+            # Если поле пустое, устанавливаем роль 'user'
+            if not new_role:
+                new_role = 'user'
+
             # Обновляем роль пользователя
             if db.is_connected:
                 cur = db.conn.cursor()
@@ -669,11 +670,10 @@ def admin_update_role():
             if session.get('username') == username:
                 session['role'] = new_role
 
-            return redirect(url_for('admin'))
+            print(f"✅ Роль пользователя {username} обновлена на: {new_role}")
 
         except Exception as e:
             print(f"❌ Ошибка обновления роли: {e}")
-            return f"Ошибка обновления роли: {e}", 500
 
     return redirect(url_for('admin'))
 
@@ -877,39 +877,6 @@ def api_map_config():
     config = load_map_config()
     return jsonify(config)
 
-
-# Инициализация приложения
-def initialize_app():
-    """Инициализация приложения при старте"""
-    print("🚀 Инициализация RGG QUEST...")
-
-    # Подключение к базе данных
-    max_retries = 10
-    retry_delay = 3
-
-    for attempt in range(max_retries):
-        try:
-            db.connect()
-            if db.conn and not db.conn.closed:
-                print("✅ База данных готова")
-                break
-        except Exception as e:
-            print(f"❌ Попытка {attempt + 1}/{max_retries}: База данных не готова: {e}")
-            if attempt < max_retries - 1:
-                print(f"⏳ Ожидание {retry_delay} секунд...")
-                time.sleep(retry_delay)
-            else:
-                print("❌ Не удалось подключиться к базе данных")
-                return
-
-    # Инициализация позиций пользователей
-    init_user_positions()
-
-    print("✅ RGG QUEST успешно инициализирован")
-
-
-# Запуск инициализации при импорте
-initialize_app()
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
