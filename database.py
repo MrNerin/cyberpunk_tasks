@@ -114,7 +114,7 @@ class Database:
             CREATE TABLE IF NOT EXISTS users (
                 username VARCHAR(50) PRIMARY KEY,
                 password VARCHAR(100) NOT NULL,
-                role VARCHAR(20) NOT NULL DEFAULT 'user',
+                role VARCHAR(100) NOT NULL DEFAULT 'user',  -- Увеличено с 20 до 100
                 coins INTEGER NOT NULL DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )

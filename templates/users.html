@@ -90,46 +90,24 @@
             <p class="subtitle">Сообщество активных участников</p>
 
             <!-- Статистика сообщества -->
-<div class="stats-panel">
-    <div class="stat-card">
-        <div class="stat-value">{{ users|length }}</div>
-        <div class="stat-label">Всего игроков</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-value">
-            {% set admin_count = 0 %}
-            {% for user in users.values() %}
-                {% if user.role == 'admin' %}
-                    {% set admin_count = admin_count + 1 %}
-                {% endif %}
-            {% endfor %}
-            {{ admin_count }}
-        </div>
-        <div class="stat-label">Администраторов</div>
-    </div>
-    <div class="stat-card coins-stat">
-        <div class="stat-value">
-            {% set total_coins = 0 %}
-            {% for user in users.values() %}
-                {% set total_coins = total_coins + user.coins %}
-            {% endfor %}
-            {{ total_coins }}
-        </div>
-        <div class="stat-label">Всего монет</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-value">
-            {% set max_coins = 0 %}
-            {% for user in users.values() %}
-                {% if user.coins > max_coins %}
-                    {% set max_coins = user.coins %}
-                {% endif %}
-            {% endfor %}
-            {{ max_coins }}
-        </div>
-        <div class="stat-label">Макс. монет</div>
-    </div>
-</div>
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <div class="stat-value">{{ users|length }}</div>
+                    <div class="stat-label">Всего игроков</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ users.values()|selectattr('role', 'equalto', 'admin')|list|length }}</div>
+                    <div class="stat-label">Администраторов</div>
+                </div>
+                <div class="stat-card coins-stat">
+                    <div class="stat-value">{{ (users.values()|map(attribute='coins')|sum)|default(0) }}</div>
+                    <div class="stat-label">Всего монет</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ (users.values()|map(attribute='coins')|max)|default(0) }}</div>
+                    <div class="stat-label">Макс. монет</div>
+                </div>
+            </div>
 
             <!-- Список пользователей -->
             <section class="panel">
@@ -150,8 +128,9 @@
                                     {% endif %}
                                 </h3>
                                 {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
-                                <div class="user-game-badge">
-                                    {{ user_data.role }}
+                                <div class="user-game-info">
+                                    <span class="game-label">Игра:</span>
+                                    <span class="game-name">{{ user_data.role }}</span>
                                 </div>
                                 {% endif %}
                             </div>
@@ -161,13 +140,16 @@
                         </div>
 
                         {% if session.role == 'admin' and username != session.username %}
-                    <form action="/admin/update_game" method="POST" class="game-form">
-    <input type="hidden" name="username" value="{{ username }}">
-    <input type="text" name="game" class="game-input"
-           value="{{ user_data.role if user_data.role != 'user' and user_data.role != 'admin' else '' }}"
-           placeholder="Введите игру" maxlength="20">
-    <button type="submit" class="btn btn-secondary btn-small">💾 Сохранить</button>
-</form>
+                        <div class="user-admin-actions">
+                            <form action="/admin/update_game" method="POST" class="game-form">
+                                <input type="hidden" name="username" value="{{ username }}">
+                                <div class="game-input-group">
+                                    <input type="text" name="game" class="game-input"
+                                           value="{{ user_data.role if user_data.role != 'user' and user_data.role != 'admin' else '' }}"
+                                           placeholder="Введите название игры">
+                                    <button type="submit" class="btn btn-secondary btn-small">💾 Сохранить</button>
+                                </div>
+                            </form>
                         </div>
                         {% endif %}
                     </div>
@@ -189,7 +171,7 @@
     <style>
         .users-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 20px;
         }
 
@@ -213,8 +195,9 @@
 
         .user-card-header {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 16px;
+            margin-bottom: 16px;
         }
 
         .user-avatar-medium {
@@ -233,6 +216,7 @@
 
         .user-main-info {
             flex: 1;
+            min-width: 0; /* Для правильного обрезания длинного текста */
         }
 
         .username {
@@ -242,6 +226,7 @@
             margin: 0 0 8px 0;
             color: var(--text-primary);
             font-size: 1.2em;
+            flex-wrap: wrap;
         }
 
         .you-badge {
@@ -251,16 +236,33 @@
             border-radius: 12px;
             font-size: 0.7em;
             font-weight: 500;
+            white-space: nowrap;
         }
 
-        .user-game-badge {
-            background: linear-gradient(135deg, var(--text-success), #66bb6a);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.8em;
+        .user-game-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .game-label {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
+        .game-name {
+            color: var(--text-success);
             font-weight: 500;
-            display: inline-block;
+            font-size: 0.9em;
+            background: rgba(129, 199, 132, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(129, 199, 132, 0.3);
+            word-break: break-word;
+            max-width: 100%;
         }
 
         .user-coins-display {
@@ -271,6 +273,8 @@
             color: gold;
             font-weight: 600;
             font-size: 0.9em;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .user-admin-actions {
@@ -279,29 +283,36 @@
             margin-top: 16px;
         }
 
-        .role-form {
-            display: flex;
-            gap: 8px;
-            align-items: center;
+        .game-form {
+            width: 100%;
         }
 
-        .role-input {
+        .game-input-group {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .game-input {
             flex: 1;
             background: var(--bg-panel);
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 6px 10px;
+            padding: 8px 12px;
             color: var(--text-primary);
             font-size: 0.9em;
+            min-width: 0;
         }
 
-        .role-input::placeholder {
+        .game-input::placeholder {
             color: var(--text-secondary);
         }
 
         .btn-small {
-            padding: 6px 12px;
+            padding: 8px 16px;
             font-size: 0.8em;
+            white-space: nowrap;
         }
 
         @media (max-width: 768px) {
@@ -319,13 +330,47 @@
                 text-align: center;
             }
 
-            .role-form {
+            .user-game-info {
+                justify-content: center;
+                text-align: center;
+            }
+
+            .game-input-group {
                 flex-direction: column;
                 gap: 8px;
             }
 
-            .role-input {
+            .game-input {
                 width: 100%;
+            }
+
+            .username {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .user-card {
+                padding: 16px;
+            }
+
+            .user-card-header {
+                gap: 10px;
+            }
+
+            .user-avatar-medium {
+                width: 40px;
+                height: 40px;
+                font-size: 1em;
+            }
+
+            .username {
+                font-size: 1.1em;
+            }
+
+            .game-name {
+                font-size: 0.85em;
+                padding: 3px 6px;
             }
         }
     </style>
