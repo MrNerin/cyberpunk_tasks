@@ -134,7 +134,27 @@ def get_user_coins(username):
 
 @cached_data('map_config', 300)
 def load_map_config():
-    return db.get_map_config()
+    config = db.get_map_config()
+    if not config:
+        # Создаем дефолтную конфигурацию карты если её нет
+        default_config = {
+            'start_point': {'x': 15, 'y': 75, 'type': 'start'},
+            'active_points': [
+                {'x': 25, 'y': 70, 'type': 'active'},
+                {'x': 35, 'y': 65, 'type': 'active'},
+                {'x': 45, 'y': 60, 'type': 'active'}
+            ],
+            'checkpoints': [
+                {'x': 75, 'y': 45, 'type': 'checkpoint', 'name': "Первый уровень", 'required': 5, 'icon': "🎯"},
+                {'x': 85, 'y': 40, 'type': 'checkpoint', 'name': "Второй уровень", 'required': 10, 'icon': "⭐"}
+            ],
+            'end_point': {'x': 95, 'y': 35, 'type': 'end'},
+            'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'updated_by': 'system'
+        }
+        db.save_map_config(default_config, 'system')
+        return default_config
+    return config
 
 
 def save_map_config(config):
@@ -315,14 +335,32 @@ def get_all_users_with_stats():
     """Получаем всех пользователей со статистикой и позициями"""
     users = db.get_all_users()
     users_with_stats = {}
+
     for username, user_data in users.items():
-        # Получаем позицию пользователя
-        user_position = get_user_position(username)
-        users_with_stats[username] = {
-            **user_data,
-            'position': user_position,
-            'registered_date': user_data.get('created_at', 'Неизвестно')
-        }
+        try:
+            # Получаем позицию пользователя
+            user_position = get_user_position(username)
+
+            users_with_stats[username] = {
+                'username': username,
+                'password': user_data.get('password', ''),
+                'role': user_data.get('role', 'user'),
+                'coins': user_data.get('coins', 0),
+                'created_at': user_data.get('created_at', 'Неизвестно'),
+                'position': user_position
+            }
+        except Exception as e:
+            print(f"❌ Ошибка получения данных пользователя {username}: {e}")
+            # Добавляем пользователя с дефолтными значениями
+            users_with_stats[username] = {
+                'username': username,
+                'password': user_data.get('password', ''),
+                'role': user_data.get('role', 'user'),
+                'coins': user_data.get('coins', 0),
+                'created_at': user_data.get('created_at', 'Неизвестно'),
+                'position': {'x': 15, 'y': 75}
+            }
+
     return users_with_stats
 
 
@@ -400,26 +438,31 @@ def map_page():
     if 'username' not in session:
         return redirect(url_for('login'))
 
-    user_position = calculate_user_position(session['username'])
-    user_coins = get_user_coins(session['username'])
-    session['coins'] = user_coins
+    try:
+        user_position_data = calculate_user_position(session['username'])
+        user_coins = get_user_coins(session['username'])
+        session['coins'] = user_coins
 
-    # Получаем сохраненную позицию пользователя
-    saved_position = get_user_position(session['username'])
+        # Получаем сохраненную позицию пользователя
+        saved_position = get_user_position(session['username'])
 
-    map_config = load_map_config()
+        map_config = load_map_config()
 
-    # Получаем данные всех пользователей для отображения их фишек
-    all_users = get_all_users_with_stats()
+        # Получаем данные всех пользователей для отображения их фишек
+        all_users = get_all_users_with_stats()
 
-    return render_template('map.html',
-                           total_completed=user_position['total_completed'],
-                           current_level=user_position['current_level'],
-                           user_position=(saved_position['x'], saved_position['y']),
-                           progress_percentage=user_position['progress_percentage'],
-                           user_coins=user_coins,
-                           map_config=map_config,
-                           all_users=all_users)
+        return render_template('map.html',
+                               total_completed=user_position_data['total_completed'],
+                               current_level=user_position_data['current_level'],
+                               user_position=(saved_position['x'], saved_position['y']),
+                               progress_percentage=user_position_data['progress_percentage'],
+                               user_coins=user_coins,
+                               map_config=map_config,
+                               all_users=all_users)
+
+    except Exception as e:
+        print(f"❌ Ошибка в маршруте /map: {e}")
+        return "Ошибка при загрузке карты", 500
 
 
 @app.route('/map/save_position', methods=['POST'])
@@ -626,8 +669,11 @@ def admin_update_role():
             if session.get('username') == username:
                 session['role'] = new_role
 
+            return redirect(url_for('admin'))
+
         except Exception as e:
-            print(f"Ошибка обновления роли: {e}")
+            print(f"❌ Ошибка обновления роли: {e}")
+            return f"Ошибка обновления роли: {e}", 500
 
     return redirect(url_for('admin'))
 

@@ -536,23 +536,27 @@ class Database:
     # Методы для карты
     def get_map_config(self):
         if not self.is_connected:
-            return self.in_memory_storage['map_config']
+            return self.in_memory_storage.get('map_config')
 
         try:
             cur = self.conn.cursor()
             cur.execute("SELECT * FROM map_config ORDER BY id DESC LIMIT 1")
             config = cur.fetchone()
             cur.close()
+
             if config:
+                # Преобразуем JSONB поля в словари
                 return {
                     'start_point': config['start_point'],
                     'active_points': config['active_points'],
                     'checkpoints': config['checkpoints'],
                     'end_point': config['end_point'],
-                    'updated_at': config['updated_at'].strftime('%Y-%m-%d %H:%M:%S'),
-                    'updated_by': config['updated_by']
+                    'updated_at': config['updated_at'].strftime('%Y-%m-%d %H:%M:%S') if config[
+                        'updated_at'] else 'Неизвестно',
+                    'updated_by': config['updated_by'] or 'system'
                 }
             return None
+
         except Exception as e:
             logger.error(f"❌ Ошибка получения конфигурации карты: {e}")
             return None
@@ -574,7 +578,7 @@ class Database:
                  json.dumps(config['end_point']),
                  updated_by)
             )
-            self.conn.commit()
+            db.conn.commit()
             cur.close()
             return True
         except Exception as e:

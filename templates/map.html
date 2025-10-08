@@ -116,8 +116,19 @@
             </div>
 
             <!-- Карта -->
-            <section class="panel">
-                <div class="map-container">
+
+<section class="panel">
+    <div class="map-container">
+        {% if not map_config %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🗺️</div>
+            <h3>Карта не настроена</h3>
+            <p>Администратор должен настроить карту</p>
+            {% if session.role == 'admin' %}
+            <a href="/map_editor" class="btn">Настроить карту</a>
+            {% endif %}
+        </div>
+        {% else %}
                     <div class="map-controls">
                         <button class="btn btn-secondary" onclick="enableMovement()">
                             🎯 Режим перемещения
@@ -132,6 +143,9 @@
 
                     <div class="map-wrapper" id="mapWrapper">
                         <img src="{{ url_for('static', filename='images/map.png') }}" alt="Карта прогресса RGG" class="map-image" id="mapImage">
+                               {% endif %}
+    </div>
+</section>
 
 <!-- Точки карты -->
 <div class="points-container">

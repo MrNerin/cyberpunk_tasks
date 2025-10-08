@@ -90,24 +90,47 @@
             <p class="subtitle">Сообщество активных участников</p>
 
             <!-- Статистика сообщества -->
-            <div class="stats-panel">
-                <div class="stat-card">
-                    <div class="stat-value">{{ users|length }}</div>
-                    <div class="stat-label">Всего игроков</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ users.values()|selectattr('role', 'equalto', 'admin')|list|length }}</div>
-                    <div class="stat-label">Администраторов</div>
-                </div>
-                <div class="stat-card coins-stat">
-                    <div class="stat-value">{{ (users.values()|map(attribute='coins')|sum)|default(0) }}</div>
-                    <div class="stat-label">Всего монет</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">{{ (users.values()|map(attribute='coins')|max)|default(0) }}</div>
-                    <div class="stat-label">Макс. монет</div>
-                </div>
-            </div>
+<!-- Статистика сообщества -->
+<div class="stats-panel">
+    <div class="stat-card">
+        <div class="stat-value">{{ users|length }}</div>
+        <div class="stat-label">Всего игроков</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">
+            {% set admin_count = 0 %}
+            {% for user in users.values() %}
+                {% if user.role == 'admin' %}
+                    {% set admin_count = admin_count + 1 %}
+                {% endif %}
+            {% endfor %}
+            {{ admin_count }}
+        </div>
+        <div class="stat-label">Администраторов</div>
+    </div>
+    <div class="stat-card coins-stat">
+        <div class="stat-value">
+            {% set total_coins = 0 %}
+            {% for user in users.values() %}
+                {% set total_coins = total_coins + user.coins %}
+            {% endfor %}
+            {{ total_coins }}
+        </div>
+        <div class="stat-label">Всего монет</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">
+            {% set max_coins = 0 %}
+            {% for user in users.values() %}
+                {% if user.coins > max_coins %}
+                    {% set max_coins = user.coins %}
+                {% endif %}
+            {% endfor %}
+            {{ max_coins }}
+        </div>
+        <div class="stat-label">Макс. монет</div>
+    </div>
+</div>
 
             <!-- Список пользователей -->
             <section class="panel">
