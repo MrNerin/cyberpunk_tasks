@@ -338,16 +338,18 @@ def delete_inventory_item_db(username, item_id):
 
 
 def get_all_users_with_stats():
-    """Получаем всех пользователей со статистикой"""
+    """Получаем всех пользователей со статистикой и позициями"""
     users = db.get_all_users()
     users_with_stats = {}
     for username, user_data in users.items():
         user_progress = calculate_user_position(username)
+        user_position = get_user_position(username)
         users_with_stats[username] = {
             **user_data,
             'total_completed': user_progress['total_completed'],
             'current_level': user_progress['current_level'],
             'progress_percentage': user_progress['progress_percentage'],
+            'position': user_position,
             'registered_date': user_data.get('created_at', 'Неизвестно')
         }
     return users_with_stats
@@ -428,13 +430,17 @@ def map_page():
 
     map_config = load_map_config()
 
+    # Получаем данные всех пользователей для отображения их фишек
+    all_users = get_all_users_with_stats()
+
     return render_template('map.html',
                            total_completed=user_position['total_completed'],
                            current_level=user_position['current_level'],
                            user_position=(saved_position['x'], saved_position['y']),
                            progress_percentage=user_position['progress_percentage'],
                            user_coins=user_coins,
-                           map_config=map_config)
+                           map_config=map_config,
+                           all_users=all_users)
 
 
 @app.route('/map/save_position', methods=['POST'])

@@ -6,9 +6,6 @@
     <title>Карта прогресса - RGG QUEST</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
 </head>
 <body>
     <!-- Mobile Menu Toggle -->
@@ -30,13 +27,6 @@
 
             <nav class="sidebar-nav">
                 <div class="sidebar-section">
-                    <div class="sidebar-section">
-    <div class="sidebar-section-title">Сообщество</div>
-    <a href="/users" class="sidebar-link">
-        <span class="sidebar-link-icon">👥</span>
-        <span class="sidebar-link-text">Все игроки</span>
-    </a>
-</div>
                     <div class="sidebar-section-title">Основное</div>
                     <a href="/" class="sidebar-link">
                         <span class="sidebar-link-icon">📋</span>
@@ -46,9 +36,21 @@
                         <span class="sidebar-link-icon">🗺️</span>
                         <span class="sidebar-link-text">Карта прогресса</span>
                     </a>
-                    <a href="/archive" class="sidebar-link">
-                        <span class="sidebar-link-icon">📚</span>
-                        <span class="sidebar-link-text">Архив задач</span>
+                    <a href="/inventory" class="sidebar-link">
+                        <span class="sidebar-link-icon">🎒</span>
+                        <span class="sidebar-link-text">Мой инвентарь</span>
+                    </a>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Сообщество</div>
+                    <a href="/users" class="sidebar-link">
+                        <span class="sidebar-link-icon">👥</span>
+                        <span class="sidebar-link-text">Все игроки</span>
+                    </a>
+                    <a href="/all_inventories" class="sidebar-link">
+                        <span class="sidebar-link-icon">📦</span>
+                        <span class="sidebar-link-text">Инвентари игроков</span>
                     </a>
                 </div>
 
@@ -63,6 +65,10 @@
                         <span class="sidebar-link-icon">🎨</span>
                         <span class="sidebar-link-text">Редактор карты</span>
                     </a>
+                    <a href="/archive" class="sidebar-link">
+                        <span class="sidebar-link-icon">📚</span>
+                        <span class="sidebar-link-text">Архив задач</span>
+                    </a>
                 </div>
                 {% endif %}
 
@@ -74,19 +80,15 @@
                             <span class="action-button-icon">📋</span>
                             <span class="action-button-text">К заданиям</span>
                         </a>
-                        <a href="/archive" class="action-button">
-                            <span class="action-button-icon">📚</span>
-                            <span class="action-button-text">История выполненных</span>
+                        <a href="/users" class="action-button">
+                            <span class="action-button-icon">👥</span>
+                            <span class="action-button-text">Все игроки</span>
                         </a>
                         {% if session.role == 'admin' %}
                         <a href="/admin" class="action-button">
                             <span class="action-button-icon">⚙️</span>
                             <span class="action-button-text">Управление системой</span>
                         </a>
-                        <a href="/inventory" class="sidebar-link">
-    <span class="sidebar-link-icon">🎒</span>
-    <span class="sidebar-link-text">Мой инвентарь</span>
-</a>
                         {% endif %}
                     </div>
                 </div>
@@ -150,17 +152,7 @@
                     </div>
 
                     <div class="map-wrapper" id="mapWrapper">
-                        <img src="{{ url_for('static', filename='images/map.png') }}" alt="Карта прогресса RGG" class="map-image" id="mapImage"
-     onerror="this.style.display='none'; document.getElementById('mapFallback').style.display='block';">
-
-<!-- Добавляем fallback контейнер: -->
-<div id="mapFallback" style="display: none; width: 100%; height: 500px; background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-panel) 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
-    <div style="text-align: center;">
-        <div style="font-size: 3em; margin-bottom: 16px;">🗺️</div>
-        <h3>Карта прогресса</h3>
-        <p>Изображение карты временно недоступно</p>
-    </div>
-</div>
+                        <img src="{{ url_for('static', filename='images/map.png') }}" alt="Карта прогресса RGG" class="map-image" id="mapImage">
 
                         <!-- Точки карты -->
                         <div class="points-container">
@@ -188,33 +180,6 @@
                             </div>
                             {% endfor %}
 
-                        <!-- Фишки всех пользователей -->
-{% for username, user_data in all_users.items() %}
-{% if username != session.username %}
-<div class="map-pin other-user-pin miniature"
-     style="left: {{ user_data.position.x }}%; top: {{ user_data.position.y }}%;"
-     data-username="{{ username }}">
-    <div class="pin-icon other-user">
-        {% if user_data.progress.total_completed >= 30 %}🚀
-        {% elif user_data.progress.total_completed >= 20 %}⭐
-        {% elif user_data.progress.total_completed >= 10 %}🔵
-        {% else %}📍{% endif %}
-    </div>
-    <div class="pin-label">
-        {{ username }}
-    </div>
-    <div class="user-tooltip">
-        <strong>{{ username }}</strong>
-        <div class="user-stats">
-            <span>Уровень: {{ user_data.progress.current_level }}</span>
-            <span>Задач: {{ user_data.progress.total_completed }}</span>
-            <span>Монет: {{ user_data.coins }}</span>
-        </div>
-    </div>
-</div>
-{% endif %}
-{% endfor %}
-
                             <!-- Финиш -->
                             <div class="map-point end-point" style="left: {{ map_config.end_point.x }}%; top: {{ map_config.end_point.y }}%;">
                                 <div class="point-marker">🏆</div>
@@ -233,6 +198,35 @@
                                 </div>
                                 <div class="pin-label">{{ session.username }}</div>
                             </div>
+
+                            <!-- Фишки других пользователей -->
+                            {% if all_users %}
+                                {% for username, user_data in all_users.items() %}
+                                {% if username != session.username %}
+                                <div class="map-pin other-user-pin miniature"
+                                     style="left: {{ user_data.position.x if user_data.position else 15 }}%; top: {{ user_data.position.y if user_data.position else 75 }}%;"
+                                     data-username="{{ username }}">
+                                    <div class="pin-icon other-user">
+                                        {% if user_data.total_completed >= 30 %}🚀
+                                        {% elif user_data.total_completed >= 20 %}⭐
+                                        {% elif user_data.total_completed >= 10 %}🔵
+                                        {% else %}📍{% endif %}
+                                    </div>
+                                    <div class="pin-label">
+                                        {{ username }}
+                                    </div>
+                                    <div class="user-tooltip">
+                                        <strong>{{ username }}</strong>
+                                        <div class="user-stats">
+                                            <span>Уровень: {{ user_data.current_level }}</span>
+                                            <span>Задач: {{ user_data.total_completed }}</span>
+                                            <span>Монет: {{ user_data.coins }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
 
@@ -240,6 +234,10 @@
                         <div class="legend-item">
                             <span class="legend-marker">📍</span>
                             <span>Ваше текущее положение</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-marker other-user">🔵</span>
+                            <span>Другие игроки</span>
                         </div>
                         <div class="legend-item">
                             <span class="legend-marker">🏁</span>
@@ -354,24 +352,6 @@
             alert('🎯 Режим перемещения включен! Перетащите свою фишку в нужное место и нажмите "Закрепить позицию"');
         }
 
-function checkIcons() {
-    const icons = document.querySelectorAll('.pin-icon, .sidebar-link-icon, .action-button-icon');
-    icons.forEach(icon => {
-        const computedStyle = window.getComputedStyle(icon);
-        if (computedStyle.fontFamily.includes('Emoji') && icon.textContent.trim() === '') {
-            // Если иконка не отображается, заменяем на текст
-            const altText = icon.getAttribute('data-alt') || '●';
-            icon.textContent = altText;
-            icon.style.fontFamily = 'Arial, sans-serif';
-        }
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    checkIcons();
-    setTimeout(checkIcons, 1000); // Повторная проверка через секунду
-});
-
         function savePosition() {
             if (!isMovementEnabled || !userPin) {
                 alert('Сначала включите режим перемещения!');
@@ -411,8 +391,8 @@ document.addEventListener('DOMContentLoaded', function() {
         function resetPosition() {
             if (confirm('Вернуться на стартовую позицию?')) {
                 userPin = document.getElementById('userPin');
-                userPin.style.left = '8.41773%';
-                userPin.style.top = '2.31483%';
+                userPin.style.left = '15%';
+                userPin.style.top = '75%';
 
                 fetch('/map/save_position', {
                     method: 'POST',
@@ -420,8 +400,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        x: 8.41773,
-                        y: 2.31483
+                        x: 15,
+                        y: 75
                     })
                 })
                 .then(response => response.json())
@@ -432,8 +412,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             }
         }
-
-
 
         // Drag & Drop для фишки пользователя
         function initMap() {
@@ -451,8 +429,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.addEventListener('touchmove', dragTouch);
                 document.addEventListener('touchend', stopDrag);
             }
-
-
 
             function startDrag(e) {
                 if (!isMovementEnabled) return;
@@ -550,5 +526,86 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     </script>
+
+    <style>
+        /* Стили для фишек других пользователей */
+        .other-user-pin {
+            position: absolute;
+            transform: translate(-50%, -100%) scale(0.6);
+            z-index: 15;
+            cursor: help;
+            transition: all 0.3s ease;
+        }
+
+        .other-user-pin:hover {
+            z-index: 25;
+            transform: translate(-50%, -100%) scale(0.7);
+        }
+
+        .other-user-pin .pin-icon {
+            font-size: 1.5em;
+            animation: floatMini 3s ease-in-out infinite;
+        }
+
+        .other-user-pin .pin-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 15, 26, 0.9);
+            color: var(--text-primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            white-space: nowrap;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 15, 26, 0.95);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            border: 1px solid var(--border-accent);
+            box-shadow: var(--shadow-soft);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 30;
+            min-width: 150px;
+            text-align: left;
+        }
+
+        .other-user-pin:hover .user-tooltip {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-8px);
+        }
+
+        .user-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .user-stats span {
+            font-size: 0.75em;
+            color: var(--text-secondary);
+        }
+
+        @keyframes floatMini {
+            0%, 100% { transform: translate(-50%, -100%) scale(0.6) translateY(0px); }
+            50% { transform: translate(-50%, -100%) scale(0.6) translateY(-3px); }
+        }
+
+        .legend-marker.other-user {
+            color: #667eea;
+        }
+    </style>
 </body>
 </html>
