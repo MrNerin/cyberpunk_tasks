@@ -99,6 +99,15 @@
         <main class="main-content">
             <!-- Основная статистика -->
             {% if 'username' in session %}
+            <div class="stats-panel">
+                <div class="stat-card coins-stat">
+                    <div class="stat-value">💰 {{ user_coins }}</div>
+                    <div class="stat-label">Монеток</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ total_completed }}</div>
+                    <div class="stat-label">Выполнено задач</div>
+                </div>
             </div>
 
             <!-- Карта -->
