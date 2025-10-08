@@ -130,7 +130,9 @@
                                 {% if user_data.role and user_data.role != 'user' and user_data.role != 'admin' %}
                                 <div class="user-game-info">
                                     <span class="game-label">Игра:</span>
-                                    <span class="game-name">{{ user_data.role }}</span>
+                                    <div class="game-name-container">
+                                        <span class="game-name">{{ user_data.role }}</span>
+                                    </div>
                                 </div>
                                 {% endif %}
                             </div>
@@ -171,7 +173,7 @@
     <style>
         .users-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
             gap: 20px;
         }
 
@@ -181,6 +183,8 @@
             border-radius: 12px;
             padding: 20px;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         .user-card.current-user {
@@ -198,6 +202,7 @@
             align-items: flex-start;
             gap: 16px;
             margin-bottom: 16px;
+            flex: 1;
         }
 
         .user-avatar-medium {
@@ -216,14 +221,14 @@
 
         .user-main-info {
             flex: 1;
-            min-width: 0; /* Для правильного обрезания длинного текста */
+            min-width: 0; /* Важно для правильного обрезания текста */
         }
 
         .username {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin: 0 0 8px 0;
+            margin: 0 0 12px 0;
             color: var(--text-primary);
             font-size: 1.2em;
             flex-wrap: wrap;
@@ -244,13 +249,20 @@
             align-items: flex-start;
             gap: 8px;
             margin-top: 8px;
-            flex-wrap: wrap;
+            width: 100%;
         }
 
         .game-label {
             color: var(--text-secondary);
             font-size: 0.9em;
             white-space: nowrap;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .game-name-container {
+            flex: 1;
+            min-width: 0; /* Критически важно для переноса текста */
         }
 
         .game-name {
@@ -258,11 +270,15 @@
             font-weight: 500;
             font-size: 0.9em;
             background: rgba(129, 199, 132, 0.1);
-            padding: 4px 8px;
-            border-radius: 6px;
+            padding: 6px 10px;
+            border-radius: 8px;
             border: 1px solid rgba(129, 199, 132, 0.3);
+            word-wrap: break-word;
             word-break: break-word;
+            overflow-wrap: break-word;
+            display: inline-block;
             max-width: 100%;
+            line-height: 1.4;
         }
 
         .user-coins-display {
@@ -275,6 +291,7 @@
             font-size: 0.9em;
             white-space: nowrap;
             flex-shrink: 0;
+            align-self: flex-start;
         }
 
         .user-admin-actions {
@@ -328,10 +345,22 @@
 
             .user-main-info {
                 text-align: center;
+                width: 100%;
             }
 
             .user-game-info {
                 justify-content: center;
+                text-align: center;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .game-label {
+                align-self: center;
+            }
+
+            .game-name-container {
+                width: 100%;
                 text-align: center;
             }
 
@@ -346,6 +375,10 @@
 
             .username {
                 justify-content: center;
+            }
+
+            .user-coins-display {
+                align-self: center;
             }
         }
 
@@ -370,6 +403,22 @@
 
             .game-name {
                 font-size: 0.85em;
+                padding: 4px 8px;
+            }
+        }
+
+        /* Специальные стили для очень длинных названий игр */
+        @media (max-width: 360px) {
+            .users-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .user-card {
+                padding: 12px;
+            }
+
+            .game-name {
+                font-size: 0.8em;
                 padding: 3px 6px;
             }
         }
